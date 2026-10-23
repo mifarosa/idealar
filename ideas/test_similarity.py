@@ -253,7 +253,7 @@ class SimilarityViewTests(TestCase):
         self.assertContains(response, "Buna benzer bir fikrin var")
         self.assertContains(response, "Water reminder")
         self.assertContains(response, "ikisi de su içmeyi hatırlatıyor")
-        self.assertContains(response, "o fikre özellik olarak ekle")
+        self.assertContains(response, "O fikre özellik olarak ekle")
 
     def test_clean_result_is_shown_after_a_check(self):
         self.patch_judge(StubJudge([]))
