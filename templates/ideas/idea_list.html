@@ -1,37 +1,84 @@
 {% extends "base.html" %}
+{% block container_class %}has-quick-bar{% endblock %}
 {% block content %}
-<form method="post" action="{% url 'ideas:create' %}" class="card stack quick-add">
-  {% csrf_token %}
-  {{ quick_form.body }}
-  <div class="row">
-    <button class="button" type="submit">Kaydet</button>
-    <a class="button button-secondary" href="{% url 'ideas:create' %}">Ayrıntılı</a>
-  </div>
-</form>
+<nav class="filters" aria-label="Filtre">
+  <a class="chip {% if not status_filter %}chip-active{% endif %}" href="?q={{ search_text|urlencode }}">Hepsi</a>
+  <a class="chip {% if status_filter == 'devam' %}chip-active{% endif %}" href="?durum=devam&q={{ search_text|urlencode }}">Devam eden</a>
+  <a class="chip {% if status_filter == 'biten' %}chip-active{% endif %}" href="?durum=biten&q={{ search_text|urlencode }}">Biten</a>
+</nav>
 
 <form method="get" class="search" role="search">
+  {% if status_filter %}<input type="hidden" name="durum" value="{{ status_filter }}">{% endif %}
   <input type="search" name="q" value="{{ search_text }}" placeholder="Fikirlerde ara…" aria-label="Ara">
 </form>
 
 {% if ideas %}
 <ul class="idea-list">
   {% for idea in ideas %}
-  <li class="card idea">
-    <a class="idea-link" href="{% url 'ideas:update' idea.pk %}">
-      <strong>{{ idea.display_title }}</strong>
-      {% if idea.title %}<span class="muted">{{ idea.body|truncatechars:120 }}</span>{% endif %}
-      <time class="muted" datetime="{{ idea.created_at|date:'c' }}">{{ idea.created_at|date:"d M Y H:i" }}</time>
-    </a>
+  <li>
+    <details class="idea-card" id="idea-{{ idea.pk }}" {% if idea.pk == open_idea_id %}open{% endif %}>
+      <summary>
+        <span class="idea-title">{{ idea.display_title }}</span>
+        <span class="progress {% if idea.progress.is_complete %}progress-complete{% endif %}">
+          <span class="progress-label">{{ idea.progress.done }}/{{ idea.progress.total }}</span>
+          <span class="progress-bar"><span class="progress-fill" style="width: {{ idea.progress.percent }}%"></span></span>
+        </span>
+      </summary>
+
+      <div class="idea-panel stack">
+        {% if idea.title %}<p class="idea-body">{{ idea.body|linebreaksbr }}</p>{% endif %}
+        {% if idea.platform_labels or idea.projects.all %}
+        <p class="badges">
+          {% for label in idea.platform_labels %}<span class="badge">{{ label }}</span>{% endfor %}
+          {% for project in idea.projects.all %}<a class="badge badge-project" href="{% url 'ideas:project-detail' project.pk %}">📁 {{ project.name }}</a>{% endfor %}
+        </p>
+        {% endif %}
+
+        <ul class="feature-list">
+          {% for feature in idea.features.all %}
+          <li class="feature" data-toggle-url="{% url 'ideas:feature-toggle' feature.pk %}">
+            <label class="feature-check">
+              <input type="checkbox" {% if feature.is_done %}checked{% endif %}>
+              <span class="feature-text">{{ feature.text }}</span>
+            </label>
+            {% if feature.platform %}<span class="badge">{{ feature.get_platform_display }}</span>{% endif %}
+            <a class="icon-link" href="{% url 'ideas:feature-copy' feature.pk %}" title="Başka fikre kopyala" aria-label="Başka fikre kopyala">⧉</a>
+            <form method="post" action="{% url 'ideas:feature-delete' feature.pk %}">
+              {% csrf_token %}
+              <button class="icon-link" type="submit" title="Sil" aria-label="Özelliği sil">✕</button>
+            </form>
+          </li>
+          {% empty %}
+          <li class="muted">Henüz özellik yok.</li>
+          {% endfor %}
+        </ul>
+
+        <form method="post" action="{% url 'ideas:feature-add' idea.pk %}" class="feature-add">
+          {% csrf_token %}
+          {{ feature_form.text }}
+          {{ feature_form.platform }}
+          <button class="button" type="submit">Ekle</button>
+        </form>
+
+        <p><a class="button button-secondary" href="{% url 'ideas:update' idea.pk %}">Düzenle</a></p>
+      </div>
+    </details>
   </li>
   {% endfor %}
 </ul>
 {% if is_paginated %}
 <nav class="row pager">
-  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ search_text|urlencode }}">← Yeni</a>{% endif %}
-  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ search_text|urlencode }}">Eski →</a>{% endif %}
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ search_text|urlencode }}&durum={{ status_filter }}">← Yeni</a>{% endif %}
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ search_text|urlencode }}&durum={{ status_filter }}">Eski →</a>{% endif %}
 </nav>
 {% endif %}
 {% else %}
-<p class="muted empty">{% if search_text %}Aramayla eşleşen fikir yok.{% else %}Henüz fikir yok. İlkini yukarıya yaz.{% endif %}</p>
+<p class="muted empty">{% if search_text or status_filter %}Eşleşen fikir yok.{% else %}Henüz fikir yok. İlkini aşağıya yaz.{% endif %}</p>
 {% endif %}
+
+<form method="post" action="{% url 'ideas:create' %}" class="quick-bar">
+  {% csrf_token %}
+  {{ quick_form.body }}
+  <button class="button" type="submit" aria-label="Kaydet">➤</button>
+</form>
 {% endblock %}

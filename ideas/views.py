@@ -3,8 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
-from .forms import IdeaForm, QuickIdeaForm
+from .forms import FeatureForm, IdeaForm, QuickIdeaForm
+from .mixins import UserFormKwargsMixin
 from .models import Idea
+
+FILTER_IN_PROGRESS = "devam"
+FILTER_FINISHED = "biten"
 
 
 class OwnedIdeaMixin(LoginRequiredMixin):
@@ -23,20 +27,39 @@ class IdeaListView(OwnedIdeaMixin, ListView):
     paginate_by = 30
 
     def get_queryset(self):
-        return super().get_queryset().matching(self.search_text)
+        ideas = super().get_queryset().with_progress().matching(self.search_text)
+        if self.status_filter == FILTER_FINISHED:
+            ideas = ideas.finished()
+        elif self.status_filter == FILTER_IN_PROGRESS:
+            ideas = ideas.unfinished()
+        return ideas.prefetch_related("features", "projects")
 
     @property
     def search_text(self) -> str:
         return self.request.GET.get("q", "")
 
+    @property
+    def status_filter(self) -> str:
+        return self.request.GET.get("durum", "")
+
+    @property
+    def open_idea_id(self) -> int | None:
+        raw = self.request.GET.get("open", "")
+        return int(raw) if raw.isdigit() else None
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["search_text"] = self.search_text
-        context["quick_form"] = QuickIdeaForm()
+        context.update(
+            search_text=self.search_text,
+            status_filter=self.status_filter,
+            open_idea_id=self.open_idea_id,
+            quick_form=QuickIdeaForm(),
+            feature_form=FeatureForm(),
+        )
         return context
 
 
-class IdeaCreateView(OwnedIdeaMixin, CreateView):
+class IdeaCreateView(UserFormKwargsMixin, OwnedIdeaMixin, CreateView):
     """Accepts both the one-field quick form and the full form; the quick form posts here too."""
 
     template_name = "ideas/idea_form.html"
@@ -51,7 +74,7 @@ class IdeaCreateView(OwnedIdeaMixin, CreateView):
         return super().form_valid(form)
 
 
-class IdeaUpdateView(OwnedIdeaMixin, UpdateView):
+class IdeaUpdateView(UserFormKwargsMixin, OwnedIdeaMixin, UpdateView):
     template_name = "ideas/idea_form.html"
     form_class = IdeaForm
 

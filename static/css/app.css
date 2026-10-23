@@ -110,3 +110,91 @@ textarea { resize: vertical; }
 
 .flash { padding: 0.6rem 0.9rem; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
 .errorlist { margin: 0; padding: 0; list-style: none; color: var(--danger); font-weight: 400; font-size: 0.9rem; }
+
+/* Navigation and filters */
+.topnav { display: flex; gap: 1rem; }
+.topnav a { color: var(--text); text-decoration: none; font-weight: 600; padding: 0.5rem 0; }
+
+.filters { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; }
+.chip {
+  white-space: nowrap;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  text-decoration: none;
+}
+.chip-active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+
+.row-between { justify-content: space-between; }
+h2 { font-size: 1.1rem; margin: 1.25rem 0 0.5rem; }
+
+/* Idea cards: an oval pill that expands to show the feature checklist */
+.idea-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; overflow: hidden; }
+.idea-card summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 52px;
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+  list-style: none;
+}
+.idea-card summary::-webkit-details-marker { display: none; }
+.idea-card[open] { border-radius: var(--radius); border-color: var(--accent); }
+.idea-title { font-weight: 600; overflow-wrap: anywhere; }
+.idea-panel { padding: 0 1.1rem 1rem; }
+.idea-body { margin: 0; color: var(--muted); }
+
+.progress { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; min-width: 3.5rem; }
+.progress-label { font-size: 0.8rem; color: var(--muted); }
+.progress-bar { width: 3.5rem; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { display: block; height: 100%; background: var(--accent); }
+.progress-complete .progress-fill { background: #16a34a; }
+
+.badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; }
+.badge {
+  font-size: 0.75rem;
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.badge-project { color: var(--accent); border-color: var(--accent); }
+
+.feature-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.feature { display: flex; align-items: center; gap: 0.5rem; min-height: 44px; }
+.feature form { margin: 0; }
+.feature-check { flex: 1; flex-direction: row; align-items: center; gap: 0.6rem; font-weight: 400; cursor: pointer; }
+.feature-check input { width: 22px; height: 22px; accent-color: var(--accent); flex-shrink: 0; }
+.feature-check input:checked + .feature-text { text-decoration: line-through; color: var(--muted); }
+.icon-link { background: none; border: 0; color: var(--muted); font-size: 1.1rem; cursor: pointer; text-decoration: none; padding: 0.4rem; }
+
+.feature-add { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.feature-add input[type="text"] { flex: 1 1 10rem; width: auto; }
+select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem; }
+
+.field { display: flex; flex-direction: column; gap: 0.25rem; }
+.field-label { font-weight: 600; }
+.field ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
+.field ul label { flex-direction: row; align-items: center; gap: 0.4rem; font-weight: 400; }
+.field input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
+
+/* Fixed capture bar at the bottom of the idea list */
+.has-quick-bar { padding-bottom: 6rem; }
+.quick-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.quick-bar textarea { flex: 1; max-height: 8rem; border-radius: 22px; resize: none; }
+.quick-bar .button { border-radius: 50%; width: 44px; padding: 0; }

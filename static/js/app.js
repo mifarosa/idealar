@@ -15,3 +15,43 @@ document.addEventListener("keydown", (event) => {
     textarea.form.requestSubmit();
   }
 });
+
+// Feature checkboxes save instantly and refresh the idea's progress without a page reload.
+function csrfToken() {
+  return document.querySelector('meta[name="csrf-token"]').content;
+}
+
+function renderProgress(card, { done_count: done, total }) {
+  const percent = total ? Math.round((100 * done) / total) : 0;
+  card.querySelector(".progress-label").textContent = `${done}/${total}`;
+  card.querySelector(".progress-fill").style.width = `${percent}%`;
+  card.querySelector(".progress").classList.toggle("progress-complete", total > 0 && done === total);
+}
+
+async function saveFeatureState(checkbox) {
+  const item = checkbox.closest(".feature");
+  const response = await fetch(item.dataset.toggleUrl, {
+    method: "POST",
+    headers: { "X-CSRFToken": csrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
+    body: `done=${checkbox.checked}`,
+  });
+  if (!response.ok) throw new Error(`Saving feature failed with status ${response.status}`);
+  renderProgress(checkbox.closest(".idea-card"), await response.json());
+}
+
+document.addEventListener("change", (event) => {
+  if (!event.target.matches(".feature-check input")) return;
+  const checkbox = event.target;
+  saveFeatureState(checkbox).catch((error) => {
+    checkbox.checked = !checkbox.checked;
+    console.error(error);
+    alert("Kaydedilemedi, bağlantını kontrol et.");
+  });
+});
+
+// The capture textarea grows with its content, like a chat input.
+document.addEventListener("input", (event) => {
+  if (!event.target.matches(".quick-bar textarea")) return;
+  event.target.style.height = "auto";
+  event.target.style.height = `${event.target.scrollHeight}px`;
+});

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Özelliği kopyala · Idealar{% endblock %}
+{% block content %}
+<h1>Özelliği kopyala</h1>
+<form method="post" class="card stack">
+  {% csrf_token %}
+  <p>“{{ feature.text }}” seçtiğin fikirlere yeni, işaretsiz bir madde olarak eklenir.</p>
+  {% include "ideas/_form_fields.html" %}
+  <div class="row">
+    <button class="button" type="submit">Kopyala</button>
+    <a class="button button-secondary" href="{% url 'ideas:list' %}?open={{ feature.idea_id }}#idea-{{ feature.idea_id }}">Vazgeç</a>
+  </div>
+</form>
+{% endblock %}

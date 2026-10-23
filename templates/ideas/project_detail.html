@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ object.name }} · Idealar{% endblock %}
+{% block content %}
+<h1>📁 {{ object.name }}</h1>
+{% if object.description %}<p>{{ object.description|linebreaksbr }}</p>{% endif %}
+<p class="muted">{{ object.progress.done }}/{{ object.progress.total }} özellik tamamlandı</p>
+
+<h2>Fikirler</h2>
+{% if ideas %}
+<ul class="idea-list">
+  {% for idea in ideas %}
+  <li class="card">
+    <a class="idea-link" href="{% url 'ideas:list' %}?open={{ idea.pk }}#idea-{{ idea.pk }}">
+      <strong>{{ idea.display_title }}</strong>
+      <span class="muted">{{ idea.progress.done }}/{{ idea.progress.total }} özellik</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="muted">Bu projeye bağlı fikir yok. Düzenleyip fikir bağlayabilirsin.</p>
+{% endif %}
+<p class="row">
+  <a class="button button-secondary" href="{% url 'ideas:project-update' object.pk %}">Düzenle</a>
+  <a class="button button-danger" href="{% url 'ideas:project-delete' object.pk %}">Sil</a>
+</p>
+{% endblock %}

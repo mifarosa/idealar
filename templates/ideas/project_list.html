@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Projeler · Idealar{% endblock %}
+{% block content %}
+<div class="row row-between">
+  <h1>Projeler</h1>
+  <a class="button" href="{% url 'ideas:project-create' %}">+ Yeni proje</a>
+</div>
+{% if projects %}
+<ul class="idea-list">
+  {% for project in projects %}
+  <li class="card">
+    <a class="idea-link" href="{% url 'ideas:project-detail' project.pk %}">
+      <strong>📁 {{ project.name }}</strong>
+      <span class="muted">{{ project.ideas.all|length }} fikir · {{ project.progress.done }}/{{ project.progress.total }} özellik</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="muted empty">Henüz proje yok.</p>
+{% endif %}
+{% endblock %}
