@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from .forms import FeatureForm, IdeaForm, QuickIdeaForm
@@ -47,9 +47,15 @@ class IdeaListView(OwnedIdeaMixin, ListView):
         raw = self.request.GET.get("open", "")
         return int(raw) if raw.isdigit() else None
 
+    @property
+    def enrich_idea_id(self) -> int | None:
+        raw = self.request.GET.get("enrich", "")
+        return int(raw) if raw.isdigit() else None
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(
+            enrich_idea_id=self.enrich_idea_id,
             search_text=self.search_text,
             status_filter=self.status_filter,
             open_idea_id=self.open_idea_id,
@@ -72,6 +78,10 @@ class IdeaCreateView(UserFormKwargsMixin, OwnedIdeaMixin, CreateView):
         form.instance.owner = self.request.user
         messages.success(self.request, "Fikir kaydedildi.")
         return super().form_valid(form)
+
+    def get_success_url(self):
+        # The list page then asks the AI to fill the new idea in the background (see app.js).
+        return f"{reverse('ideas:list')}?enrich={self.object.pk}"
 
 
 class IdeaUpdateView(UserFormKwargsMixin, OwnedIdeaMixin, UpdateView):

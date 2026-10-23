@@ -9,6 +9,9 @@ TITLE_PREVIEW_LENGTH = 60
 PLATFORM_CHOICES = [("pwa", "PWA"), ("android", "Android"), ("ios", "iOS")]
 PLATFORM_LABELS = dict(PLATFORM_CHOICES)
 
+AI_PENDING, AI_DONE, AI_FAILED = "pending", "done", "failed"
+AI_STATUS_CHOICES = [(AI_PENDING, "Bekliyor"), (AI_DONE, "Tamam"), (AI_FAILED, "Başarısız")]
+
 
 @dataclass(frozen=True)
 class Progress:
@@ -32,7 +35,12 @@ class IdeaQuerySet(models.QuerySet):
         text = text.strip()
         if not text:
             return self
-        return self.filter(Q(title__icontains=text) | Q(body__icontains=text))
+        return self.filter(
+            Q(title__icontains=text) | Q(body__icontains=text) | Q(ai_title__icontains=text) | Q(ai_summary__icontains=text)
+        )
+
+    def awaiting_ai(self):
+        return self.exclude(ai_status=AI_DONE)
 
     def with_progress(self):
         # Aggregating adds GROUP BY, which discards Meta.ordering, so order explicitly.
@@ -73,6 +81,12 @@ class Idea(models.Model):
     body = models.TextField()
     platforms = models.JSONField(default=list, blank=True)
     projects = models.ManyToManyField(Project, related_name="ideas", blank=True)
+    # Filled by the AI layer; the idea is saved even when AI is unavailable (status stays pending/failed).
+    ai_title = models.CharField(max_length=200, blank=True)
+    ai_summary = models.TextField(blank=True)
+    ai_tags = models.JSONField(default=list, blank=True)
+    suggested_features = models.JSONField(default=list, blank=True)
+    ai_status = models.CharField(max_length=10, choices=AI_STATUS_CHOICES, default=AI_PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -87,9 +101,11 @@ class Idea(models.Model):
 
     @property
     def display_title(self) -> str:
-        """Explicit title if given, otherwise the first line of the body (quick capture has no title)."""
+        """Own title, else the AI title, else the first line of the body (quick capture has no title)."""
         if self.title:
             return self.title
+        if self.ai_title:
+            return self.ai_title
         first_line = self.body.strip().splitlines()[0] if self.body.strip() else ""
         if len(first_line) <= TITLE_PREVIEW_LENGTH:
             return first_line
