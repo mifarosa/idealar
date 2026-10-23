@@ -1,0 +1,68 @@
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+
+from .forms import IdeaForm, QuickIdeaForm
+from .models import Idea
+
+
+class OwnedIdeaMixin(LoginRequiredMixin):
+    """Restricts every query to the signed-in user's ideas; other users' ideas are simply 404."""
+
+    model = Idea
+    success_url = reverse_lazy("ideas:list")
+
+    def get_queryset(self):
+        return Idea.objects.owned_by(self.request.user)
+
+
+class IdeaListView(OwnedIdeaMixin, ListView):
+    template_name = "ideas/idea_list.html"
+    context_object_name = "ideas"
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().matching(self.search_text)
+
+    @property
+    def search_text(self) -> str:
+        return self.request.GET.get("q", "")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_text"] = self.search_text
+        context["quick_form"] = QuickIdeaForm()
+        return context
+
+
+class IdeaCreateView(OwnedIdeaMixin, CreateView):
+    """Accepts both the one-field quick form and the full form; the quick form posts here too."""
+
+    template_name = "ideas/idea_form.html"
+
+    def get_form_class(self):
+        is_quick_capture = self.request.method == "POST" and "title" not in self.request.POST
+        return QuickIdeaForm if is_quick_capture else IdeaForm
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        messages.success(self.request, "Fikir kaydedildi.")
+        return super().form_valid(form)
+
+
+class IdeaUpdateView(OwnedIdeaMixin, UpdateView):
+    template_name = "ideas/idea_form.html"
+    form_class = IdeaForm
+
+    def form_valid(self, form):
+        messages.success(self.request, "Fikir güncellendi.")
+        return super().form_valid(form)
+
+
+class IdeaDeleteView(OwnedIdeaMixin, DeleteView):
+    template_name = "ideas/idea_confirm_delete.html"
+
+    def form_valid(self, form):
+        messages.success(self.request, "Fikir silindi.")
+        return super().form_valid(form)
