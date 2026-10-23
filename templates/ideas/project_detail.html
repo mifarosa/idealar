@@ -21,6 +21,7 @@
 <p class="muted">Bu projeye bağlı fikir yok. Düzenleyip fikir bağlayabilirsin.</p>
 {% endif %}
 <p class="row">
+  <a class="button" href="{% url 'ideas:project-chat' object.pk %}">💬 Proje hakkında konuş</a>
   <a class="button button-secondary" href="{% url 'ideas:project-update' object.pk %}">Düzenle</a>
   <a class="button button-danger" href="{% url 'ideas:project-delete' object.pk %}">Sil</a>
 </p>

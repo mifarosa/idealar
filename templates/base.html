@@ -19,6 +19,7 @@
     <nav class="topnav">
       <a href="{% url 'ideas:list' %}">Fikirler</a>
       <a href="{% url 'ideas:project-list' %}">Projeler</a>
+      <a href="{% url 'ideas:chat' %}">💬</a>
     </nav>
     <form method="post" action="{% url 'accounts:logout' %}">
       {% csrf_token %}

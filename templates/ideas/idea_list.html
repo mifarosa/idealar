@@ -86,6 +86,7 @@
 
         <div class="row">
           <a class="button button-secondary" href="{% url 'ideas:update' idea.pk %}">Düzenle</a>
+          <a class="button button-secondary" href="{% url 'ideas:idea-chat' idea.pk %}">💬 Sohbet</a>
           <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}">
             {% csrf_token %}
             <button class="link-button" type="submit">✨ {% if idea.ai_status == 'done' %}AI ile yenile{% else %}AI ile doldur{% endif %}</button>

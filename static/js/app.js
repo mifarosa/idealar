@@ -71,3 +71,13 @@ async function enrichPendingIdea() {
 }
 
 enrichPendingIdea();
+
+// Chat: show a typing indicator while the server waits for the AI, and start at the newest message.
+const chatForm = document.querySelector(".chat-form");
+if (chatForm) {
+  window.scrollTo(0, document.body.scrollHeight);
+  chatForm.addEventListener("submit", () => {
+    document.querySelector(".typing").hidden = false;
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+}

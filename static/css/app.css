@@ -206,3 +206,15 @@ select { font: inherit; color: var(--text); background: var(--bg); border: 1px s
 .suggestions { border-top: 1px dashed var(--border); padding-top: 0.5rem; }
 .suggestion-text { flex: 1; }
 .suggestions .chip { cursor: pointer; background: transparent; font: inherit; color: var(--accent); border-color: var(--accent); }
+
+/* Chat */
+.chat-log { display: flex; flex-direction: column; gap: 0.6rem; }
+.bubble { max-width: 88%; padding: 0.6rem 0.9rem; border-radius: 18px; overflow-wrap: anywhere; }
+.bubble p { margin: 0; }
+.bubble-user { align-self: flex-end; background: var(--accent); color: var(--accent-text); border-bottom-right-radius: 4px; }
+.bubble-assistant { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.action-card { margin-top: 0.6rem; padding: 0.5rem 0.7rem; border: 1px dashed var(--accent); border-radius: 12px; }
+.action-card p { margin-bottom: 0.4rem; }
+.chat-retry { justify-content: space-between; }
+.typing { align-self: flex-start; color: var(--accent); font-weight: 600; }
+.action-card .chip { cursor: pointer; background: transparent; font: inherit; color: var(--accent); border-color: var(--accent); }
