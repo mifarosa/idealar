@@ -44,7 +44,7 @@ Fikir kaydedilince sayfa hemen açılır, AI arkadan başlık, kısa özet, etik
 
 ### Gemini / Google AI Studio (isteğe bağlı)
 1. https://aistudio.google.com/apikey adresinden anahtar al.
-2. `.env`: `GEMINI_API_KEY=...`, `GEMINI_MODEL=<model adı>` ve `AI_PROVIDERS=groq,gemini,ollama` (sıra = öncelik). Model adlarını `docker compose exec web python manage.py ai_models` listeler (Gemini anahtarını ekledikten sonra).
+2. `.env`: `GEMINI_API_KEY=...` ve `AI_PROVIDERS=groq,gemini,ollama` (sıra = öncelik). Model adı yazmak zorunda değilsin; varsayılan `gemini-flash-lite-latest` (Google'ın güncel hafif modeline işaret eden takma ad). Başka model istersen `GEMINI_MODEL=` yaz; geçerli adları `docker compose exec web python manage.py ai_models` listeler.
 3. Ücretsiz katmanda gönderdiğin içeriğin Google'ın ürünlerini geliştirmek için kullanılabildiği belirtiliyor; fikirlerin gizliyse bunu göz önünde bulundur. Ayrıca günlük istek limiti modele göre çok değişiyor; kendi limitlerini aistudio.google.com/rate-limit sayfasında gör.
 
 ### Ollama (yedek, isteğe bağlı)

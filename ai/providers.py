@@ -18,6 +18,8 @@ CLOUD_TIMEOUT_SECONDS = 20
 LOCAL_TIMEOUT_SECONDS = 90  # small local models on CPU are slow
 # Groq retires models regularly (llama-3.3-70b-versatile was shut down); run `manage.py ai_models` to check.
 DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
+# "-latest" aliases follow Google's current model, so the default does not go stale like a pinned version.
+DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest"
 
 
 def _required(environ: Mapping[str, str], key: str) -> str:
@@ -48,12 +50,12 @@ def _openrouter(environ: Mapping[str, str]) -> LLMClient:
 
 
 def _gemini(environ: Mapping[str, str]) -> LLMClient:
-    # Google AI Studio exposes an OpenAI-compatible endpoint. Model names change often, so none is assumed.
+    # Google AI Studio exposes an OpenAI-compatible endpoint.
     return OpenAICompatibleClient(
         name="gemini",
         base_url="https://generativelanguage.googleapis.com/v1beta/openai",
         api_key=_required(environ, "GEMINI_API_KEY"),
-        model=_required(environ, "GEMINI_MODEL"),
+        model=environ.get("GEMINI_MODEL", DEFAULT_GEMINI_MODEL),
         timeout=CLOUD_TIMEOUT_SECONDS,
     )
 
