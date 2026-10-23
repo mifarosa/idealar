@@ -47,7 +47,7 @@ class IdeaCrudTests(TestCase):
     def test_quick_capture_saves_body_only_idea_for_current_user(self):
         response = self.client.post(reverse("ideas:create"), {"body": "A habit tracker"})
 
-        self.assertRedirects(response, reverse("ideas:list"))
+        self.assertRedirects(response, f"{reverse('ideas:list')}?enrich={Idea.objects.get().pk}", fetch_redirect_response=False)
         idea = Idea.objects.get()
         self.assertEqual((idea.owner, idea.title, idea.body), (self.user, "", "A habit tracker"))
 

@@ -198,3 +198,11 @@ select { font: inherit; color: var(--text); background: var(--bg); border: 1px s
 }
 .quick-bar textarea { flex: 1; max-height: 8rem; border-radius: 22px; resize: none; }
 .quick-bar .button { border-radius: 50%; width: 44px; padding: 0; }
+
+/* AI-generated content */
+.ai-summary { margin: 0; font-style: italic; }
+.ai-working { margin: 0; color: var(--accent); font-weight: 600; }
+.badge-tag { color: var(--accent); }
+.suggestions { border-top: 1px dashed var(--border); padding-top: 0.5rem; }
+.suggestion-text { flex: 1; }
+.suggestions .chip { cursor: pointer; background: transparent; font: inherit; color: var(--accent); border-color: var(--accent); }

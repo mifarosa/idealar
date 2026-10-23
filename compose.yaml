@@ -7,6 +7,10 @@ x-app: &app
     # Container paths override the host-style values in .env.
     DATABASE_URL: sqlite:////data/db.sqlite3
     BACKUP_DIR: /backups
+    # Ollama runs on the host (outside Docker); host.docker.internal reaches it from the container.
+    OLLAMA_BASE_URL: http://host.docker.internal:11434
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   volumes:
     # Named volume: SQLite is unreliable on Windows bind mounts.
     - idealar-data:/data

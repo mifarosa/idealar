@@ -2,7 +2,7 @@
 
 Günlük uygulama fikirlerini hızlıca yakalamak için kişisel not defteri (PWA). Django tek süreçte hem sayfaları hem PWA dosyalarını sunar: tek adres, CORS yok.
 
-**Durum:** Aşama 1 + fikir/özellik/proje yapısı. (AI katmanı, puanlama ve haftalık liste sonraki aşamalar.)
+**Durum:** Aşama 1 + fikir/özellik/proje yapısı + Aşama 2 (AI ile başlık/özet/etiket/özellik önerisi). Puanlama, benzerlik uyarısı ve haftalık liste sonraki aşamalar.
 
 ## Kavramlar
 
@@ -22,8 +22,32 @@ Günlük uygulama fikirlerini hızlıca yakalamak için kişisel not defteri (PW
 | DB | `DATABASE_URL` ile ayarlanır (başta SQLite, sonra Postgres) |
 | PWA | `/manifest.webmanifest`, kökten sunulan `/sw.js`, çevrimdışı sayfa |
 | Paketleme | Dockerfile + `compose.yaml` (web + günlük yedek servisi) |
+| AI | `ai/` paketi: tek arayüz (`LLMClient`), Groq → Ollama fallback, OpenAI uyumlu API |
 | Sunucu | `waitress` (Linux/macOS/Windows'ta çalışır), statik dosyalar WhiteNoise ile |
 | Uzaktan erişim | Tailscale + `tailscale serve` (HTTPS) |
+
+## Yapay zeka (ücretsiz)
+
+Fikir kaydedilince sayfa hemen açılır, AI arkadan başlık, kısa özet, etiketler ve **önerilen özellikler** üretir. Öneriler kartta çıkar: **＋ Ekle** ile özellik listesine eklenir, ✕ ile yoksayılır. Kendi yazdığın başlık AI başlığının önüne geçer.
+
+- **Birincil: Groq** (ücretsiz katman, kart gerekmez). **Yedek: Ollama** (kendi bilgisayarında küçük model). Groq limit doldurursa, kapalıysa veya bozuk cevap verirse otomatik Ollama denenir.
+- **AI hata verirse fikir yine kaydedilir.** Kartta "✨ AI ile doldur" düğmesi çıkar. Toplu doldurmak için: `docker compose exec web python manage.py enrich_ideas`
+- Sağlayıcı sırası ve ayarları `.env` içindedir (`AI_PROVIDERS=groq,ollama`). Yeni sağlayıcı eklemek veya değiştirmek tek dosyadır: `ai/providers.py`.
+- **Gizlilik:** Groq'a fikirlerinin metni gönderilir. Bunu istemiyorsan `.env`'de `AI_PROVIDERS=ollama` yap; o zaman her şey bilgisayarından çıkmaz.
+
+### Groq anahtarı
+1. https://console.groq.com/keys adresinden ücretsiz hesap aç ve bir API anahtarı oluştur.
+2. `.env` içine `GROQ_API_KEY=...` yaz (anahtarı kimseyle paylaşma, git'e girmez).
+3. `docker compose up -d` (ayar değişince konteyner yeniden oluşur).
+
+Ücretsiz limitler zamanla değişir; güncel limitler için Groq konsolundaki *Limits* sayfasına bak. Model adı `GROQ_MODEL` ile değiştirilebilir.
+
+### Ollama (yedek, isteğe bağlı)
+1. https://ollama.com/download adresinden Windows sürümünü kur.
+2. Modeli indir: `ollama pull qwen2.5:3b` (yaklaşık 2 GB; Türkçe için makul bir küçük model).
+3. Docker konteyneri Ollama'ya `host.docker.internal:11434` üzerinden ulaşır (`compose.yaml` bunu ayarlar). Bağlanamazsa Ollama'yı `OLLAMA_HOST=0.0.0.0` ortam değişkeniyle başlatmayı dene.
+
+Küçük yerel modelin çıktısı Groq'unkinden zayıf ve yavaştır; yalnızca yedek olarak düşünüldü.
 
 ## Docker ile çalıştırma (önerilen, Windows dahil)
 

@@ -16,7 +16,7 @@
 <ul class="idea-list">
   {% for idea in ideas %}
   <li>
-    <details class="idea-card" id="idea-{{ idea.pk }}" {% if idea.pk == open_idea_id %}open{% endif %}>
+    <details class="idea-card" id="idea-{{ idea.pk }}" {% if idea.pk == open_idea_id or idea.pk == enrich_idea_id %}open{% endif %}{% if idea.pk == enrich_idea_id and idea.ai_status != 'done' %} data-enrich-url="{% url 'ideas:idea-enrich' idea.pk %}" data-done-url="{% url 'ideas:list' %}?open={{ idea.pk }}#idea-{{ idea.pk }}"{% endif %}>
       <summary>
         <span class="idea-title">{{ idea.display_title }}</span>
         <span class="progress {% if idea.progress.is_complete %}progress-complete{% endif %}">
@@ -26,7 +26,12 @@
       </summary>
 
       <div class="idea-panel stack">
-        {% if idea.title %}<p class="idea-body">{{ idea.body|linebreaksbr }}</p>{% endif %}
+        {% if idea.pk == enrich_idea_id and idea.ai_status != 'done' %}<p class="ai-working" role="status">✨ AI düşünüyor…</p>{% endif %}
+        {% if idea.title or idea.ai_title %}<p class="idea-body">{{ idea.body|linebreaksbr }}</p>{% endif %}
+        {% if idea.ai_summary %}<p class="ai-summary">✨ {{ idea.ai_summary }}</p>{% endif %}
+        {% if idea.ai_tags %}
+        <p class="badges">{% for tag in idea.ai_tags %}<span class="badge badge-tag">#{{ tag }}</span>{% endfor %}</p>
+        {% endif %}
         {% if idea.platform_labels or idea.projects.all %}
         <p class="badges">
           {% for label in idea.platform_labels %}<span class="badge">{{ label }}</span>{% endfor %}
@@ -60,7 +65,33 @@
           <button class="button" type="submit">Ekle</button>
         </form>
 
-        <p><a class="button button-secondary" href="{% url 'ideas:update' idea.pk %}">Düzenle</a></p>
+        {% if idea.suggested_features %}
+        <div class="suggestions">
+          <span class="field-label">✨ Önerilen özellikler</span>
+          <ul class="feature-list">
+            {% for text in idea.suggested_features %}
+            <li class="feature">
+              <span class="feature-text suggestion-text">{{ text }}</span>
+              <form method="post" action="{% url 'ideas:suggestion-resolve' idea.pk %}" class="row">
+                {% csrf_token %}
+                <input type="hidden" name="text" value="{{ text }}">
+                <button class="chip" name="action" value="accept" type="submit">＋ Ekle</button>
+                <button class="icon-link" name="action" value="dismiss" type="submit" aria-label="Öneriyi yoksay">✕</button>
+              </form>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div class="row">
+          <a class="button button-secondary" href="{% url 'ideas:update' idea.pk %}">Düzenle</a>
+          <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}">
+            {% csrf_token %}
+            <button class="link-button" type="submit">✨ {% if idea.ai_status == 'done' %}AI ile yenile{% else %}AI ile doldur{% endif %}</button>
+          </form>
+          {% if idea.ai_status == 'failed' %}<span class="muted">AI daha önce yanıt veremedi.</span>{% endif %}
+        </div>
       </div>
     </details>
   </li>

@@ -55,3 +55,19 @@ document.addEventListener("input", (event) => {
   event.target.style.height = "auto";
   event.target.style.height = `${event.target.scrollHeight}px`;
 });
+
+// After quick capture the list page asks the server to fill the new idea with AI, so saving itself
+// is instant. Whatever happens, we end up on the normal page; a failed AI run is shown there.
+async function enrichPendingIdea() {
+  const card = document.querySelector("[data-enrich-url]");
+  if (!card) return;
+  try {
+    // "manual": do not follow the redirect, or its page render would consume the flash message.
+    await fetch(card.dataset.enrichUrl, { method: "POST", redirect: "manual", headers: { "X-CSRFToken": csrfToken() } });
+  } catch (error) {
+    console.error("AI enrichment request failed:", error);
+  }
+  window.location.replace(card.dataset.doneUrl);
+}
+
+enrichPendingIdea();
