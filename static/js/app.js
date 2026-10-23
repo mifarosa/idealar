@@ -107,3 +107,12 @@ document.addEventListener("change", (event) => {
 });
 
 restoreProviderChoice();
+
+// The repository review takes a while: tell the user it is working instead of showing a frozen page.
+const inspectForm = document.querySelector(".inspect-form");
+if (inspectForm) {
+  inspectForm.addEventListener("submit", () => {
+    inspectForm.querySelector("button").disabled = true;
+    document.querySelector(".inspect-working").hidden = false;
+  });
+}

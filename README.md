@@ -66,6 +66,25 @@ AI fikir verir, risk ve alternatif söyler. Somut bir şey önerdiğinde cevabı
 
 Sohbette AI'a gönderilenler: konuşma (son 10 mesaj) ve o sohbetin kapsamındaki fikirlerin metni (en fazla yaklaşık 6000 karakter). Başka kullanıcıların verisi hiçbir zaman gönderilmez.
 
+## Benzerlik uyarısı
+
+Yeni bir fikir kaydedilince AI, onu **tüm fikirlerin ve projelerinle** karşılaştırır (yeni fikir hazırlanırken kartta "AI düşünüyor" aşamasında, ayrıca "🔎 Benzerleri ara" düğmesiyle istediğin zaman).
+
+- Karar **amaca göre** verilir, kelimelere göre değil: farklı kelimelerle (hatta farklı dilde) yazılmış aynı fikir de yakalanır. Sadece "ikisi de mobil uygulama" gibi genel benzerlikler eşleşme sayılmaz. Her eşleşmenin yanında gerekçe cümlesi ve "aynısı / benzer / ilgili" etiketi görürsün.
+- Çok az fikrin varsa hepsi AI'a verilir. Çok fikrin olunca önce kelime örtüşmesiyle en olası adaylar ve en yeni fikirler seçilir.
+- Benzer bir **proje** bulunursa **"＋ Bu projeye bağla"**, benzer bir **fikir** bulunursa **"＋ O fikre özellik olarak ekle"** düğmesi çıkar; ✕ ile "farklı, yoksay" dersin. Sen basmadan hiçbir şey değişmez.
+- AI çalışmazsa güçlü kelime örtüşmesi gösterilir ve kartta açıkça "AI kontrolü yapılamadı; yalnızca kelime benzerliğine baktım" yazar. Sessizce eksik sonuç göstermez.
+
+## GitHub projesini AI ile inceleme
+
+Projeye bir GitHub adresi eklersen (Düzenle → *GitHub adresi*), proje sayfasında **🔍 Projeyi incele** düğmesi çıkar. Sunucu GitHub API'sinden depoyu okur ve AI'a inceletir. Sonuç: kısa özet, kullanılan teknolojiler, **çözülmüş/yapılmış görünenler**, **eksik veya belirsiz olanlar**. Ayrıca projeye bağlı fikirlerdeki özellik listendeki maddelerden kodda yapılmış görünenler için **"✓ Yapıldı olarak işaretle"** düğmesi çıkar (sen basmadan işaretlenmez).
+
+- İnceleme için **Gemini** tercih edilir (büyük içerik); kurulu değilse veya hata verirse diğer AI'lara düşer.
+- **Sınır:** AI depodaki tüm kodu görmez; yalnızca README, dosya listesi, birkaç manifest/ana dosya ve son 30 commit mesajı gönderilir (varsayılan en fazla 24.000 karakter, `REPO_ANALYSIS_MAX_CHARS`). Sonuç bir tahmindir; "yapılmış" iddiası kanıt (dosya/commit) gösterir, emin olunamayan için "belirsiz" yazılır.
+- **Gizlilik:** Depodaki metin seçilen AI sağlayıcısına gönderilir. Ücretsiz Gemini katmanında içeriğin Google'ın ürünlerini geliştirmek için kullanılabildiği belirtiliyor; **özel depolarını incelemeden önce bunu düşün.** İstersen `AI_PROVIDERS=ollama` ile her şeyi kendi bilgisayarında tut.
+- **Herkese açık depolar** token olmadan okunur (saatte 60 istek sınırı). Özel depo için `.env`'ye `GITHUB_TOKEN` ekle (yalnızca okuma izinli, ayrıntı `.env.example`'da).
+- Yalnızca `https://github.com/sahip/depo` biçimindeki adresler kabul edilir; sunucu başka adreslere istek atmaz.
+
 ## Docker ile çalıştırma (önerilen, Windows dahil)
 
 Docker Desktop kurulu olması yeterli; Python/venv gerekmez. Veritabanı `idealar-data` adlı Docker volume'unda, yedekler proje klasöründeki `backups/` içinde durur.

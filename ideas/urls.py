@@ -11,6 +11,8 @@ urlpatterns = [
     path("ideas/<int:pk>/delete/", views.IdeaDeleteView.as_view(), name="delete"),
     path("ideas/<int:idea_pk>/features/add/", feature_views.FeatureAddView.as_view(), name="feature-add"),
     path("ideas/<int:pk>/ai/", ai_views.IdeaEnrichView.as_view(), name="idea-enrich"),
+    path("ideas/<int:pk>/similar/check/", ai_views.SimilarCheckView.as_view(), name="idea-similar-check"),
+    path("ideas/<int:pk>/similar/<int:index>/", ai_views.SimilarDecideView.as_view(), name="idea-similar-decide"),
     path("ideas/<int:pk>/suggestions/", ai_views.SuggestionResolveView.as_view(), name="suggestion-resolve"),
     path("chat/", chat_views.ConversationListView.as_view(), name="chat"),
     path("ideas/<int:idea_pk>/chat/", chat_views.ConversationListView.as_view(), name="idea-chat"),
@@ -25,5 +27,7 @@ urlpatterns = [
     path("projects/new/", project_views.ProjectCreateView.as_view(), name="project-create"),
     path("projects/<int:pk>/", project_views.ProjectDetailView.as_view(), name="project-detail"),
     path("projects/<int:pk>/edit/", project_views.ProjectUpdateView.as_view(), name="project-update"),
+    path("projects/<int:pk>/inspect/", project_views.ProjectInspectView.as_view(), name="project-inspect"),
+    path("projects/<int:pk>/matches/<int:index>/", project_views.ProjectMatchDecideView.as_view(), name="project-match-decide"),
     path("projects/<int:pk>/delete/", project_views.ProjectDeleteView.as_view(), name="project-delete"),
 ]

@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from ai.analysis import IdeaAnalyzer, IdeaInsights
 from ai.client import LLMClient
+from ai.similarity import SimilarityJudge
 from ai.errors import AIProviderError, AllProvidersFailed
 from ideas import ai_enrichment
 from ideas.models import AI_DONE, AI_FAILED, AI_PENDING, Feature, Idea
@@ -30,6 +31,13 @@ class StubAnalyzer(IdeaAnalyzer):
         if self._error:
             raise self._error
         return self._insights
+
+
+class _NoMatchClient(LLMClient):
+    name = "no-match"
+
+    def chat_json(self, system, messages):
+        return {"matches": []}
 
 
 def failing_analyzer():
@@ -90,6 +98,9 @@ class EnrichIdeaTests(TestCase):
 
 class EnrichViewTests(TestCase):
     def setUp(self):
+        judge_patcher = patch("ideas.similarity.build_judge", return_value=SimilarityJudge(_NoMatchClient()))
+        judge_patcher.start()
+        self.addCleanup(judge_patcher.stop)
         self.user = make_user()
         self.client.force_login(self.user)
         self.idea = Idea.objects.create(owner=self.user, body="track my habits")

@@ -5,6 +5,53 @@
 {% if object.description %}<p>{{ object.description|linebreaksbr }}</p>{% endif %}
 <p class="muted">{{ object.progress.done }}/{{ object.progress.total }} özellik tamamlandı</p>
 
+
+<section class="card stack github">
+  <h2>GitHub</h2>
+  {% if object.github_url %}
+  <p><a href="{{ object.github_url }}" rel="noopener noreferrer" target="_blank">{{ object.github_url }}</a></p>
+  <form method="post" action="{% url 'ideas:project-inspect' object.pk %}" class="inspect-form">
+    {% csrf_token %}
+    <button class="button" type="submit">🔍 Projeyi incele</button>
+  </form>
+  <p class="muted inspect-working" hidden role="status">İnceleniyor… GitHub'dan okuyup AI'a soruyorum, yarım dakika sürebilir.</p>
+  <p class="muted">İnceleme README'yi, dosya listesini, birkaç ana dosyayı ve son commit'leri okur; kodun tamamını görmez. Sonuç bir tahmindir.</p>
+  {% if object.repo_analysis_error %}<p class="error-text">{{ object.repo_analysis_error }}</p>{% endif %}
+
+  {% with analysis=object.repo_analysis %}
+  {% if analysis.summary %}
+  <p class="muted">Son inceleme: {{ object.repo_analyzed_at|date:"d M Y H:i" }}{% if object.repo_analysis_provider %} · ✨ {{ object.repo_analysis_provider }}{% endif %}</p>
+  <p>{{ analysis.summary }}</p>
+  {% if analysis.tech %}<p class="badges">{% for item in analysis.tech %}<span class="badge">{{ item }}</span>{% endfor %}</p>{% endif %}
+
+  {% if analysis.implemented %}
+  <h3>✅ Çözülmüş / yapılmış görünenler</h3>
+  <ul class="plain-list">{% for item in analysis.implemented %}<li>{{ item }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if analysis.gaps %}
+  <h3>🧩 Eksik veya belirsiz</h3>
+  <ul class="plain-list">{% for item in analysis.gaps %}<li>{{ item }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  {% for match in analysis.matches %}
+  {% if match.status == 'done' and not match.already_done and match.decision == 'pending' %}
+  <div class="action-card">
+    <p>Checklist'indeki <strong>“{{ match.text }}”</strong> kodda yapılmış görünüyor.<br><span class="muted">{{ match.evidence }}</span></p>
+    <form method="post" action="{% url 'ideas:project-match-decide' object.pk forloop.counter0 %}" class="row">
+      {% csrf_token %}
+      <button class="chip" name="decision" value="apply" type="submit">✓ Yapıldı olarak işaretle</button>
+      <button class="icon-link" name="decision" value="dismiss" type="submit" aria-label="Yoksay">✕</button>
+    </form>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  {% else %}
+  <p class="muted">GitHub adresi eklersen projeyi AI'a inceletebilirsin. <a href="{% url 'ideas:project-update' object.pk %}">Adres ekle</a></p>
+  {% endif %}
+</section>
+
 <h2>Fikirler</h2>
 {% if ideas %}
 <ul class="idea-list">

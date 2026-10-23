@@ -14,7 +14,7 @@ from .fallback import FallbackClient
 logger = logging.getLogger(__name__)
 
 DEFAULT_CHAIN = "groq,ollama"
-CLOUD_TIMEOUT_SECONDS = 20
+CLOUD_TIMEOUT_SECONDS = 40  # repo reviews send large prompts
 LOCAL_TIMEOUT_SECONDS = 90  # small local models on CPU are slow
 # Groq retires models regularly (llama-3.3-70b-versatile was shut down); run `manage.py ai_models` to check.
 DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"

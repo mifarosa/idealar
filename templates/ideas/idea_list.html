@@ -39,6 +39,37 @@
         </p>
         {% endif %}
 
+        {% if idea.similar or idea.similarity_status %}
+        <div class="similar stack">
+          {% for hint in idea.similar %}{% if hint.status != 'dismissed' %}
+          <div class="similar-card">
+            <p class="field-label">⚠️ {% if hint.kind == 'project' %}Buna benzer bir projen var{% else %}Buna benzer bir fikrin var{% endif %}</p>
+            <p>
+              <strong>{{ hint.title }}</strong>
+              <span class="badge">{% if hint.kind == 'project' %}proje{% else %}fikir{% endif %}</span>
+              <span class="badge">{% if hint.verdict == 'same' %}aynısı{% elif hint.verdict == 'similar' %}benzer{% else %}ilgili{% endif %}</span>
+              {% if hint.source == 'words' %}<span class="badge">kelime benzerliği</span>{% endif %}
+              <br><span class="muted">{{ hint.reason }}</span>
+            </p>
+            {% if hint.status == 'pending' %}
+            <form method="post" action="{% url 'ideas:idea-similar-decide' idea.pk forloop.counter0 %}" class="row">
+              {% csrf_token %}
+              <button class="chip" name="decision" value="apply" type="submit">
+                {% if hint.kind == 'project' %}＋ Bu projeye bağla{% else %}＋ O fikre özellik olarak ekle{% endif %}
+              </button>
+              <button class="icon-link" name="decision" value="dismiss" type="submit" title="Farklı, yoksay" aria-label="Farklı, yoksay">✕</button>
+            </form>
+            {% else %}<span class="muted">✓ Eklendi</span>{% endif %}
+          </div>
+          {% endif %}{% endfor %}
+          {% if idea.similarity_status == 'words_only' %}
+          <p class="muted">AI kontrolü yapılamadı; yalnızca kelime benzerliğine baktım.</p>
+          {% elif idea.similarity_status == 'done' and not idea.similar %}
+          <p class="muted">✓ Benzer bir kayıt bulunmadı.</p>
+          {% endif %}
+        </div>
+        {% endif %}
+
         <ul class="feature-list">
           {% for feature in idea.features.all %}
           <li class="feature" data-toggle-url="{% url 'ideas:feature-toggle' feature.pk %}">
@@ -90,6 +121,10 @@
           <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}">
             {% csrf_token %}
             <button class="link-button" type="submit">✨ {% if idea.ai_status == 'done' %}AI ile yenile{% else %}AI ile doldur{% endif %}</button>
+          </form>
+          <form method="post" action="{% url 'ideas:idea-similar-check' idea.pk %}">
+            {% csrf_token %}
+            <button class="link-button" type="submit">🔎 Benzerleri ara</button>
           </form>
           {% if idea.ai_status == 'failed' %}<span class="muted">AI daha önce yanıt veremedi.</span>{% endif %}
         </div>

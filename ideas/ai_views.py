@@ -3,7 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 
-from . import ai_enrichment
+from . import ai_enrichment, similarity
+from .errors import ActionNotApplicable
 from .mixins import idea_panel_url
 from .models import Feature, Idea
 
@@ -24,6 +25,31 @@ class IdeaEnrichView(OwnedIdeaActionView):
             messages.success(request, "AI başlık, özet, etiket ve özellik önerilerini hazırladı.")
         else:
             messages.error(request, "AI şu an yanıt veremedi. Fikir kaydedildi; sonra tekrar deneyebilirsin.")
+        similarity.check_idea(idea)  # separate AI call; its failure never undoes the enrichment above
+        return redirect(idea_panel_url(idea.pk))
+
+
+class SimilarCheckView(OwnedIdeaActionView):
+    """Manual "look for duplicates" button."""
+
+    def post(self, request, pk):
+        idea = self.get_idea(pk)
+        similarity.check_idea(idea)
+        if idea.similarity_status == similarity.SIMILARITY_WORDS_ONLY:
+            messages.warning(request, "AI şu an yanıt veremedi; yalnızca kelime benzerliğine baktım.")
+        return redirect(idea_panel_url(idea.pk))
+
+
+class SimilarDecideView(OwnedIdeaActionView):
+    def post(self, request, pk, index):
+        idea = self.get_idea(pk)
+        if index < len(idea.similar):
+            apply = request.POST.get("decision") == "apply"
+            try:
+                similarity.decide_similar(idea, index, apply)
+                messages.success(request, "Eklendi." if apply else "Tamam, farklı olarak işaretlendi.")
+            except ActionNotApplicable:
+                messages.error(request, "Bu kayıt artık yok (silinmiş olabilir).")
         return redirect(idea_panel_url(idea.pk))
 
 

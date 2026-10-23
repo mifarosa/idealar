@@ -1,5 +1,6 @@
 from django import forms
 
+from .github_repo import GitHubError, parse_repo_url
 from .models import PLATFORM_CHOICES, Feature, Idea, Project
 
 
@@ -53,9 +54,21 @@ class ProjectForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ["name", "description"]
-        labels = {"name": "Proje adı", "description": "Açıklama"}
-        widgets = {"description": forms.Textarea(attrs={"rows": 5})}
+        fields = ["name", "description", "github_url"]
+        labels = {"name": "Proje adı", "description": "Açıklama", "github_url": "GitHub adresi (isteğe bağlı)"}
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 5}),
+            "github_url": forms.URLInput(attrs={"placeholder": "https://github.com/sahip/depo"}),
+        }
+
+    def clean_github_url(self):
+        url = self.cleaned_data["github_url"]
+        if url:
+            try:
+                parse_repo_url(url)
+            except GitHubError as error:
+                raise forms.ValidationError(str(error)) from error
+        return url
 
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
