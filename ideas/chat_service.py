@@ -12,6 +12,7 @@ from .models import (
     ROLE_ASSISTANT,
     ROLE_USER,
     ChatMessage,
+    Conversation,
     Feature,
     Idea,
 )
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 HISTORY_LIMIT = 10
 HISTORY_MESSAGE_CHARS = 1500
+TITLE_CHARS = 50
 
 
 class ActionNotApplicable(Exception):
@@ -30,18 +32,38 @@ def build_assistant() -> ChatAssistant:
     return ChatAssistant(build_default_client())
 
 
-def save_user_message(scope: ChatScope, text: str) -> ChatMessage:
-    return ChatMessage.objects.create(owner=scope.owner, idea=scope.idea, project=scope.project, role=ROLE_USER, content=text)
+def _title_from(first_message: str) -> str:
+    text = " ".join(first_message.split())
+    return text if len(text) <= TITLE_CHARS else text[: TITLE_CHARS - 1].rstrip() + "…"
 
 
-def needs_reply(scope: ChatScope) -> bool:
-    last = scope.messages().last()
+def start_conversation(scope: ChatScope, first_message: str) -> Conversation:
+    conversation = Conversation.objects.create(
+        owner=scope.owner, idea=scope.idea, project=scope.project, title=_title_from(first_message)
+    )
+    save_user_message(conversation, first_message)
+    return conversation
+
+
+def save_user_message(conversation: Conversation, text: str) -> ChatMessage:
+    return _add_message(conversation, ROLE_USER, text)
+
+
+def _add_message(conversation: Conversation, role: str, text: str, actions: list[dict] | None = None) -> ChatMessage:
+    message = ChatMessage.objects.create(conversation=conversation, role=role, content=text, actions=actions or [])
+    conversation.save(update_fields=["updated_at"])  # keeps the most recently used chat on top
+    return message
+
+
+def needs_reply(conversation: Conversation) -> bool:
+    last = conversation.messages.last()
     return last is not None and last.role == ROLE_USER
 
 
-def ask_assistant(scope: ChatScope, assistant_factory=None) -> ChatMessage | None:
+def ask_assistant(conversation: Conversation, assistant_factory=None) -> ChatMessage | None:
     """Replies to the conversation. Returns None (user messages are kept) if the AI is unavailable."""
-    recent = list(scope.messages().order_by("-id")[:HISTORY_LIMIT])[::-1]
+    scope = ChatScope.of(conversation)
+    recent = list(conversation.messages.order_by("-id")[:HISTORY_LIMIT])[::-1]
     history = [ChatTurn(m.role, m.content[:HISTORY_MESSAGE_CHARS]) for m in recent]
     try:
         assistant = (assistant_factory or build_assistant)()
@@ -49,14 +71,7 @@ def ask_assistant(scope: ChatScope, assistant_factory=None) -> ChatMessage | Non
     except AIError as error:
         logger.warning("AI chat failed (%s scope): %s", scope.kind, error)
         return None
-    return ChatMessage.objects.create(
-        owner=scope.owner,
-        idea=scope.idea,
-        project=scope.project,
-        role=ROLE_ASSISTANT,
-        content=reply.reply,
-        actions=_pending_actions(scope, reply.actions),
-    )
+    return _add_message(conversation, ROLE_ASSISTANT, reply.reply, _pending_actions(scope, reply.actions))
 
 
 def _pending_actions(scope: ChatScope, actions: list[ChatAction]) -> list[dict]:
@@ -82,23 +97,22 @@ def decide_action(message: ChatMessage, index: int, apply: bool) -> None:
     if action["status"] != ACTION_PENDING:
         return
     if apply:
-        _apply(message, action)
+        _apply(ChatScope.of(message.conversation), action)
     action["status"] = ACTION_APPLIED if apply else ACTION_DISMISSED
     message.save(update_fields=["actions"])
 
 
-def _apply(message: ChatMessage, action: dict) -> None:
+def _apply(scope: ChatScope, action: dict) -> None:
     if action["type"] == ACTION_ADD_FEATURE:
-        idea = _owned_idea_in_scope(message, action["idea_id"])
+        idea = _idea_in_scope(scope, action["idea_id"])
         Feature.objects.create(idea=idea, text=action["text"])
     elif action["type"] == ACTION_NEW_IDEA:
-        idea = Idea.objects.create(owner=message.owner, body=action["text"])
-        if message.project:
-            idea.projects.add(message.project)
+        idea = Idea.objects.create(owner=scope.owner, body=action["text"])
+        if scope.project:
+            idea.projects.add(scope.project)
 
 
-def _owned_idea_in_scope(message: ChatMessage, idea_id: int | None) -> Idea:
-    scope = ChatScope(message.owner, message.idea, message.project)
+def _idea_in_scope(scope: ChatScope, idea_id: int | None) -> Idea:
     idea = scope.visible_ideas().filter(pk=idea_id).first() if idea_id else None
     if idea is None:
         raise ActionNotApplicable("Target idea is no longer available")

@@ -42,6 +42,11 @@ Fikir kaydedilince sayfa hemen açılır, AI arkadan başlık, kısa özet, etik
 
 Ücretsiz limitler zamanla değişir; güncel limitler için Groq konsolundaki *Limits* sayfasına bak. Model adı `GROQ_MODEL` ile değiştirilebilir. Groq modelleri zamanla kaldırır (`llama-3.3-70b-versatile` kaldırıldı); log'da `model_not_found` görürsen `docker compose exec web python manage.py ai_models` ile anahtarının kullanabildiği modelleri listele ve birini `.env`'e yaz.
 
+### Gemini / Google AI Studio (isteğe bağlı)
+1. https://aistudio.google.com/apikey adresinden anahtar al.
+2. `.env`: `GEMINI_API_KEY=...`, `GEMINI_MODEL=<model adı>` ve `AI_PROVIDERS=groq,gemini,ollama` (sıra = öncelik). Model adlarını `docker compose exec web python manage.py ai_models` listeler (Gemini anahtarını ekledikten sonra).
+3. Ücretsiz katmanda gönderdiğin içeriğin Google'ın ürünlerini geliştirmek için kullanılabildiği belirtiliyor; fikirlerin gizliyse bunu göz önünde bulundur. Ayrıca günlük istek limiti modele göre çok değişiyor; kendi limitlerini aistudio.google.com/rate-limit sayfasında gör.
+
 ### Ollama (yedek, isteğe bağlı)
 1. https://ollama.com/download adresinden Windows sürümünü kur.
 2. Modeli indir: `ollama pull qwen2.5:3b` (yaklaşık 2 GB; Türkçe için makul bir küçük model).
@@ -51,13 +56,13 @@ Küçük yerel modelin çıktısı Groq'unkinden zayıf ve yavaştır; yalnızca
 
 ## AI ile sohbet
 
-AI ile projeni, fikirlerini ve özelliklerini konuşabilirsin. Üç yerden açılır:
+AI ile projeni, fikirlerini ve özelliklerini konuşabilirsin. Her kapsamda **birden çok sohbet (oturum)** açabilirsin: kapsamın sohbet sayfasında geçmiş sohbetler başlıklarıyla listelenir, alttaki kutu yeni bir sohbet başlatır, bir sohbeti açıp devam edebilir veya silebilirsin. Üç yerden açılır:
 
 - **Proje sayfası → "💬 Proje hakkında konuş":** AI projeyi, bağlı fikirleri ve özelliklerin yapıldı/yapılmadı durumunu görür.
 - **Fikir kartı → "💬 Sohbet":** yalnızca o fikir hakkında.
 - **Üst menüde 💬:** genel sohbet; tüm fikirlerinin başlık ve özetini görür.
 
-AI fikir verir, risk ve alternatif söyler. Somut bir şey önerdiğinde cevabın altında düğmeli kart çıkar: *"＋ Şu fikre özellik: …"* veya *"＋ Yeni fikir: …"*. **Sen "Ekle"ye basmadan hiçbir şey değişmez.** Proje sohbetinde önerilen yeni fikir otomatik olarak projeye bağlanır. Sohbet geçmişi veritabanında kalır, "Temizle" ile silinir. AI yanıt veremezse mesajın kaybolmaz, "Tekrar dene" düğmesi çıkar.
+AI fikir verir, risk ve alternatif söyler. Somut bir şey önerdiğinde cevabın altında düğmeli kart çıkar: *"＋ Şu fikre özellik: …"* veya *"＋ Yeni fikir: …"*. **Sen "Ekle"ye basmadan hiçbir şey değişmez.** Proje sohbetinde önerilen yeni fikir otomatik olarak projeye bağlanır. Sohbetler veritabanında kalır; istediğin sohbeti "Sil" ile kaldırırsın. Bir sohbetin geçmişi diğerine karışmaz. AI yanıt veremezse mesajın kaybolmaz, "Tekrar dene" düğmesi çıkar.
 
 Sohbette AI'a gönderilenler: konuşma (son 10 mesaj) ve o sohbetin kapsamındaki fikirlerin metni (en fazla yaklaşık 6000 karakter). Başka kullanıcıların verisi hiçbir zaman gönderilmez.
 

@@ -1,17 +1,19 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
 
 from . import chat_service
 from .chat_context import ChatScope
-from .models import ROLE_ASSISTANT, ChatMessage, Idea, Project
+from .models import ROLE_ASSISTANT, ChatMessage, Conversation, Idea, Project
 
 MAX_USER_MESSAGE_CHARS = 4000
 
 
-def chat_url(scope: ChatScope) -> str:
+def scope_chat_url(scope: ChatScope) -> str:
+    """The page listing a scope's conversations."""
     if scope.idea:
         return reverse("ideas:idea-chat", args=[scope.idea.pk])
     if scope.project:
@@ -27,8 +29,12 @@ def back_url(scope: ChatScope) -> str:
     return reverse("ideas:list")
 
 
-class ChatView(LoginRequiredMixin, View):
-    """One conversation per scope: a single idea, a single project, or the whole idea list."""
+def conversation_url(conversation: Conversation) -> str:
+    return reverse("ideas:conversation", args=[conversation.pk])
+
+
+class ConversationListView(LoginRequiredMixin, View):
+    """Lists the conversations of one scope (an idea, a project or the whole list) and starts new ones."""
 
     def get_scope(self, idea_pk=None, project_pk=None) -> ChatScope:
         user = self.request.user
@@ -38,33 +44,53 @@ class ChatView(LoginRequiredMixin, View):
 
     def get(self, request, **kwargs):
         scope = self.get_scope(**kwargs)
-        context = {
-            "scope": scope,
-            "chat_messages": self._messages_with_action_views(scope),
-            "needs_reply": chat_service.needs_reply(scope),
-            "chat_url": chat_url(scope),
-            "back_url": back_url(scope),
-        }
-        return render(request, "ideas/chat.html", context)
+        conversations = scope.conversations().annotate(message_count=Count("messages"))
+        context = {"scope": scope, "conversations": conversations, "post_url": scope_chat_url(scope), "back_url": back_url(scope)}
+        return render(request, "ideas/chat_list.html", context)
 
     def post(self, request, **kwargs):
         scope = self.get_scope(**kwargs)
-        if "clear" in request.POST:
-            scope.messages().delete()
-            return redirect(chat_url(scope))
+        text = request.POST.get("text", "").strip()[:MAX_USER_MESSAGE_CHARS]
+        if not text:
+            return redirect(scope_chat_url(scope))
+        conversation = chat_service.start_conversation(scope, text)
+        if chat_service.ask_assistant(conversation) is None:
+            messages.error(request, "AI şu an yanıt veremedi. Mesajın kaydedildi, tekrar deneyebilirsin.")
+        return redirect(conversation_url(conversation))
+
+
+class ConversationView(LoginRequiredMixin, View):
+    def get_conversation(self, pk: int) -> Conversation:
+        return get_object_or_404(Conversation.objects.filter(owner=self.request.user), pk=pk)
+
+    def get(self, request, pk):
+        conversation = self.get_conversation(pk)
+        scope = ChatScope.of(conversation)
+        context = {
+            "conversation": conversation,
+            "scope": scope,
+            "chat_messages": self._messages_with_action_views(conversation),
+            "needs_reply": chat_service.needs_reply(conversation),
+            "post_url": conversation_url(conversation),
+            "list_url": scope_chat_url(scope),
+        }
+        return render(request, "ideas/chat.html", context)
+
+    def post(self, request, pk):
+        conversation = self.get_conversation(pk)
         text = request.POST.get("text", "").strip()[:MAX_USER_MESSAGE_CHARS]
         if text:
-            chat_service.save_user_message(scope, text)
+            chat_service.save_user_message(conversation, text)
         # An empty post is a "retry" of an unanswered message; otherwise there is nothing to do.
-        if chat_service.needs_reply(scope) and chat_service.ask_assistant(scope) is None:
+        if chat_service.needs_reply(conversation) and chat_service.ask_assistant(conversation) is None:
             messages.error(request, "AI şu an yanıt veremedi. Mesajın kaydedildi, tekrar deneyebilirsin.")
-        return redirect(chat_url(scope))
+        return redirect(conversation_url(conversation))
 
     @staticmethod
-    def _messages_with_action_views(scope: ChatScope) -> list[ChatMessage]:
-        chat_messages = list(scope.messages())
+    def _messages_with_action_views(conversation: Conversation) -> list[ChatMessage]:
+        chat_messages = list(conversation.messages.all())
         idea_ids = {a["idea_id"] for m in chat_messages for a in m.actions if a.get("idea_id")}
-        titles = {i.pk: i.display_title for i in Idea.objects.owned_by(scope.owner).filter(pk__in=idea_ids)}
+        titles = {i.pk: i.display_title for i in Idea.objects.owned_by(conversation.owner).filter(pk__in=idea_ids)}
         for message in chat_messages:
             message.action_views = [
                 {**action, "index": index, "target_title": titles.get(action.get("idea_id"), "")}
@@ -73,17 +99,31 @@ class ChatView(LoginRequiredMixin, View):
         return chat_messages
 
 
+class ConversationDeleteView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        conversation = get_object_or_404(Conversation.objects.filter(owner=request.user), pk=pk)
+        list_url = scope_chat_url(ChatScope.of(conversation))
+        conversation.delete()
+        messages.success(request, "Sohbet silindi.")
+        return redirect(list_url)
+
+
 class ChatActionView(LoginRequiredMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, pk, index):
-        message = get_object_or_404(ChatMessage, pk=pk, owner=request.user, role=ROLE_ASSISTANT)
+        message = get_object_or_404(
+            ChatMessage, pk=pk, conversation__owner=request.user, role=ROLE_ASSISTANT
+        )
+        destination = conversation_url(message.conversation)
         if index >= len(message.actions):
-            return redirect(chat_url(ChatScope(request.user, message.idea, message.project)))
+            return redirect(destination)
         apply = request.POST.get("decision") == "apply"
         try:
             chat_service.decide_action(message, index, apply)
             messages.success(request, "Eklendi." if apply else "Öneri yoksayıldı.")
         except chat_service.ActionNotApplicable:
             messages.error(request, "Bu öneri artık uygulanamıyor (fikir silinmiş olabilir).")
-        return redirect(chat_url(ChatScope(request.user, message.idea, message.project)))
+        return redirect(destination)

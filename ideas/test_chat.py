@@ -15,6 +15,7 @@ from ideas.models import (
     ROLE_ASSISTANT,
     ROLE_USER,
     ChatMessage,
+    Conversation,
     Feature,
     Idea,
     Project,
@@ -99,74 +100,84 @@ class ChatServiceTests(TestCase):
         self.user = make_user()
         self.idea = Idea.objects.create(owner=self.user, body="habit app")
         self.scope = ChatScope(self.user, idea=self.idea)
+        self.conversation = chat_service.start_conversation(self.scope, "ne ekleyelim?")
+
+    def test_start_conversation_titles_it_after_the_first_message(self):
+        long = chat_service.start_conversation(self.scope, "word " * 40)
+
+        self.assertEqual(self.conversation.title, "ne ekleyelim?")
+        self.assertEqual(len(long.title), chat_service.TITLE_CHARS)
+        self.assertTrue(long.title.endswith("…"))
+        self.assertEqual([m.content for m in self.conversation.messages.all()], ["ne ekleyelim?"])
 
     def test_reply_is_stored_with_pending_actions_forced_to_scope_idea(self):
         assistant = StubAssistant(actions=[ChatAction("add_feature", "Streaks", idea_id=99999)])
-        chat_service.save_user_message(self.scope, "ne ekleyelim?")
 
-        reply = chat_service.ask_assistant(self.scope, stub_factory(assistant))
+        reply = chat_service.ask_assistant(self.conversation, stub_factory(assistant))
 
         self.assertEqual(reply.role, ROLE_ASSISTANT)
         self.assertEqual(reply.actions, [{"type": "add_feature", "text": "Streaks", "idea_id": self.idea.pk, "status": ACTION_PENDING}])
 
-    def test_history_is_sent_oldest_first(self):
+    def test_history_is_sent_oldest_first_and_only_from_this_conversation(self):
+        other = chat_service.start_conversation(self.scope, "other session")
         assistant = StubAssistant()
-        chat_service.save_user_message(self.scope, "first")
-        chat_service.ask_assistant(self.scope, stub_factory(assistant))
-        chat_service.save_user_message(self.scope, "second")
+        chat_service.ask_assistant(self.conversation, stub_factory(assistant))
+        chat_service.save_user_message(self.conversation, "second")
 
-        chat_service.ask_assistant(self.scope, stub_factory(assistant))
+        chat_service.ask_assistant(self.conversation, stub_factory(assistant))
 
         _, history = assistant.seen[-1]
-        self.assertEqual([t.content for t in history], ["first", "Fikir güzel.", "second"])
+        self.assertEqual([t.content for t in history], ["ne ekleyelim?", "Fikir güzel.", "second"])
+        self.assertEqual(other.messages.count(), 1)
+
+    def test_activity_moves_a_conversation_to_the_top(self):
+        newer = chat_service.start_conversation(self.scope, "newer")
+        self.assertEqual(self.scope.conversations().first(), newer)
+
+        chat_service.save_user_message(self.conversation, "bump")
+
+        self.assertEqual(self.scope.conversations().first(), self.conversation)
 
     def test_project_scope_drops_add_feature_for_ideas_outside_the_project(self):
         project = Project.objects.create(owner=self.user, name="P")
         inside = Idea.objects.create(owner=self.user, body="inside")
         inside.projects.add(project)
-        scope = ChatScope(self.user, project=project)
+        conversation = chat_service.start_conversation(ChatScope(self.user, project=project), "hi")
         actions = [ChatAction("add_feature", "ok", inside.pk), ChatAction("add_feature", "bad", self.idea.pk)]
-        chat_service.save_user_message(scope, "hi")
 
-        reply = chat_service.ask_assistant(scope, stub_factory(StubAssistant(actions=actions)))
+        reply = chat_service.ask_assistant(conversation, stub_factory(StubAssistant(actions=actions)))
 
         self.assertEqual([a["text"] for a in reply.actions], ["ok"])
 
     def test_general_scope_drops_other_users_idea_ids(self):
         foreign = Idea.objects.create(owner=make_user("other"), body="theirs")
-        scope = ChatScope(self.user)
-        chat_service.save_user_message(scope, "hi")
+        conversation = chat_service.start_conversation(ChatScope(self.user), "hi")
 
-        reply = chat_service.ask_assistant(scope, stub_factory(StubAssistant(actions=[ChatAction("add_feature", "x", foreign.pk)])))
+        reply = chat_service.ask_assistant(conversation, stub_factory(StubAssistant(actions=[ChatAction("add_feature", "x", foreign.pk)])))
 
         self.assertEqual(reply.actions, [])
 
     def test_ai_failure_returns_none_and_keeps_the_user_message(self):
-        chat_service.save_user_message(self.scope, "hello")
-
         with self.assertLogs("ideas.chat_service", level="WARNING"):
-            reply = chat_service.ask_assistant(self.scope, stub_factory(DownAssistant()))
+            reply = chat_service.ask_assistant(self.conversation, stub_factory(DownAssistant()))
 
         self.assertIsNone(reply)
-        self.assertTrue(chat_service.needs_reply(self.scope))
+        self.assertTrue(chat_service.needs_reply(self.conversation))
 
     def test_factory_failure_is_also_handled(self):
-        chat_service.save_user_message(self.scope, "hello")
-
         def broken_factory():
             raise AllProvidersFailed([])
 
         with self.assertLogs("ideas.chat_service", level="WARNING"):
-            self.assertIsNone(chat_service.ask_assistant(self.scope, broken_factory))
+            self.assertIsNone(chat_service.ask_assistant(self.conversation, broken_factory))
 
-    def test_scopes_keep_separate_histories(self):
+    def test_scopes_keep_separate_conversation_lists(self):
         project = Project.objects.create(owner=self.user, name="P")
-        chat_service.save_user_message(self.scope, "about idea")
-        chat_service.save_user_message(ChatScope(self.user, project=project), "about project")
-        chat_service.save_user_message(ChatScope(self.user), "general")
+        chat_service.start_conversation(ChatScope(self.user, project=project), "about project")
+        chat_service.start_conversation(ChatScope(self.user), "general")
 
-        self.assertEqual([m.content for m in self.scope.messages()], ["about idea"])
-        self.assertEqual([m.content for m in ChatScope(self.user).messages()], ["general"])
+        self.assertEqual([c.title for c in self.scope.conversations()], ["ne ekleyelim?"])
+        self.assertEqual([c.title for c in ChatScope(self.user).conversations()], ["general"])
 
 
 class DecideActionTests(TestCase):
@@ -175,8 +186,9 @@ class DecideActionTests(TestCase):
         self.idea = Idea.objects.create(owner=self.user, body="habit app")
 
     def message(self, action, **scope):
+        conversation = Conversation.objects.create(owner=self.user, title="t", **scope)
         return ChatMessage.objects.create(
-            owner=self.user, role=ROLE_ASSISTANT, content="c", actions=[{**action, "status": ACTION_PENDING}], **scope
+            conversation=conversation, role=ROLE_ASSISTANT, content="c", actions=[{**action, "status": ACTION_PENDING}]
         )
 
     def test_apply_add_feature_creates_it_and_marks_applied(self):
@@ -213,8 +225,10 @@ class DecideActionTests(TestCase):
         new_idea = Idea.objects.get(body="A brand new idea")
         self.assertEqual((new_idea.owner, list(new_idea.projects.all())), (self.user, [project]))
 
-    def test_apply_fails_cleanly_when_target_idea_is_gone(self):
-        message = self.message({"type": "add_feature", "text": "x", "idea_id": self.idea.pk}, project=Project.objects.create(owner=self.user, name="P"))
+    def test_apply_fails_cleanly_when_target_idea_is_outside_the_conversation(self):
+        message = self.message(
+            {"type": "add_feature", "text": "x", "idea_id": self.idea.pk}, project=Project.objects.create(owner=self.user, name="P")
+        )
 
         with self.assertRaises(chat_service.ActionNotApplicable):
             chat_service.decide_action(message, 0, apply=True)
@@ -234,65 +248,94 @@ class ChatViewTests(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def test_all_three_chat_pages_render_for_the_owner(self):
+    def test_scope_pages_render_for_the_owner(self):
         for name, args in (("chat", []), ("idea-chat", [self.idea.pk]), ("project-chat", [self.project.pk])):
             self.assertEqual(self.client.get(reverse(f"ideas:{name}", args=args)).status_code, 200)
 
-    def test_sending_a_message_stores_both_sides_and_shows_action_card(self):
-        url = reverse("ideas:project-chat", args=[self.project.pk])
+    def test_starting_a_chat_creates_a_conversation_with_both_messages_and_action_card(self):
+        response = self.client.post(reverse("ideas:project-chat", args=[self.project.pk]), {"text": "ne yapalım?"}, follow=True)
 
-        response = self.client.post(url, {"text": "ne yapalım?"}, follow=True)
-
-        self.assertEqual([m.role for m in ChatMessage.objects.all()], [ROLE_USER, ROLE_ASSISTANT])
+        conversation = Conversation.objects.get()
+        self.assertEqual((conversation.project, conversation.title), (self.project, "ne yapalım?"))
+        self.assertEqual([m.role for m in conversation.messages.all()], [ROLE_USER, ROLE_ASSISTANT])
         self.assertContains(response, "Fikir güzel.")
         self.assertContains(response, "Sleep tracker")
 
+    def test_each_new_chat_is_its_own_session_and_the_list_shows_them(self):
+        url = reverse("ideas:chat")
+        self.client.post(url, {"text": "first topic"})
+        self.client.post(url, {"text": "second topic"})
+
+        response = self.client.get(url)
+
+        self.assertEqual(Conversation.objects.count(), 2)
+        self.assertContains(response, "first topic")
+        self.assertContains(response, "second topic")
+
+    def test_empty_start_does_nothing(self):
+        self.client.post(reverse("ideas:chat"), {"text": "  "})
+
+        self.assertEqual(Conversation.objects.count(), 0)
+
+    def test_replying_inside_a_conversation_appends_to_it(self):
+        conversation = chat_service.start_conversation(ChatScope(self.user), "topic")
+
+        self.client.post(reverse("ideas:conversation", args=[conversation.pk]), {"text": "follow up"})
+
+        self.assertEqual([m.role for m in conversation.messages.all()], [ROLE_USER, ROLE_USER, ROLE_ASSISTANT])
+
     def test_ai_failure_keeps_message_and_offers_retry(self):
         self.assistant.respond = DownAssistant().respond
-        url = reverse("ideas:chat")
 
         with self.assertLogs("ideas.chat_service", level="WARNING"):
-            response = self.client.post(url, {"text": "merhaba"}, follow=True)
+            response = self.client.post(reverse("ideas:chat"), {"text": "merhaba"}, follow=True)
 
         self.assertContains(response, "AI şu an yanıt veremedi")
         self.assertContains(response, "Tekrar dene")
         self.assertEqual(ChatMessage.objects.filter(role=ROLE_USER).count(), 1)
 
     def test_retry_with_empty_post_asks_again_without_duplicating_the_user_message(self):
-        chat_service.save_user_message(ChatScope(self.user), "merhaba")
+        conversation = chat_service.start_conversation(ChatScope(self.user), "merhaba")
 
-        self.client.post(reverse("ideas:chat"), {"text": ""})
+        self.client.post(reverse("ideas:conversation", args=[conversation.pk]), {"text": ""})
 
-        self.assertEqual([m.role for m in ChatMessage.objects.all()], [ROLE_USER, ROLE_ASSISTANT])
+        self.assertEqual([m.role for m in conversation.messages.all()], [ROLE_USER, ROLE_ASSISTANT])
 
-    def test_empty_post_without_pending_message_does_nothing(self):
-        self.client.post(reverse("ideas:chat"), {"text": "  "})
+    def test_delete_removes_only_that_conversation(self):
+        scope = ChatScope(self.user)
+        doomed = chat_service.start_conversation(scope, "doomed")
+        kept = chat_service.start_conversation(scope, "kept")
 
-        self.assertEqual(ChatMessage.objects.count(), 0)
+        response = self.client.post(reverse("ideas:conversation-delete", args=[doomed.pk]))
 
-    def test_clear_deletes_only_this_scopes_messages(self):
-        chat_service.save_user_message(ChatScope(self.user), "general")
-        chat_service.save_user_message(ChatScope(self.user, idea=self.idea), "about idea")
+        self.assertRedirects(response, reverse("ideas:chat"), fetch_redirect_response=False)
+        self.assertEqual(list(Conversation.objects.all()), [kept])
+        self.assertFalse(ChatMessage.objects.filter(conversation_id=doomed.pk).exists())
 
-        self.client.post(reverse("ideas:idea-chat", args=[self.idea.pk]), {"clear": "1"})
+    def test_deleting_an_idea_deletes_its_conversations(self):
+        chat_service.start_conversation(ChatScope(self.user, idea=self.idea), "about idea")
 
-        self.assertEqual([m.content for m in ChatMessage.objects.all()], ["general"])
+        self.idea.delete()
+
+        self.assertEqual(Conversation.objects.count(), 0)
 
     def test_apply_action_via_button_adds_feature(self):
-        scope = ChatScope(self.user, idea=self.idea)
+        conversation = Conversation.objects.create(owner=self.user, idea=self.idea, title="t")
         message = ChatMessage.objects.create(
-            owner=self.user, idea=self.idea, role=ROLE_ASSISTANT, content="c",
+            conversation=conversation, role=ROLE_ASSISTANT, content="c",
             actions=[{"type": "add_feature", "text": "Streaks", "idea_id": self.idea.pk, "status": ACTION_PENDING}],
         )
 
         response = self.client.post(reverse("ideas:chat-action", args=[message.pk, 0]), {"decision": "apply"})
 
-        self.assertRedirects(response, reverse("ideas:idea-chat", args=[self.idea.pk]))
+        self.assertRedirects(response, reverse("ideas:conversation", args=[conversation.pk]))
         self.assertEqual(list(self.idea.features.values_list("text", flat=True)), ["Streaks"])
-        self.assertEqual(scope.messages().get(pk=message.pk).actions[0]["status"], ACTION_APPLIED)
+        message.refresh_from_db()
+        self.assertEqual(message.actions[0]["status"], ACTION_APPLIED)
 
     def test_action_index_out_of_range_is_ignored(self):
-        message = ChatMessage.objects.create(owner=self.user, role=ROLE_ASSISTANT, content="c", actions=[])
+        conversation = Conversation.objects.create(owner=self.user, title="t")
+        message = ChatMessage.objects.create(conversation=conversation, role=ROLE_ASSISTANT, content="c", actions=[])
 
         response = self.client.post(reverse("ideas:chat-action", args=[message.pk, 5]), {"decision": "apply"})
 
@@ -309,8 +352,9 @@ class ChatIsolationTests(TestCase):
         owner = make_user("owner")
         self.idea = Idea.objects.create(owner=owner, body="private")
         self.project = Project.objects.create(owner=owner, name="Private")
+        self.conversation = Conversation.objects.create(owner=owner, title="secret chat")
         self.message = ChatMessage.objects.create(
-            owner=owner, role=ROLE_ASSISTANT, content="c",
+            conversation=self.conversation, role=ROLE_ASSISTANT, content="c",
             actions=[{"type": "new_idea", "text": "x", "idea_id": None, "status": ACTION_PENDING}],
         )
         self.client.force_login(make_user("intruder"))
@@ -318,8 +362,15 @@ class ChatIsolationTests(TestCase):
     def test_other_users_chats_and_actions_are_404(self):
         self.assertEqual(self.client.get(reverse("ideas:idea-chat", args=[self.idea.pk])).status_code, 404)
         self.assertEqual(self.client.post(reverse("ideas:project-chat", args=[self.project.pk]), {"text": "hi"}).status_code, 404)
+        self.assertEqual(self.client.get(reverse("ideas:conversation", args=[self.conversation.pk])).status_code, 404)
+        self.assertEqual(self.client.post(reverse("ideas:conversation", args=[self.conversation.pk]), {"text": "hi"}).status_code, 404)
+        self.assertEqual(self.client.post(reverse("ideas:conversation-delete", args=[self.conversation.pk])).status_code, 404)
         self.assertEqual(self.client.post(reverse("ideas:chat-action", args=[self.message.pk, 0]), {"decision": "apply"}).status_code, 404)
         self.assertFalse(Idea.objects.filter(body="x").exists())
+        self.assertTrue(Conversation.objects.filter(pk=self.conversation.pk).exists())
+
+    def test_general_chat_list_never_shows_other_users_conversations(self):
+        self.assertNotContains(self.client.get(reverse("ideas:chat")), "secret chat")
 
     def test_anonymous_is_redirected_to_login(self):
         self.client.logout()

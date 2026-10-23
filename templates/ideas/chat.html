@@ -1,18 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Sohbet · {{ scope.title }}{% endblock %}
+{% block title %}{{ conversation.title }} · Sohbet{% endblock %}
 {% block container_class %}has-quick-bar{% endblock %}
 {% block content %}
 <div class="row row-between">
   <div>
-    <a class="muted" href="{{ back_url }}">← Geri</a>
-    <h1>💬 {{ scope.title }}</h1>
+    <a class="muted" href="{{ list_url }}">← {{ scope.title }} sohbetleri</a>
+    <h1>{{ conversation.title }}</h1>
   </div>
-  {% if chat_messages %}
-  <form method="post" action="{{ chat_url }}" onsubmit="return confirm('Bu sohbetin tüm mesajları silinsin mi?')">
+  <form method="post" action="{% url 'ideas:conversation-delete' conversation.pk %}" onsubmit="return confirm('Bu sohbet silinsin mi?')">
     {% csrf_token %}
-    <button class="link-button" name="clear" value="1" type="submit">Temizle</button>
+    <button class="link-button" type="submit">Sil</button>
   </form>
-  {% endif %}
 </div>
 
 <div class="chat-log">
@@ -36,16 +34,10 @@
     </div>
     {% endfor %}
   </div>
-  {% empty %}
-  <p class="muted empty">
-    {% if scope.kind == 'project' %}Projeyi, fikirlerini ve özelliklerini konuşalım. Ne eksik, neyi önce yapmalısın?
-    {% elif scope.kind == 'idea' %}Bu fikri konuşalım. Hangi özellikler olmalı, ne riskli?
-    {% else %}Fikirlerini konuşalım. Yeni fikir bulmak, öncelik belirlemek ya da birleştirmek için yaz.{% endif %}
-  </p>
   {% endfor %}
 
   {% if needs_reply %}
-  <form method="post" action="{{ chat_url }}" class="card row chat-retry">
+  <form method="post" action="{{ post_url }}" class="card row chat-retry">
     {% csrf_token %}
     <span class="muted">Son mesajına yanıt gelmedi.</span>
     <button class="button button-secondary" type="submit">Tekrar dene</button>
@@ -54,7 +46,7 @@
   <p class="muted typing" hidden role="status">AI yazıyor…</p>
 </div>
 
-<form method="post" action="{{ chat_url }}" class="quick-bar chat-form">
+<form method="post" action="{{ post_url }}" class="quick-bar chat-form">
   {% csrf_token %}
   <textarea name="text" rows="1" placeholder="Bir şey sor ya da öner…" aria-label="Mesaj" required></textarea>
   <button class="button" type="submit" aria-label="Gönder">➤</button>

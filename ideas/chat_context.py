@@ -1,7 +1,7 @@
 """Describes what the AI may see in a conversation, and which ideas it may touch."""
 from dataclasses import dataclass
 
-from .models import ChatMessage, Idea, Project
+from .models import Conversation, Idea, Project
 
 MAX_CONTEXT_CHARS = 6000
 MAX_GENERAL_IDEAS = 60
@@ -13,6 +13,10 @@ class ChatScope:
     owner: object
     idea: Idea | None = None
     project: Project | None = None
+
+    @classmethod
+    def of(cls, conversation: Conversation) -> "ChatScope":
+        return cls(conversation.owner, conversation.idea, conversation.project)
 
     @property
     def kind(self) -> str:
@@ -26,8 +30,8 @@ class ChatScope:
             return self.idea.display_title
         return self.project.name if self.project else "Genel sohbet"
 
-    def messages(self):
-        return ChatMessage.objects.filter(owner=self.owner, idea=self.idea, project=self.project)
+    def conversations(self):
+        return Conversation.objects.filter(owner=self.owner, idea=self.idea, project=self.project)
 
     def visible_ideas(self):
         """The ideas the AI is told about and may add features to."""
