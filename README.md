@@ -2,7 +2,15 @@
 
 Günlük uygulama fikirlerini hızlıca yakalamak için kişisel not defteri (PWA). Django tek süreçte hem sayfaları hem PWA dosyalarını sunar: tek adres, CORS yok.
 
-**Durum:** Aşama 1 — kullanıcı girişi, fikir ekleme/listeleme/arama/düzenleme/silme, kurulabilir PWA arayüzü, günlük SQLite yedeği. (AI katmanı, puanlama ve haftalık liste sonraki aşamalar.)
+**Durum:** Aşama 1 + fikir/özellik/proje yapısı. (AI katmanı, puanlama ve haftalık liste sonraki aşamalar.)
+
+## Kavramlar
+
+- **Fikir:** başlık (isteğe bağlı), açıklama, platformlar (PWA / Android / iOS). Hızlı eklemede yalnızca metin yazılır.
+- **Özellik:** bir fikrin işaretlenebilir (yapıldı / yapılmadı) maddesi; isteğe bağlı platformu olur. Kartı açıp kutucuğu işaretlemek anında kaydeder.
+- **Özelliği kopyalama:** ortak noktalar için özelliği başka fikirlere kopyalarsın. Kopya bağımsızdır ve işaretsiz başlar.
+- **Biten fikir:** tüm özellikleri işaretli olan (en az bir özelliği bulunan) fikirdir. Listede *Hepsi / Devam eden / Biten* filtreleri vardır.
+- **Proje:** fikirlerden ayrı bir kayıt. Fikirler projelere, projeler fikirlere (iki yönden de, çoka-çok) bağlanır. Projenin ilerlemesi bağlı fikirlerin özelliklerinden hesaplanır. Proje silinince fikirler silinmez.
 
 ## Mimari özet
 
