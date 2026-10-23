@@ -17,6 +17,9 @@
   {% for message in chat_messages %}
   <div class="bubble bubble-{{ message.role }}">
     <p>{{ message.content|linebreaksbr }}</p>
+    {% if message.provider_label %}
+    <p class="provider-badge muted">✨ {{ message.provider_label }}{% if message.failed_labels %} · {{ message.failed_labels|join:", " }} yanıt vermediği için{% endif %}</p>
+    {% endif %}
     {% for action in message.action_views %}
     <div class="action-card">
       <p>
@@ -40,6 +43,7 @@
   <form method="post" action="{{ post_url }}" class="card row chat-retry">
     {% csrf_token %}
     <span class="muted">Son mesajına yanıt gelmedi.</span>
+    {% include "ideas/_provider_select.html" %}
     <button class="button button-secondary" type="submit">Tekrar dene</button>
   </form>
   {% endif %}
@@ -48,7 +52,8 @@
 
 <form method="post" action="{{ post_url }}" class="quick-bar chat-form">
   {% csrf_token %}
-  <textarea name="text" rows="1" placeholder="Bir şey sor ya da öner…" aria-label="Mesaj" required></textarea>
+  {% include "ideas/_provider_select.html" %}
+  <textarea name="text" rows="1" placeholder="Mesaj yaz…" aria-label="Mesaj" required></textarea>
   <button class="button" type="submit" aria-label="Gönder">➤</button>
 </form>
 {% endblock %}

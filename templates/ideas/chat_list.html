@@ -27,6 +27,7 @@
 
 <form method="post" action="{{ post_url }}" class="quick-bar chat-form">
   {% csrf_token %}
+  {% include "ideas/_provider_select.html" %}
   <textarea name="text" rows="1" placeholder="Yeni sohbet başlat…" aria-label="Yeni sohbet" required></textarea>
   <button class="button" type="submit" aria-label="Başlat">➤</button>
 </form>

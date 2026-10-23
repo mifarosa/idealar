@@ -218,3 +218,8 @@ select { font: inherit; color: var(--text); background: var(--bg); border: 1px s
 .chat-retry { justify-content: space-between; }
 .typing { align-self: flex-start; color: var(--accent); font-weight: 600; }
 .action-card .chip { cursor: pointer; background: transparent; font: inherit; color: var(--accent); border-color: var(--accent); }
+
+/* AI picker next to the chat input, and the "who answered" badge */
+.provider-select { max-width: 6.5rem; min-height: 44px; border-radius: 22px; font-size: 0.85rem; }
+.chat-retry .provider-select { max-width: none; }
+.provider-badge { margin-top: 0.4rem !important; font-size: 0.75rem; }

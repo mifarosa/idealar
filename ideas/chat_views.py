@@ -5,11 +5,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
 
+from ai.providers import PROVIDER_LABELS, configured_provider_names
+
 from . import chat_service
 from .chat_context import ChatScope
 from .models import ROLE_ASSISTANT, ChatMessage, Conversation, Idea, Project
 
 MAX_USER_MESSAGE_CHARS = 4000
+NO_ANSWER_MESSAGE = "Hiçbir AI yanıt veremedi. Mesajın kaydedildi; başka bir AI seçip tekrar deneyebilirsin."
 
 
 def scope_chat_url(scope: ChatScope) -> str:
@@ -33,6 +36,20 @@ def conversation_url(conversation: Conversation) -> str:
     return reverse("ideas:conversation", args=[conversation.pk])
 
 
+def provider_label(name: str) -> str:
+    return PROVIDER_LABELS.get(name, name)
+
+
+def provider_choices() -> list[tuple[str, str]]:
+    return [(name, provider_label(name)) for name in configured_provider_names()]
+
+
+def chosen_provider(request) -> str | None:
+    """The picker value from the form; anything not currently configured means "automatic"."""
+    name = request.POST.get("provider", "")
+    return name if name in configured_provider_names() else None
+
+
 class ConversationListView(LoginRequiredMixin, View):
     """Lists the conversations of one scope (an idea, a project or the whole list) and starts new ones."""
 
@@ -45,7 +62,13 @@ class ConversationListView(LoginRequiredMixin, View):
     def get(self, request, **kwargs):
         scope = self.get_scope(**kwargs)
         conversations = scope.conversations().annotate(message_count=Count("messages"))
-        context = {"scope": scope, "conversations": conversations, "post_url": scope_chat_url(scope), "back_url": back_url(scope)}
+        context = {
+            "scope": scope,
+            "conversations": conversations,
+            "post_url": scope_chat_url(scope),
+            "back_url": back_url(scope),
+            "providers": provider_choices(),
+        }
         return render(request, "ideas/chat_list.html", context)
 
     def post(self, request, **kwargs):
@@ -54,8 +77,8 @@ class ConversationListView(LoginRequiredMixin, View):
         if not text:
             return redirect(scope_chat_url(scope))
         conversation = chat_service.start_conversation(scope, text)
-        if chat_service.ask_assistant(conversation) is None:
-            messages.error(request, "AI şu an yanıt veremedi. Mesajın kaydedildi, tekrar deneyebilirsin.")
+        if chat_service.ask_assistant(conversation, provider=chosen_provider(request)) is None:
+            messages.error(request, NO_ANSWER_MESSAGE)
         return redirect(conversation_url(conversation))
 
 
@@ -73,6 +96,7 @@ class ConversationView(LoginRequiredMixin, View):
             "needs_reply": chat_service.needs_reply(conversation),
             "post_url": conversation_url(conversation),
             "list_url": scope_chat_url(scope),
+            "providers": provider_choices(),
         }
         return render(request, "ideas/chat.html", context)
 
@@ -82,8 +106,9 @@ class ConversationView(LoginRequiredMixin, View):
         if text:
             chat_service.save_user_message(conversation, text)
         # An empty post is a "retry" of an unanswered message; otherwise there is nothing to do.
-        if chat_service.needs_reply(conversation) and chat_service.ask_assistant(conversation) is None:
-            messages.error(request, "AI şu an yanıt veremedi. Mesajın kaydedildi, tekrar deneyebilirsin.")
+        needs_answer = chat_service.needs_reply(conversation)
+        if needs_answer and chat_service.ask_assistant(conversation, provider=chosen_provider(request)) is None:
+            messages.error(request, NO_ANSWER_MESSAGE)
         return redirect(conversation_url(conversation))
 
     @staticmethod
@@ -96,6 +121,8 @@ class ConversationView(LoginRequiredMixin, View):
                 {**action, "index": index, "target_title": titles.get(action.get("idea_id"), "")}
                 for index, action in enumerate(message.actions)
             ]
+            message.provider_label = provider_label(message.provider) if message.provider else ""
+            message.failed_labels = [provider_label(name) for name in message.failed_providers]
         return chat_messages
 
 

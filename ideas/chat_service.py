@@ -28,8 +28,8 @@ class ActionNotApplicable(Exception):
     """The proposed change no longer makes sense (e.g. its idea was deleted)."""
 
 
-def build_assistant() -> ChatAssistant:
-    return ChatAssistant(build_default_client())
+def build_assistant(preferred_provider: str | None = None) -> ChatAssistant:
+    return ChatAssistant(build_default_client(preferred=preferred_provider))
 
 
 def _title_from(first_message: str) -> str:
@@ -49,8 +49,8 @@ def save_user_message(conversation: Conversation, text: str) -> ChatMessage:
     return _add_message(conversation, ROLE_USER, text)
 
 
-def _add_message(conversation: Conversation, role: str, text: str, actions: list[dict] | None = None) -> ChatMessage:
-    message = ChatMessage.objects.create(conversation=conversation, role=role, content=text, actions=actions or [])
+def _add_message(conversation: Conversation, role: str, text: str, **extra) -> ChatMessage:
+    message = ChatMessage.objects.create(conversation=conversation, role=role, content=text, **extra)
     conversation.save(update_fields=["updated_at"])  # keeps the most recently used chat on top
     return message
 
@@ -60,18 +60,25 @@ def needs_reply(conversation: Conversation) -> bool:
     return last is not None and last.role == ROLE_USER
 
 
-def ask_assistant(conversation: Conversation, assistant_factory=None) -> ChatMessage | None:
-    """Replies to the conversation. Returns None (user messages are kept) if the AI is unavailable."""
+def ask_assistant(conversation: Conversation, assistant_factory=None, provider: str | None = None) -> ChatMessage | None:
+    """Replies to the conversation, trying `provider` first when given. Returns None if no AI answered."""
     scope = ChatScope.of(conversation)
     recent = list(conversation.messages.order_by("-id")[:HISTORY_LIMIT])[::-1]
     history = [ChatTurn(m.role, m.content[:HISTORY_MESSAGE_CHARS]) for m in recent]
     try:
-        assistant = (assistant_factory or build_assistant)()
+        assistant = assistant_factory() if assistant_factory else build_assistant(provider)
         reply = assistant.respond(build_context(scope), history)
     except AIError as error:
         logger.warning("AI chat failed (%s scope): %s", scope.kind, error)
         return None
-    return _add_message(conversation, ROLE_ASSISTANT, reply.reply, _pending_actions(scope, reply.actions))
+    return _add_message(
+        conversation,
+        ROLE_ASSISTANT,
+        reply.reply,
+        actions=_pending_actions(scope, reply.actions),
+        provider=reply.provider,
+        failed_providers=list(reply.failed_providers),
+    )
 
 
 def _pending_actions(scope: ChatScope, actions: list[ChatAction]) -> list[dict]:

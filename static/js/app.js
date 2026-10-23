@@ -81,3 +81,29 @@ if (chatForm) {
     window.scrollTo(0, document.body.scrollHeight);
   });
 }
+
+// Remember the last chosen AI across pages and visits (per device).
+const PROVIDER_STORAGE_KEY = "idealar.provider";
+
+function restoreProviderChoice() {
+  let saved = "";
+  try {
+    saved = localStorage.getItem(PROVIDER_STORAGE_KEY) || "";
+  } catch (error) {
+    return; // storage can be blocked (private mode); the picker then just defaults to Otomatik
+  }
+  document.querySelectorAll(".provider-select").forEach((select) => {
+    if ([...select.options].some((option) => option.value === saved)) select.value = saved;
+  });
+}
+
+document.addEventListener("change", (event) => {
+  if (!event.target.matches(".provider-select")) return;
+  try {
+    localStorage.setItem(PROVIDER_STORAGE_KEY, event.target.value);
+  } catch (error) {
+    console.warn("Could not remember the AI choice:", error);
+  }
+});
+
+restoreProviderChoice();

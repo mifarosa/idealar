@@ -118,6 +118,20 @@ class ChatServiceTests(TestCase):
         self.assertEqual(reply.role, ROLE_ASSISTANT)
         self.assertEqual(reply.actions, [{"type": "add_feature", "text": "Streaks", "idea_id": self.idea.pk, "status": ACTION_PENDING}])
 
+    def test_reply_stores_which_provider_answered_and_which_failed(self):
+        assistant = StubAssistant()
+        assistant._reply = ChatReply("hi", [], provider="gemini", failed_providers=("groq",))
+
+        reply = chat_service.ask_assistant(self.conversation, stub_factory(assistant))
+
+        self.assertEqual((reply.provider, reply.failed_providers), ("gemini", ["groq"]))
+
+    def test_chosen_provider_is_handed_to_the_assistant_builder(self):
+        with patch("ideas.chat_service.build_assistant", return_value=StubAssistant()) as build:
+            chat_service.ask_assistant(self.conversation, provider="gemini")
+
+        build.assert_called_once_with("gemini")
+
     def test_history_is_sent_oldest_first_and_only_from_this_conversation(self):
         other = chat_service.start_conversation(self.scope, "other session")
         assistant = StubAssistant()
@@ -245,7 +259,7 @@ class ChatViewTests(TestCase):
         self.project = Project.objects.create(owner=self.user, name="P")
         self.assistant = StubAssistant(actions=[ChatAction("new_idea", "Sleep tracker")])
         patcher = patch("ideas.chat_service.build_assistant", return_value=self.assistant)
-        patcher.start()
+        self.build = patcher.start()
         self.addCleanup(patcher.stop)
 
     def test_scope_pages_render_for_the_owner(self):
@@ -260,6 +274,29 @@ class ChatViewTests(TestCase):
         self.assertEqual([m.role for m in conversation.messages.all()], [ROLE_USER, ROLE_ASSISTANT])
         self.assertContains(response, "Fikir güzel.")
         self.assertContains(response, "Sleep tracker")
+
+    def test_picker_lists_only_configured_providers_and_posts_the_choice(self):
+        environ = {"AI_PROVIDERS": "groq,gemini", "GROQ_API_KEY": "k"}  # gemini lacks a key
+        with patch.dict("os.environ", environ, clear=True):
+            page = self.client.get(reverse("ideas:chat"))
+            self.assertContains(page, '<option value="groq">Groq</option>')
+            self.assertNotContains(page, 'value="gemini"')
+
+            self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": "groq"})
+            self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": "gemini"})
+            self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": "skynet"})
+
+        self.assertEqual(self.build.call_args_list[0].args, ("groq",))
+        # Not configured or unknown means "automatic".
+        self.assertEqual([call.args for call in self.build.call_args_list[1:]], [(None,), (None,)])
+
+    def test_answer_shows_provider_badge_with_fallback_note(self):
+        self.assistant._reply = ChatReply("cevap", [], provider="ollama", failed_providers=("groq", "gemini"))
+
+        response = self.client.post(reverse("ideas:chat"), {"text": "hi"}, follow=True)
+
+        self.assertContains(response, "✨ Ollama")
+        self.assertContains(response, "Groq, Gemini yanıt vermediği için")
 
     def test_each_new_chat_is_its_own_session_and_the_list_shows_them(self):
         url = reverse("ideas:chat")
@@ -290,7 +327,7 @@ class ChatViewTests(TestCase):
         with self.assertLogs("ideas.chat_service", level="WARNING"):
             response = self.client.post(reverse("ideas:chat"), {"text": "merhaba"}, follow=True)
 
-        self.assertContains(response, "AI şu an yanıt veremedi")
+        self.assertContains(response, "Hiçbir AI yanıt veremedi")
         self.assertContains(response, "Tekrar dene")
         self.assertEqual(ChatMessage.objects.filter(role=ROLE_USER).count(), 1)
 
