@@ -147,12 +147,32 @@ ROLE_USER, ROLE_ASSISTANT = "user", "assistant"
 ACTION_PENDING, ACTION_APPLIED, ACTION_DISMISSED = "pending", "applied", "dismissed"
 
 
-class ChatMessage(models.Model):
-    """One message of a conversation about an idea, a project, or (both null) the whole idea list."""
+class Conversation(models.Model):
+    """A chat session about an idea, a project, or (both null) the whole idea list."""
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_messages")
-    idea = models.ForeignKey(Idea, null=True, blank=True, on_delete=models.CASCADE, related_name="chat_messages")
-    project = models.ForeignKey(Project, null=True, blank=True, on_delete=models.CASCADE, related_name="chat_messages")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="conversations")
+    idea = models.ForeignKey(Idea, null=True, blank=True, on_delete=models.CASCADE, related_name="conversations")
+    project = models.ForeignKey(Project, null=True, blank=True, on_delete=models.CASCADE, related_name="conversations")
+    title = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at", "-id"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(idea__isnull=True) | Q(project__isnull=True), name="conversation_single_scope"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return self.title or f"Conversation {self.pk}"
+
+
+class ChatMessage(models.Model):
+    """One message of a conversation."""
+
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     role = models.CharField(max_length=10, choices=[(ROLE_USER, "Kullanıcı"), (ROLE_ASSISTANT, "AI")])
     content = models.TextField()
     # Proposed changes: [{"type", "text", "idea_id", "status"}]; applied only after the user confirms.
@@ -161,12 +181,6 @@ class ChatMessage(models.Model):
 
     class Meta:
         ordering = ["created_at", "id"]
-        indexes = [models.Index(fields=["owner", "idea", "project", "created_at"])]
-        constraints = [
-            models.CheckConstraint(
-                condition=Q(idea__isnull=True) | Q(project__isnull=True), name="chat_message_single_scope"
-            )
-        ]
 
     def __str__(self) -> str:
         return f"{self.role}: {self.content[:40]}"
