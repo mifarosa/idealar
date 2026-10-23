@@ -1,0 +1,13 @@
+# Secrets and local state
+.env
+db.sqlite3
+db.sqlite3-*
+backups/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Django
+staticfiles/

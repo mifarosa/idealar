@@ -1,0 +1,6 @@
+Django>=5.2,<5.3
+argon2-cffi>=25.1
+python-dotenv>=1.0
+dj-database-url>=3.0
+whitenoise>=6.7
+waitress>=3.0
