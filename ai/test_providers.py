@@ -39,6 +39,16 @@ class ProviderChainTests(SimpleTestCase):
         self.assertEqual(names(skipped), [])
         self.assertEqual(names(configured), ["openrouter"])
 
+    def test_gemini_needs_key_and_model_and_can_sit_between_groq_and_ollama(self):
+        base = {"AI_PROVIDERS": "groq,gemini,ollama", "GROQ_API_KEY": "k"}
+        with self.assertLogs("ai.providers", level="WARNING"):
+            without_model = build_default_client({**base, "GEMINI_API_KEY": "g"})
+        configured = build_default_client({**base, "GEMINI_API_KEY": "g", "GEMINI_MODEL": "gemini-x"})
+
+        self.assertEqual(names(without_model), ["groq", "ollama"])
+        self.assertEqual(names(configured), ["groq", "gemini", "ollama"])
+        self.assertIn("generativelanguage.googleapis.com", configured._clients[1]._chat_url)
+
     def test_ollama_url_and_model_come_from_environment(self):
         client = build_default_client(
             {"AI_PROVIDERS": "ollama", "OLLAMA_BASE_URL": "http://host.docker.internal:11434/", "OLLAMA_MODEL": "tiny"}

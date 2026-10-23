@@ -47,6 +47,17 @@ def _openrouter(environ: Mapping[str, str]) -> LLMClient:
     )
 
 
+def _gemini(environ: Mapping[str, str]) -> LLMClient:
+    # Google AI Studio exposes an OpenAI-compatible endpoint. Model names change often, so none is assumed.
+    return OpenAICompatibleClient(
+        name="gemini",
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai",
+        api_key=_required(environ, "GEMINI_API_KEY"),
+        model=_required(environ, "GEMINI_MODEL"),
+        timeout=CLOUD_TIMEOUT_SECONDS,
+    )
+
+
 def _ollama(environ: Mapping[str, str]) -> LLMClient:
     host = environ.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
     return OpenAICompatibleClient(
@@ -59,6 +70,7 @@ def _ollama(environ: Mapping[str, str]) -> LLMClient:
 
 PROVIDER_FACTORIES: dict[str, Callable[[Mapping[str, str]], LLMClient]] = {
     "groq": _groq,
+    "gemini": _gemini,
     "openrouter": _openrouter,
     "ollama": _ollama,
 }
