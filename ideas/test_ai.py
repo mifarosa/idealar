@@ -209,3 +209,37 @@ class EnrichIdeasCommandTests(TestCase):
 
         self.assertIn("filled 0 of 1", output)
         self.assertEqual(Idea.objects.get().ai_status, AI_FAILED)
+
+
+class AiModelsCommandTests(TestCase):
+    def test_prints_models_and_marks_the_configured_one(self):
+        from ai.client import OpenAICompatibleClient
+        from ai.fallback import FallbackClient
+
+        class FakeModelsClient(OpenAICompatibleClient):
+            def list_models(self):
+                return ["other-model", "wanted-model"]
+
+        client = FakeModelsClient("fake", "http://unused/v1", "wanted-model")
+        out = StringIO()
+        with patch("ideas.management.commands.ai_models.build_default_client", return_value=FallbackClient([client])):
+            call_command("ai_models", stdout=out)
+
+        self.assertIn("[fake] configured model: wanted-model", out.getvalue())
+        self.assertIn("wanted-model  <- in use", out.getvalue())
+        self.assertIn("other-model", out.getvalue())
+
+    def test_reports_listing_failure_instead_of_crashing(self):
+        from ai.client import OpenAICompatibleClient
+        from ai.fallback import FallbackClient
+
+        class BrokenClient(OpenAICompatibleClient):
+            def list_models(self):
+                raise AIProviderError("down")
+
+        out = StringIO()
+        client = BrokenClient("fake", "http://unused/v1", "m")
+        with patch("ideas.management.commands.ai_models.build_default_client", return_value=FallbackClient([client])):
+            call_command("ai_models", stdout=out)
+
+        self.assertIn("could not list models: down", out.getvalue())

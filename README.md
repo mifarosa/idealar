@@ -40,7 +40,7 @@ Fikir kaydedilince sayfa hemen açılır, AI arkadan başlık, kısa özet, etik
 2. `.env` içine `GROQ_API_KEY=...` yaz (anahtarı kimseyle paylaşma, git'e girmez).
 3. `docker compose up -d` (ayar değişince konteyner yeniden oluşur).
 
-Ücretsiz limitler zamanla değişir; güncel limitler için Groq konsolundaki *Limits* sayfasına bak. Model adı `GROQ_MODEL` ile değiştirilebilir.
+Ücretsiz limitler zamanla değişir; güncel limitler için Groq konsolundaki *Limits* sayfasına bak. Model adı `GROQ_MODEL` ile değiştirilebilir. Groq modelleri zamanla kaldırır (`llama-3.3-70b-versatile` kaldırıldı); log'da `model_not_found` görürsen `docker compose exec web python manage.py ai_models` ile anahtarının kullanabildiği modelleri listele ve birini `.env`'e yaz.
 
 ### Ollama (yedek, isteğe bağlı)
 1. https://ollama.com/download adresinden Windows sürümünü kur.

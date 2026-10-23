@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 DEFAULT_CHAIN = "groq,ollama"
 CLOUD_TIMEOUT_SECONDS = 20
 LOCAL_TIMEOUT_SECONDS = 90  # small local models on CPU are slow
+# Groq retires models regularly (llama-3.3-70b-versatile was shut down); run `manage.py ai_models` to check.
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
 
 
 def _required(environ: Mapping[str, str], key: str) -> str:
@@ -30,7 +32,7 @@ def _groq(environ: Mapping[str, str]) -> LLMClient:
         name="groq",
         base_url="https://api.groq.com/openai/v1",
         api_key=_required(environ, "GROQ_API_KEY"),
-        model=environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
+        model=environ.get("GROQ_MODEL", DEFAULT_GROQ_MODEL),
         timeout=CLOUD_TIMEOUT_SECONDS,
     )
 

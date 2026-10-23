@@ -32,6 +32,14 @@ class FakeProviderServer:
                 self.end_headers()
                 self.wfile.write(payload.encode())
 
+            def do_GET(self):
+                outer.requests.append({"path": self.path, "auth": self.headers.get("Authorization"), "method": "GET"})
+                payload = body if isinstance(body, str) else json.dumps(body)
+                self.send_response(status)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(payload.encode())
+
             def log_message(self, *args):
                 pass
 
@@ -118,6 +126,24 @@ class OpenAICompatibleClientTests(SimpleTestCase):
 
         with self.assertRaises(AIResponseError):
             self.client_for(server).complete_json("s", "u")
+
+
+class ListModelsTests(SimpleTestCase):
+    def test_lists_model_ids_sorted_using_the_models_endpoint(self):
+        server = FakeProviderServer(body={"data": [{"id": "b-model"}, {"id": "a-model"}]})
+        self.addCleanup(server.close)
+
+        models = OpenAICompatibleClient("fake", server.url, "m", api_key="k", timeout=5).list_models()
+
+        self.assertEqual(models, ["a-model", "b-model"])
+        self.assertEqual((server.requests[0]["path"], server.requests[0]["auth"]), ("/v1/models", "Bearer k"))
+
+    def test_unexpected_shape_is_a_response_error(self):
+        server = FakeProviderServer(body={"nope": 1})
+        self.addCleanup(server.close)
+
+        with self.assertRaises(AIResponseError):
+            OpenAICompatibleClient("fake", server.url, "m", timeout=5).list_models()
 
 
 class ParseJsonObjectTests(SimpleTestCase):

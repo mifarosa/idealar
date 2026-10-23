@@ -45,6 +45,7 @@ class OpenAICompatibleClient(LLMClient):
     def __init__(self, name: str, base_url: str, model: str, api_key: str = "", timeout: float = 20):
         self.name = name
         self._chat_url = base_url.rstrip("/") + "/chat/completions"
+        self._models_url = base_url.rstrip("/") + "/models"
         self._model = model
         self._api_key = api_key
         self._timeout = timeout
@@ -58,8 +59,19 @@ class OpenAICompatibleClient(LLMClient):
         }
         return parse_json_object(self._extract_content(self._post(payload)))
 
+    def list_models(self) -> list[str]:
+        """Model ids this provider/key can use; handy when a configured model has been retired."""
+        body = self._send(urllib.request.Request(self._models_url, headers=self._headers()))
+        try:
+            return sorted(model["id"] for model in body["data"])
+        except (KeyError, TypeError) as error:
+            raise AIResponseError(f"{self.name} model list has an unexpected shape") from error
+
     def _post(self, payload: dict) -> dict:
         request = urllib.request.Request(self._chat_url, data=json.dumps(payload).encode(), headers=self._headers())
+        return self._send(request)
+
+    def _send(self, request: urllib.request.Request) -> dict:
         try:
             with urllib.request.urlopen(request, timeout=self._timeout) as response:
                 return json.load(response)
