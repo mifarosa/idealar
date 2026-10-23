@@ -2,7 +2,7 @@
 
 Günlük uygulama fikirlerini hızlıca yakalamak için kişisel not defteri (PWA). Django tek süreçte hem sayfaları hem PWA dosyalarını sunar: tek adres, CORS yok.
 
-**Durum:** Aşama 1 + fikir/özellik/proje yapısı + Aşama 2 (AI ile başlık/özet/etiket/özellik önerisi). Puanlama, benzerlik uyarısı ve haftalık liste sonraki aşamalar.
+**Durum:** Aşama 1 + fikir/özellik/proje yapısı + Aşama 2 (AI ile başlık/özet/etiket/özellik önerisi) + AI ile sohbet. Puanlama, benzerlik uyarısı ve haftalık liste sonraki aşamalar.
 
 ## Kavramlar
 
@@ -48,6 +48,18 @@ Fikir kaydedilince sayfa hemen açılır, AI arkadan başlık, kısa özet, etik
 3. Docker konteyneri Ollama'ya `host.docker.internal:11434` üzerinden ulaşır (`compose.yaml` bunu ayarlar). Bağlanamazsa Ollama'yı `OLLAMA_HOST=0.0.0.0` ortam değişkeniyle başlatmayı dene.
 
 Küçük yerel modelin çıktısı Groq'unkinden zayıf ve yavaştır; yalnızca yedek olarak düşünüldü.
+
+## AI ile sohbet
+
+AI ile projeni, fikirlerini ve özelliklerini konuşabilirsin. Üç yerden açılır:
+
+- **Proje sayfası → "💬 Proje hakkında konuş":** AI projeyi, bağlı fikirleri ve özelliklerin yapıldı/yapılmadı durumunu görür.
+- **Fikir kartı → "💬 Sohbet":** yalnızca o fikir hakkında.
+- **Üst menüde 💬:** genel sohbet; tüm fikirlerinin başlık ve özetini görür.
+
+AI fikir verir, risk ve alternatif söyler. Somut bir şey önerdiğinde cevabın altında düğmeli kart çıkar: *"＋ Şu fikre özellik: …"* veya *"＋ Yeni fikir: …"*. **Sen "Ekle"ye basmadan hiçbir şey değişmez.** Proje sohbetinde önerilen yeni fikir otomatik olarak projeye bağlanır. Sohbet geçmişi veritabanında kalır, "Temizle" ile silinir. AI yanıt veremezse mesajın kaybolmaz, "Tekrar dene" düğmesi çıkar.
+
+Sohbette AI'a gönderilenler: konuşma (son 10 mesaj) ve o sohbetin kapsamındaki fikirlerin metni (en fazla yaklaşık 6000 karakter). Başka kullanıcıların verisi hiçbir zaman gönderilmez.
 
 ## Docker ile çalıştırma (önerilen, Windows dahil)
 
