@@ -62,3 +62,25 @@ class FallbackClientTests(SimpleTestCase):
 
         with self.assertRaises(ValueError):
             FallbackClient([broken, StubClient("backup", {})]).complete_json("s", "u")
+
+
+class RunInfoTests(SimpleTestCase):
+    def test_last_run_names_the_provider_that_answered_and_those_that_failed(self):
+        clients = [
+            StubClient("a", error=AIRateLimitError("limit")),
+            StubClient("b", error=AIProviderError("down")),
+            StubClient("c", {"ok": 1}),
+        ]
+        fallback = FallbackClient(clients)
+
+        with self.assertLogs("ai.fallback", level="WARNING"):
+            fallback.complete_json("s", "u")
+
+        self.assertEqual((fallback.last_run.served_by, fallback.last_run.failed), ("c", ["a", "b"]))
+
+    def test_last_run_is_empty_failed_list_when_primary_answers(self):
+        fallback = FallbackClient([StubClient("a", {"ok": 1})])
+
+        fallback.complete_json("s", "u")
+
+        self.assertEqual((fallback.last_run.served_by, fallback.last_run.failed), ("a", []))

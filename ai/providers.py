@@ -78,19 +78,36 @@ PROVIDER_FACTORIES: dict[str, Callable[[Mapping[str, str]], LLMClient]] = {
 }
 
 
-def build_default_client(environ: Mapping[str, str] | None = None) -> FallbackClient:
+PROVIDER_LABELS = {"groq": "Groq", "gemini": "Gemini", "openrouter": "OpenRouter", "ollama": "Ollama"}
+
+
+def _chain_names(environ: Mapping[str, str]) -> list[str]:
+    return [name.strip() for name in environ.get("AI_PROVIDERS", DEFAULT_CHAIN).split(",") if name.strip()]
+
+
+def configured_provider_names(environ: Mapping[str, str] | None = None) -> list[str]:
+    """Providers that are usable right now, in priority order (for the UI picker)."""
     environ = os.environ if environ is None else environ
-    names = [name.strip() for name in environ.get("AI_PROVIDERS", DEFAULT_CHAIN).split(",") if name.strip()]
+    return [name for name in _chain_names(environ) if _build_or_skip(name, environ, log_skips=False) is not None]
+
+
+def build_default_client(environ: Mapping[str, str] | None = None, preferred: str | None = None) -> FallbackClient:
+    """The fallback chain. A `preferred` provider is tried first; the others follow in configured order."""
+    environ = os.environ if environ is None else environ
+    names = _chain_names(environ)
+    if preferred in names:
+        names = [preferred] + [name for name in names if name != preferred]
     clients = [client for name in names if (client := _build_or_skip(name, environ)) is not None]
     return FallbackClient(clients)
 
 
-def _build_or_skip(name: str, environ: Mapping[str, str]) -> LLMClient | None:
+def _build_or_skip(name: str, environ: Mapping[str, str], log_skips: bool = True) -> LLMClient | None:
     factory = PROVIDER_FACTORIES.get(name)
     if factory is None:
         raise AINotConfiguredError(f"Unknown AI provider '{name}'. Known: {', '.join(PROVIDER_FACTORIES)}")
     try:
         return factory(environ)
     except AINotConfiguredError as error:
-        logger.warning("AI provider %s skipped: %s", name, error)
+        if log_skips:
+            logger.warning("AI provider %s skipped: %s", name, error)
         return None

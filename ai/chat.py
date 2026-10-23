@@ -3,7 +3,7 @@
 Actions are only proposals; the application applies them after the user confirms (never the model).
 """
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .client import LLMClient
 from .errors import AIResponseError
@@ -50,6 +50,8 @@ class ChatAction:
 class ChatReply:
     reply: str
     actions: list[ChatAction]
+    provider: str = ""  # which provider produced the answer
+    failed_providers: tuple[str, ...] = ()  # providers tried first that did not answer
 
 
 class ChatAssistant:
@@ -59,7 +61,10 @@ class ChatAssistant:
     def respond(self, context: str, history: Sequence[ChatTurn]) -> ChatReply:
         system = f"{SYSTEM_PROMPT}\n\n--- CONTEXT ---\n{context}"
         messages = [{"role": turn.role, "content": turn.content} for turn in history]
-        return _parse_reply(self._client.chat_json(system, messages))
+        reply = _parse_reply(self._client.chat_json(system, messages))
+        run = getattr(self._client, "last_run", None)
+        served_by = run.served_by if run else self._client.name
+        return replace(reply, provider=served_by, failed_providers=tuple(run.failed) if run else ())
 
 
 def _parse_reply(answer: dict) -> ChatReply:

@@ -76,3 +76,32 @@ class ChatAssistantTests(SimpleTestCase):
         self.assertIn("[id=1] Habit app", system)
         self.assertEqual([m["content"] for m in messages], ["first", "second", "third"])
         self.assertEqual([m["role"] for m in messages], ["user", "assistant", "user"])
+
+
+class ProviderInfoTests(SimpleTestCase):
+    def test_reply_reports_provider_and_failures_from_a_fallback_client(self):
+        from ai.fallback import FallbackClient, RunInfo
+
+        class Down(LLMClient):
+            name = "groq"
+
+            def chat_json(self, system, messages):
+                from ai.errors import AIRateLimitError
+
+                raise AIRateLimitError("limit")
+
+        class Up(LLMClient):
+            name = "gemini"
+
+            def chat_json(self, system, messages):
+                return {"reply": "merhaba"}
+
+        with self.assertLogs("ai.fallback", level="WARNING"):
+            result = ChatAssistant(FallbackClient([Down(), Up()])).respond("ctx", [ChatTurn("user", "hi")])
+
+        self.assertEqual((result.provider, result.failed_providers), ("gemini", ("groq",)))
+
+    def test_plain_client_reports_its_own_name(self):
+        result = respond({"reply": "ok"})
+
+        self.assertEqual((result.provider, result.failed_providers), ("recording", ()))

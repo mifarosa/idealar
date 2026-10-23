@@ -64,3 +64,24 @@ class ProviderChainTests(SimpleTestCase):
         ollama = client._clients[0]
         self.assertEqual(ollama._chat_url, "http://host.docker.internal:11434/v1/chat/completions")
         self.assertEqual(ollama._model, "tiny")
+
+
+class PreferredProviderTests(SimpleTestCase):
+    ENVIRON = {"AI_PROVIDERS": "groq,gemini,ollama", "GROQ_API_KEY": "k", "GEMINI_API_KEY": "g"}
+
+    def test_preferred_provider_goes_first_and_others_keep_their_order(self):
+        client = build_default_client(self.ENVIRON, preferred="gemini")
+
+        self.assertEqual(names(client), ["gemini", "groq", "ollama"])
+
+    def test_unknown_or_missing_preference_keeps_the_configured_order(self):
+        self.assertEqual(names(build_default_client(self.ENVIRON, preferred="skynet")), ["groq", "gemini", "ollama"])
+        self.assertEqual(names(build_default_client(self.ENVIRON, preferred=None)), ["groq", "gemini", "ollama"])
+
+    def test_configured_names_list_only_usable_providers_without_logging(self):
+        from ai.providers import configured_provider_names
+
+        environ = {"AI_PROVIDERS": "groq,gemini,ollama", "GEMINI_API_KEY": "g"}  # groq has no key
+
+        with self.assertNoLogs("ai.providers", level="WARNING"):
+            self.assertEqual(configured_provider_names(environ), ["gemini", "ollama"])

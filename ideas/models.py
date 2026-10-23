@@ -177,6 +177,9 @@ class ChatMessage(models.Model):
     content = models.TextField()
     # Proposed changes: [{"type", "text", "idea_id", "status"}]; applied only after the user confirms.
     actions = models.JSONField(default=list, blank=True)
+    # Assistant messages only: which AI answered, and which ones failed before it.
+    provider = models.CharField(max_length=30, blank=True)
+    failed_providers = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
