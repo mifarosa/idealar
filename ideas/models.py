@@ -1,8 +1,27 @@
+from dataclasses import dataclass
+
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
+from django.db.models import Count, F, Q
 
 TITLE_PREVIEW_LENGTH = 60
+
+PLATFORM_CHOICES = [("pwa", "PWA"), ("android", "Android"), ("ios", "iOS")]
+PLATFORM_LABELS = dict(PLATFORM_CHOICES)
+
+
+@dataclass(frozen=True)
+class Progress:
+    done: int
+    total: int
+
+    @property
+    def percent(self) -> int:
+        return round(100 * self.done / self.total) if self.total else 0
+
+    @property
+    def is_complete(self) -> bool:
+        return self.total > 0 and self.done == self.total
 
 
 class IdeaQuerySet(models.QuerySet):
@@ -15,11 +34,45 @@ class IdeaQuerySet(models.QuerySet):
             return self
         return self.filter(Q(title__icontains=text) | Q(body__icontains=text))
 
+    def with_progress(self):
+        # Aggregating adds GROUP BY, which discards Meta.ordering, so order explicitly.
+        return self.annotate(
+            total_features=Count("features", distinct=True),
+            done_features=Count("features", filter=Q(features__is_done=True), distinct=True),
+        ).order_by("-created_at", "-id")
+
+    def finished(self):
+        """Ideas whose features are all checked (needs with_progress)."""
+        return self.filter(total_features__gt=0, done_features=F("total_features"))
+
+    def unfinished(self):
+        return self.exclude(total_features__gt=0, done_features=F("total_features"))
+
+
+class Project(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def progress(self) -> Progress:
+        features = Feature.objects.filter(idea__projects=self)
+        return Progress(done=features.filter(is_done=True).count(), total=features.count())
+
 
 class Idea(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ideas")
     title = models.CharField(max_length=200, blank=True)
     body = models.TextField()
+    platforms = models.JSONField(default=list, blank=True)
+    projects = models.ManyToManyField(Project, related_name="ideas", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -41,3 +94,34 @@ class Idea(models.Model):
         if len(first_line) <= TITLE_PREVIEW_LENGTH:
             return first_line
         return first_line[: TITLE_PREVIEW_LENGTH - 1].rstrip() + "…"
+
+    @property
+    def platform_labels(self) -> list[str]:
+        return [PLATFORM_LABELS[key] for key in self.platforms if key in PLATFORM_LABELS]
+
+    @property
+    def progress(self) -> Progress:
+        """Uses the with_progress() annotations when present, otherwise counts."""
+        if hasattr(self, "total_features"):
+            return Progress(done=self.done_features, total=self.total_features)
+        features = self.features.all()
+        return Progress(done=sum(f.is_done for f in features), total=len(features))
+
+
+class Feature(models.Model):
+    """A checklist item of an idea. Copying to another idea creates an independent row."""
+
+    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="features")
+    text = models.CharField(max_length=300)
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES, blank=True)
+    is_done = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["is_done", "id"]
+
+    def __str__(self) -> str:
+        return self.text
+
+    def copy_to(self, idea: Idea) -> "Feature":
+        return Feature.objects.create(idea=idea, text=self.text, platform=self.platform)
