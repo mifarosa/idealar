@@ -12,8 +12,8 @@ class CannedClient(LLMClient):
         self.answer = answer
         self.user_messages = []
 
-    def complete_json(self, system, user):
-        self.user_messages.append(user)
+    def chat_json(self, system, messages):
+        self.user_messages.append(messages[-1]["content"])
         return self.answer
 
 

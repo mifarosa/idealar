@@ -141,3 +141,32 @@ class Feature(models.Model):
 
     def copy_to(self, idea: Idea) -> "Feature":
         return Feature.objects.create(idea=idea, text=self.text, platform=self.platform)
+
+
+ROLE_USER, ROLE_ASSISTANT = "user", "assistant"
+ACTION_PENDING, ACTION_APPLIED, ACTION_DISMISSED = "pending", "applied", "dismissed"
+
+
+class ChatMessage(models.Model):
+    """One message of a conversation about an idea, a project, or (both null) the whole idea list."""
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_messages")
+    idea = models.ForeignKey(Idea, null=True, blank=True, on_delete=models.CASCADE, related_name="chat_messages")
+    project = models.ForeignKey(Project, null=True, blank=True, on_delete=models.CASCADE, related_name="chat_messages")
+    role = models.CharField(max_length=10, choices=[(ROLE_USER, "Kullanıcı"), (ROLE_ASSISTANT, "AI")])
+    content = models.TextField()
+    # Proposed changes: [{"type", "text", "idea_id", "status"}]; applied only after the user confirms.
+    actions = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        indexes = [models.Index(fields=["owner", "idea", "project", "created_at"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(idea__isnull=True) | Q(project__isnull=True), name="chat_message_single_scope"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.role}: {self.content[:40]}"

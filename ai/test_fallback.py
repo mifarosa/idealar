@@ -12,7 +12,7 @@ class StubClient(LLMClient):
         self._error = error
         self.calls = 0
 
-    def complete_json(self, system, user):
+    def chat_json(self, system, messages):
         self.calls += 1
         if self._error:
             raise self._error

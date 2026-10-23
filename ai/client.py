@@ -17,8 +17,12 @@ class LLMClient(ABC):
     name: str
 
     @abstractmethod
+    def chat_json(self, system: str, messages: list[dict]) -> dict:
+        """Answers a conversation ({"role", "content"} messages) as a parsed JSON object, or raises an AIError."""
+
     def complete_json(self, system: str, user: str) -> dict:
-        """Returns the model's answer parsed as a JSON object, or raises an AIError."""
+        """Single-turn convenience over chat_json."""
+        return self.chat_json(system, [{"role": "user", "content": user}])
 
 
 def parse_json_object(text: str) -> dict:
@@ -43,10 +47,10 @@ class OpenAICompatibleClient(LLMClient):
         self._api_key = api_key
         self._timeout = timeout
 
-    def complete_json(self, system: str, user: str) -> dict:
+    def chat_json(self, system: str, messages: list[dict]) -> dict:
         payload = {
             "model": self._model,
-            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            "messages": [{"role": "system", "content": system}, *messages],
             "temperature": 0.3,
             "response_format": {"type": "json_object"},
         }
