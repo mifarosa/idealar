@@ -11,6 +11,8 @@ from abc import ABC, abstractmethod
 from .errors import AIProviderError, AIRateLimitError, AIResponseError
 
 ERROR_BODY_PREVIEW_CHARS = 200
+# Cloudflare-fronted APIs (e.g. Groq) reject urllib's default "Python-urllib" agent with HTTP 403 / code 1010.
+USER_AGENT = "idealar/1.0"
 
 
 class LLMClient(ABC):
@@ -69,7 +71,7 @@ class OpenAICompatibleClient(LLMClient):
             raise AIResponseError(f"{self.name} returned a non-JSON HTTP body") from error
 
     def _headers(self) -> dict:
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json", "User-Agent": USER_AGENT}
         if self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"
         return headers

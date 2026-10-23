@@ -19,7 +19,12 @@ class FakeProviderServer:
             def do_POST(self):
                 length = int(self.headers["Content-Length"])
                 outer.requests.append(
-                    {"path": self.path, "auth": self.headers.get("Authorization"), "json": json.loads(self.rfile.read(length))}
+                    {
+                        "path": self.path,
+                        "auth": self.headers.get("Authorization"),
+                        "user_agent": self.headers.get("User-Agent"),
+                        "json": json.loads(self.rfile.read(length)),
+                    }
                 )
                 payload = body if isinstance(body, str) else json.dumps(body)
                 self.send_response(status)
@@ -64,6 +69,14 @@ class OpenAICompatibleClientTests(SimpleTestCase):
         self.assertEqual(request["json"]["model"], "test-model")
         self.assertEqual(request["json"]["response_format"], {"type": "json_object"})
         self.assertEqual([m["role"] for m in request["json"]["messages"]], ["system", "user"])
+
+    def test_sends_a_custom_user_agent_because_cloudflare_blocks_urllibs_default(self):
+        server = self.serve(body=chat_reply("{}"))
+
+        self.client_for(server).complete_json("s", "u")
+
+        self.assertEqual(server.requests[0]["user_agent"], "idealar/1.0")
+        self.assertNotIn("urllib", server.requests[0]["user_agent"])
 
     def test_omits_auth_header_without_api_key(self):
         server = self.serve(body=chat_reply("{}"))
