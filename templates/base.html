@@ -1,0 +1,32 @@
+{% load static %}<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4f46e5">
+  <title>{% block title %}Idealar{% endblock %}</title>
+  <link rel="manifest" href="{% url 'pwa:manifest' %}">
+  <link rel="icon" href="{% static 'icons/icon-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'ideas:list' %}">💡 Idealar</a>
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button class="link-button" type="submit">Çıkış</button>
+    </form>
+    {% endif %}
+  </header>
+  <main class="container">
+    {% for message in messages %}
+    <p class="flash flash-{{ message.tags }}" role="status">{{ message }}</p>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{% static 'js/app.js' %}" defer></script>
+</body>
+</html>

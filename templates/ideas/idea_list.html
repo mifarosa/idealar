@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" action="{% url 'ideas:create' %}" class="card stack quick-add">
+  {% csrf_token %}
+  {{ quick_form.body }}
+  <div class="row">
+    <button class="button" type="submit">Kaydet</button>
+    <a class="button button-secondary" href="{% url 'ideas:create' %}">Ayrıntılı</a>
+  </div>
+</form>
+
+<form method="get" class="search" role="search">
+  <input type="search" name="q" value="{{ search_text }}" placeholder="Fikirlerde ara…" aria-label="Ara">
+</form>
+
+{% if ideas %}
+<ul class="idea-list">
+  {% for idea in ideas %}
+  <li class="card idea">
+    <a class="idea-link" href="{% url 'ideas:update' idea.pk %}">
+      <strong>{{ idea.display_title }}</strong>
+      {% if idea.title %}<span class="muted">{{ idea.body|truncatechars:120 }}</span>{% endif %}
+      <time class="muted" datetime="{{ idea.created_at|date:'c' }}">{{ idea.created_at|date:"d M Y H:i" }}</time>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% if is_paginated %}
+<nav class="row pager">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ search_text|urlencode }}">← Yeni</a>{% endif %}
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ search_text|urlencode }}">Eski →</a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<p class="muted empty">{% if search_text %}Aramayla eşleşen fikir yok.{% else %}Henüz fikir yok. İlkini yukarıya yaz.{% endif %}</p>
+{% endif %}
+{% endblock %}

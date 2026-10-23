@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Fikri düzenle{% else %}Yeni fikir{% endif %} · Idealar{% endblock %}
+{% block content %}
+<h1>{% if object %}Fikri düzenle{% else %}Yeni fikir{% endif %}</h1>
+<form method="post" class="card stack">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% for field in form %}
+  <label>{{ field.label }}
+    {{ field }}
+    {{ field.errors }}
+  </label>
+  {% endfor %}
+  <div class="row">
+    <button class="button" type="submit">Kaydet</button>
+    <a class="button button-secondary" href="{% url 'ideas:list' %}">Vazgeç</a>
+    {% if object %}<a class="button button-danger" href="{% url 'ideas:delete' object.pk %}">Sil</a>{% endif %}
+  </div>
+</form>
+{% endblock %}

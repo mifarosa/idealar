@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Fikri sil · Idealar{% endblock %}
+{% block content %}
+<h1>Fikri sil</h1>
+<form method="post" class="card stack">
+  {% csrf_token %}
+  <p>“{{ object.display_title }}” kalıcı olarak silinecek.</p>
+  <div class="row">
+    <button class="button button-danger" type="submit">Evet, sil</button>
+    <a class="button button-secondary" href="{% url 'ideas:update' object.pk %}">Vazgeç</a>
+  </div>
+</form>
+{% endblock %}
