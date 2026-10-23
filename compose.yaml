@@ -1,0 +1,35 @@
+name: idealar
+
+x-app: &app
+  image: idealar:latest
+  env_file: .env
+  environment:
+    # Container paths override the host-style values in .env.
+    DATABASE_URL: sqlite:////data/db.sqlite3
+    BACKUP_DIR: /backups
+  volumes:
+    # Named volume: SQLite is unreliable on Windows bind mounts.
+    - idealar-data:/data
+  restart: unless-stopped
+
+services:
+  web:
+    <<: *app
+    build: .
+    # Published on localhost only; `tailscale serve` on the host exposes it over HTTPS.
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  backup:
+    <<: *app
+    volumes:
+      - idealar-data:/data
+      - ./backups:/backups
+    # Daily backup loop; the script prunes backups older than BACKUP_KEEP_DAYS.
+    command: ["sh", "-c", "while true; do python scripts/backup_sqlite.py; sleep 86400; done"]
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  idealar-data:

@@ -13,10 +13,36 @@ Günlük uygulama fikirlerini hızlıca yakalamak için kişisel not defteri (PW
 | Veri | Her fikir bir kullanıcıya ait (`Idea.owner`); başka kullanıcının fikri 404 verir |
 | DB | `DATABASE_URL` ile ayarlanır (başta SQLite, sonra Postgres) |
 | PWA | `/manifest.webmanifest`, kökten sunulan `/sw.js`, çevrimdışı sayfa |
+| Paketleme | Dockerfile + `compose.yaml` (web + günlük yedek servisi) |
 | Sunucu | `waitress` (Linux/macOS/Windows'ta çalışır), statik dosyalar WhiteNoise ile |
 | Uzaktan erişim | Tailscale + `tailscale serve` (HTTPS) |
 
-## Kurulum
+## Docker ile çalıştırma (önerilen, Windows dahil)
+
+Docker Desktop kurulu olması yeterli; Python/venv gerekmez. Veritabanı `idealar-data` adlı Docker volume'unda, yedekler proje klasöründeki `backups/` içinde durur.
+
+```powershell
+git clone https://github.com/mifarosa/idealar.git
+cd idealar
+copy .env.example .env
+```
+
+`.env` içinde `SECRET_KEY` değerini bir anahtarla değiştir (Python kurulu olmadan üretmek için: `docker run --rm python:3.13-slim python -c "import secrets; print(secrets.token_urlsafe(50))"`). Anahtarda `$` olmasın. Sonra:
+
+```powershell
+docker compose up -d --build
+docker compose exec web python manage.py createsuperuser
+```
+
+- Uygulama `http://localhost:8000` adresinde; yalnızca bilgisayarın kendisine açıktır (`127.0.0.1`). Telefon erişimi için aşağıdaki Tailscale adımlarını **bilgisayarda (Docker'ın dışında)** uygula: `tailscale serve --bg 8000` konteynerdeki uygulamaya da aynen ulaşır.
+- `backup` servisi her gün `backups/` klasörüne yedek yazar ve eski yedekleri siler; ayrıca cron/Task Scheduler gerekmez.
+- Konteynerler `restart: unless-stopped` ile Docker Desktop açılınca kendiliğinden başlar. Docker Desktop ayarlarında "Start Docker Desktop when you sign in" açık olmalı.
+- Güncelleme: `git pull` sonra `docker compose up -d --build`. Veri volume'da kaldığı için kaybolmaz; migration'lar açılışta otomatik uygulanır.
+- Testler: `docker compose run --rm web python manage.py test`
+- Durdurma: `docker compose down` (veriyi silmez; `-v` eklersen volume silinir, ekleme).
+- Yedekten geri dönme: `docker compose stop`, sonra `docker compose cp backups/idealar-YYYY-MM-DD.sqlite3 web:/data/db.sqlite3`, sonra `docker compose up -d`.
+
+## Docker olmadan kurulum
 
 ```bash
 git clone https://github.com/mifarosa/idealar.git && cd idealar
@@ -26,7 +52,7 @@ pip install -r requirements.txt
 
 cp .env.example .env
 # SECRET_KEY üret ve .env içine yaz:
-python -c "from django.core.management.utils import get_random_secret_key as k; print(k())"
+python -c "import secrets; print(secrets.token_urlsafe(50))"
 
 python manage.py migrate
 python manage.py createsuperuser   # ilk (ve şimdilik tek) kullanıcı

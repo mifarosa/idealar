@@ -2,7 +2,8 @@
 .env
 db.sqlite3
 db.sqlite3-*
-backups/
+backups/*
+!backups/.gitkeep
 
 # Python
 .venv/
