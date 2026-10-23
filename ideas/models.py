@@ -9,6 +9,9 @@ TITLE_PREVIEW_LENGTH = 60
 PLATFORM_CHOICES = [("pwa", "PWA"), ("android", "Android"), ("ios", "iOS")]
 PLATFORM_LABELS = dict(PLATFORM_CHOICES)
 
+SIMILARITY_DONE, SIMILARITY_WORDS_ONLY = "done", "words_only"
+SUGGESTION_PENDING, SUGGESTION_APPLIED, SUGGESTION_DISMISSED = "pending", "applied", "dismissed"
+
 AI_PENDING, AI_DONE, AI_FAILED = "pending", "done", "failed"
 AI_STATUS_CHOICES = [(AI_PENDING, "Bekliyor"), (AI_DONE, "Tamam"), (AI_FAILED, "Başarısız")]
 
@@ -61,6 +64,12 @@ class Project(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    github_url = models.URLField(blank=True)
+    # Result of the last AI review of the repository (see project_review.py).
+    repo_analysis = models.JSONField(default=dict, blank=True)
+    repo_analyzed_at = models.DateTimeField(null=True, blank=True)
+    repo_analysis_error = models.CharField(max_length=300, blank=True)
+    repo_analysis_provider = models.CharField(max_length=30, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -87,6 +96,9 @@ class Idea(models.Model):
     ai_tags = models.JSONField(default=list, blank=True)
     suggested_features = models.JSONField(default=list, blank=True)
     ai_status = models.CharField(max_length=10, choices=AI_STATUS_CHOICES, default=AI_PENDING)
+    # Possible duplicates: [{"kind", "id", "title", "verdict", "reason", "source", "status"}].
+    similar = models.JSONField(default=list, blank=True)
+    similarity_status = models.CharField(max_length=12, blank=True)  # "", done, words_only
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

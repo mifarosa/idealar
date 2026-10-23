@@ -5,6 +5,7 @@ from ai.errors import AIError
 from ai.providers import build_default_client
 
 from .chat_context import ChatScope, build_context
+from .errors import ActionNotApplicable
 from .models import (
     ACTION_APPLIED,
     ACTION_DISMISSED,
@@ -22,10 +23,6 @@ logger = logging.getLogger(__name__)
 HISTORY_LIMIT = 10
 HISTORY_MESSAGE_CHARS = 1500
 TITLE_CHARS = 50
-
-
-class ActionNotApplicable(Exception):
-    """The proposed change no longer makes sense (e.g. its idea was deleted)."""
 
 
 def build_assistant(preferred_provider: str | None = None) -> ChatAssistant:
