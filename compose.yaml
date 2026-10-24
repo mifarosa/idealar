@@ -31,6 +31,9 @@ services:
       - ./backups:/backups
     # Daily backup loop; the script prunes backups older than BACKUP_KEEP_DAYS.
     command: ["sh", "-c", "while true; do python scripts/backup_sqlite.py; sleep 86400; done"]
+    # The image's HEALTHCHECK probes the web server, which this container does not run.
+    healthcheck:
+      disable: true
     depends_on:
       web:
         condition: service_healthy
