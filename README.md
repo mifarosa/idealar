@@ -66,6 +66,12 @@ AI fikir verir, risk ve alternatif söyler. Somut bir şey önerdiğinde cevabı
 
 Sohbette AI'a gönderilenler: konuşma (son 10 mesaj) ve o sohbetin kapsamındaki fikirlerin metni (en fazla yaklaşık 6000 karakter). Başka kullanıcıların verisi hiçbir zaman gönderilmez.
 
+## Arayüz: tema ve bilgisayar kullanımı
+
+- **Tema:** Üstteki düğme *Otomatik → Açık → Koyu → Gri* arasında döner. Seçimin cihazda hatırlanır. Otomatik, telefonun/bilgisayarın açık-koyu ayarını izler.
+- **Bilgisayar:** Geniş ekranda fikir kartları yan yana dizilir, giriş çubuğu ortada yüzer, proje sayfası iki sütun olur. Telefonda tek sütun kalır.
+- **Enter:** Bilgisayarda (fare + klavye) **Enter mesajı gönderir, Shift+Enter yeni satır açar.** Telefonda Enter yeni satırdır, gönderme için ➤ düğmesi kullanılır.
+
 ## Benzerlik uyarısı
 
 Yeni bir fikir kaydedilince AI, onu **tüm fikirlerin ve projelerinle** karşılaştırır (yeni fikir hazırlanırken kartta "AI düşünüyor" aşamasında, ayrıca "🔎 Benzerleri ara" düğmesiyle istediğin zaman).

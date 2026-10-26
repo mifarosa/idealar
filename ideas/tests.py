@@ -382,3 +382,24 @@ class ProjectViewTests(TestCase):
 
         for name in ("project-detail", "project-update", "project-delete"):
             self.assertEqual(self.client.get(reverse(f"ideas:{name}", args=[foreign.pk])).status_code, 404)
+
+
+class LayoutTests(TestCase):
+    def test_pages_have_the_theme_switch_and_apply_the_saved_theme_before_paint(self):
+        self.client.force_login(make_user("viewer"))
+
+        response = self.client.get(reverse("ideas:list"))
+
+        self.assertContains(response, 'class="theme-toggle"')
+        self.assertContains(response, 'localStorage.getItem("idealar.theme")')
+
+    def test_login_page_also_has_the_theme_switch(self):
+        self.assertContains(self.client.get(reverse("accounts:login")), 'class="theme-toggle"')
+
+    def test_list_and_project_pages_use_the_wide_layout(self):
+        user = make_user("viewer")
+        self.client.force_login(user)
+        project = Project.objects.create(owner=user, name="P")
+
+        for url in (reverse("ideas:list"), reverse("ideas:project-list"), reverse("ideas:project-detail", args=[project.pk])):
+            self.assertContains(self.client.get(url), "container-wide")

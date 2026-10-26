@@ -116,3 +116,53 @@ if (inspectForm) {
     document.querySelector(".inspect-working").hidden = false;
   });
 }
+
+// Theme switch: Otomatik (system) -> Açık -> Koyu -> Gri. The choice is remembered on this device.
+const THEME_STORAGE_KEY = "idealar.theme";
+const THEMES = [
+  { value: "", label: "🌓 Otomatik" },
+  { value: "light", label: "☀️ Açık" },
+  { value: "dark", label: "🌙 Koyu" },
+  { value: "gray", label: "🌫️ Gri" },
+];
+
+function currentThemeIndex() {
+  const index = THEMES.findIndex((theme) => theme.value === (document.documentElement.dataset.theme || ""));
+  return index === -1 ? 0 : index;
+}
+
+function showTheme(theme) {
+  if (theme.value) document.documentElement.dataset.theme = theme.value;
+  else delete document.documentElement.dataset.theme;
+  document.querySelectorAll(".theme-toggle").forEach((button) => (button.textContent = theme.label));
+}
+
+function saveTheme(theme) {
+  try {
+    if (theme.value) localStorage.setItem(THEME_STORAGE_KEY, theme.value);
+    else localStorage.removeItem(THEME_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Could not remember the theme:", error);
+  }
+}
+
+showTheme(THEMES[currentThemeIndex()]);
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".theme-toggle")) return;
+  const next = THEMES[(currentThemeIndex() + 1) % THEMES.length];
+  showTheme(next);
+  saveTheme(next);
+});
+
+// On a computer (mouse + keyboard) Enter sends the message and Shift+Enter adds a new line.
+// On touch devices Enter stays a new line because the on-screen keyboard has no Shift and a send button exists.
+const DESKTOP_INPUT = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+document.addEventListener("keydown", (event) => {
+  const textarea = event.target;
+  const isPlainEnter = event.key === "Enter" && !event.shiftKey && !event.isComposing;
+  if (!isPlainEnter || !DESKTOP_INPUT.matches) return;
+  if (!(textarea instanceof HTMLTextAreaElement) || !textarea.matches(".quick-bar textarea")) return;
+  event.preventDefault();
+  textarea.form.requestSubmit();
+});

@@ -10,6 +10,13 @@
   <link rel="icon" href="{% static 'icons/icon-192.png' %}">
   <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <script>
+    // Apply the saved theme before first paint so there is no flash of the wrong colors.
+    try {
+      var savedTheme = localStorage.getItem("idealar.theme");
+      if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+    } catch (error) { /* storage blocked: fall back to the system theme */ }
+  </script>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
@@ -21,10 +28,15 @@
       <a href="{% url 'ideas:project-list' %}">Projeler</a>
       <a href="{% url 'ideas:chat' %}">💬</a>
     </nav>
-    <form method="post" action="{% url 'accounts:logout' %}">
-      {% csrf_token %}
-      <button class="link-button" type="submit">Çıkış</button>
-    </form>
+    <div class="topbar-actions">
+      <button class="theme-toggle" type="button" aria-label="Temayı değiştir" title="Temayı değiştir">🌓 Otomatik</button>
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button class="link-button" type="submit">Çıkış</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="topbar-actions"><button class="theme-toggle" type="button" aria-label="Temayı değiştir" title="Temayı değiştir">🌓 Otomatik</button></div>
     {% endif %}
   </header>
   <main class="container {% block container_class %}{% endblock %}">

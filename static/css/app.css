@@ -1,3 +1,4 @@
+/* Themes: light, dark and gray. Without a saved choice the system preference decides (light or dark). */
 :root {
   --bg: #f8fafc;
   --surface: #ffffff;
@@ -8,10 +9,23 @@
   --accent-text: #ffffff;
   --danger: #dc2626;
   --radius: 14px;
+  --shadow: 0 6px 24px rgb(15 23 42 / 0.12);
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #334155;
+  --accent: #818cf8;
+  --accent-text: #0f172a;
+  --danger: #f87171;
+  --shadow: 0 6px 24px rgb(0 0 0 / 0.45);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --bg: #0f172a;
     --surface: #1e293b;
     --text: #f1f5f9;
@@ -20,10 +34,26 @@
     --accent: #818cf8;
     --accent-text: #0f172a;
     --danger: #f87171;
+    --shadow: 0 6px 24px rgb(0 0 0 / 0.45);
   }
 }
 
+/* Soft mid-gray: lower contrast than light, easier on the eyes than dark. */
+:root[data-theme="gray"] {
+  --bg: #d8dbe0;
+  --surface: #e8eaee;
+  --text: #1c2026;
+  --muted: #565d68;
+  --border: #bcc1c9;
+  --accent: #4338ca;
+  --accent-text: #ffffff;
+  --danger: #b91c1c;
+  --shadow: 0 6px 24px rgb(28 32 38 / 0.18);
+}
+
 * { box-sizing: border-box; }
+
+a { color: var(--accent); }
 
 body {
   margin: 0;
@@ -45,7 +75,8 @@ body {
 
 .brand { font-weight: 700; color: var(--text); text-decoration: none; }
 
-.container { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+.container { max-width: 52rem; margin: 0 auto; padding: 1rem; }
+.container-wide { max-width: 82rem; }
 
 h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
 
@@ -234,3 +265,42 @@ select { font: inherit; color: var(--text); background: var(--bg); border: 1px s
 .similar-card .chip { white-space: normal; border-radius: 14px; padding: 0.4rem 0.8rem; }
 .github.stack { gap: 0.4rem; }
 .github p { margin: 0; }
+
+/* Theme switch, keyboard focus and mouse hover */
+.topbar-actions { display: flex; align-items: center; gap: 0.25rem; }
+.theme-toggle { background: none; border: 1px solid var(--border); border-radius: 999px; color: var(--text); cursor: pointer; font: inherit; font-size: 0.85rem; min-height: 36px; padding: 0 0.7rem; white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.button:hover, .chip:hover { filter: brightness(1.08); }
+.idea-card summary:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.theme-toggle:hover, .link-button:hover, .icon-link:hover { color: var(--accent); }
+.toolbar { display: flex; flex-direction: column; }
+.split { display: block; }
+
+/* Desktop: use the width. Phones keep the single-column layout above. */
+@media (min-width: 900px) {
+  .topbar { padding-inline: max(1rem, calc((100vw - 82rem) / 2 + 1rem)); }
+  .topnav a { padding: 0.5rem 0.9rem; border-radius: 999px; }
+  .topnav a:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .container { padding: 1.5rem 1rem; }
+  h1 { font-size: 1.7rem; }
+
+  .toolbar { flex-direction: row; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+  .toolbar .search { margin: 0; flex: 0 1 24rem; }
+
+  .container-wide .idea-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); align-items: start; gap: 0.9rem; }
+  .split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1.5rem; align-items: start; }
+  .split h2:first-child { margin-top: 0; }
+
+  .quick-bar {
+    left: 50%;
+    right: auto;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    width: min(52rem, calc(100% - 2rem));
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+  }
+  .has-quick-bar { padding-bottom: 7rem; }
+  .bubble { max-width: 75%; }
+}

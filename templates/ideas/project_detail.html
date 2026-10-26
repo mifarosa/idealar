@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ object.name }} · Idealar{% endblock %}
+{% block container_class %}container-wide{% endblock %}
 {% block content %}
 <h1>📁 {{ object.name }}</h1>
 {% if object.description %}<p>{{ object.description|linebreaksbr }}</p>{% endif %}
 <p class="muted">{{ object.progress.done }}/{{ object.progress.total }} özellik tamamlandı</p>
 
 
+<div class="split">
 <section class="card stack github">
   <h2>GitHub</h2>
   {% if object.github_url %}
@@ -52,6 +54,7 @@
   {% endif %}
 </section>
 
+<div>
 <h2>Fikirler</h2>
 {% if ideas %}
 <ul class="idea-list">
@@ -67,6 +70,8 @@
 {% else %}
 <p class="muted">Bu projeye bağlı fikir yok. Düzenleyip fikir bağlayabilirsin.</p>
 {% endif %}
+</div>
+</div>
 <p class="row">
   <a class="button" href="{% url 'ideas:project-chat' object.pk %}">💬 Proje hakkında konuş</a>
   <a class="button button-secondary" href="{% url 'ideas:project-update' object.pk %}">Düzenle</a>

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
-{% block container_class %}has-quick-bar{% endblock %}
+{% block container_class %}has-quick-bar container-wide{% endblock %}
 {% block content %}
+<div class="toolbar">
 <nav class="filters" aria-label="Filtre">
   <a class="chip {% if not status_filter %}chip-active{% endif %}" href="?q={{ search_text|urlencode }}">Hepsi</a>
   <a class="chip {% if status_filter == 'devam' %}chip-active{% endif %}" href="?durum=devam&q={{ search_text|urlencode }}">Devam eden</a>
@@ -11,6 +12,7 @@
   {% if status_filter %}<input type="hidden" name="durum" value="{{ status_filter }}">{% endif %}
   <input type="search" name="q" value="{{ search_text }}" placeholder="Fikirlerde ara…" aria-label="Ara">
 </form>
+</div>
 
 {% if ideas %}
 <ul class="idea-list">
