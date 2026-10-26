@@ -295,7 +295,7 @@ class ChatViewTests(TestCase):
 
         response = self.client.post(reverse("ideas:chat"), {"text": "hi"}, follow=True)
 
-        self.assertContains(response, "✨ Ollama")
+        self.assertContains(response, "Yanıtlayan: Ollama")
         self.assertContains(response, "Groq, Gemini yanıt vermediği için")
 
     def test_each_new_chat_is_its_own_session_and_the_list_shows_them(self):

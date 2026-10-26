@@ -248,7 +248,7 @@ class SimilarityViewTests(TestCase):
         self.patch_judge(StubJudge([SimilarMatch("idea", self.target.pk, "same", "ikisi de su içmeyi hatırlatıyor")]))
 
         self.client.post(reverse("ideas:idea-similar-check", args=[self.idea.pk]))
-        response = self.client.get(reverse("ideas:list"), {"open": self.idea.pk})
+        response = self.client.get(reverse("ideas:detail", args=[self.idea.pk]))
 
         self.assertContains(response, "Buna benzer bir fikrin var")
         self.assertContains(response, "Water reminder")
@@ -260,7 +260,7 @@ class SimilarityViewTests(TestCase):
 
         self.client.post(reverse("ideas:idea-similar-check", args=[self.idea.pk]))
 
-        self.assertContains(self.client.get(reverse("ideas:list"), {"open": self.idea.pk}), "Benzer bir kayıt bulunmadı")
+        self.assertContains(self.client.get(reverse("ideas:detail", args=[self.idea.pk])), "Benzer bir kayıt bulunmadı")
 
     def test_ai_outage_tells_the_user_only_words_were_checked(self):
         self.patch_judge(down_judge())

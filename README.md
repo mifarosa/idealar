@@ -66,11 +66,16 @@ AI fikir verir, risk ve alternatif söyler. Somut bir şey önerdiğinde cevabı
 
 Sohbette AI'a gönderilenler: konuşma (son 10 mesaj) ve o sohbetin kapsamındaki fikirlerin metni (en fazla yaklaşık 6000 karakter). Başka kullanıcıların verisi hiçbir zaman gönderilmez.
 
-## Arayüz: tema ve bilgisayar kullanımı
+## Arayüz
 
-- **Tema:** Üstteki düğme *Otomatik → Açık → Koyu → Gri* arasında döner. Seçimin cihazda hatırlanır. Otomatik, telefonun/bilgisayarın açık-koyu ayarını izler.
-- **Bilgisayar:** Geniş ekranda fikir kartları yan yana dizilir, giriş çubuğu ortada yüzer, proje sayfası iki sütun olur. Telefonda tek sütun kalır.
-- **Enter:** Bilgisayarda (fare + klavye) **Enter mesajı gönderir, Shift+Enter yeni satır açar.** Telefonda Enter yeni satırdır, gönderme için ➤ düğmesi kullanılır.
+Tasarım dili işlevsel ve sadedir (Dieter Rams/Braun'dan esinli): ince çizgiler, keskin köşeler, gölge yok; tek turuncu vurgu yalnızca seçili satır, ilerleme çubuğu ve odak halkası gibi işlevsel yerlerde kullanılır.
+
+- **Masaüstü:** solda menü (sayaçlarla), ortada fikir listesi, sağda seçilen fikrin tamamı (özet, platform, proje, etiket, benzerlik uyarısı, özellikler, AI önerileri). Kart açıp kapatmak yok.
+- **Telefon:** tek sütun. Alttaki sabit kutu hızlı fikir ekler, fikre dokununca detay ayrı ekran olarak açılır, altta Fikirler/Projeler/Sohbet/Ayarlar sekmeleri bulunur.
+- **Liste:** Hepsi / Devam eden / Biten sekmeleri (sayaçlı), proje filtresi, sıralama (yeni, eski, son güncellenen, ilerleme) ve arama birlikte çalışır.
+- **Özellikler:** kutucuğa tıklamak anında kaydeder ve ilerlemeyi güncel tutar; kalem simgesi adı yerinde değiştirir.
+- **Tema:** Açık / Gri / Koyu. Bilgisayarda sol menünün altında, telefonda *Ayarlar* sekmesinde. Seçimin cihazda hatırlanır; seçmediysen cihazın açık-koyu ayarını izler.
+- **Klavye (bilgisayar):** `N` yeni fikir, `/` arama, `J`/`K` veya ↑/↓ listede gezinme. Mesaj kutularında **Enter gönderir, Shift+Enter yeni satır açar** (telefonda Enter yeni satırdır, ➤ gönderir).
 
 ## Benzerlik uyarısı
 

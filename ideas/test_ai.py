@@ -106,21 +106,25 @@ class EnrichViewTests(TestCase):
         self.idea = Idea.objects.create(owner=self.user, body="track my habits")
         self.url = reverse("ideas:idea-enrich", args=[self.idea.pk])
 
-    def test_quick_capture_redirects_to_list_with_enrich_marker(self):
+    def test_quick_capture_redirects_to_the_new_idea_with_enrich_marker(self):
         response = self.client.post(reverse("ideas:create"), {"body": "brand new"})
 
         new_idea = Idea.objects.get(body="brand new")
-        self.assertRedirects(response, f"{reverse('ideas:list')}?enrich={new_idea.pk}", fetch_redirect_response=False)
+        self.assertRedirects(response, f"{reverse('ideas:detail', args=[new_idea.pk])}?enrich=1", fetch_redirect_response=False)
 
-    def test_list_marks_the_new_idea_for_background_enrichment(self):
-        response = self.client.get(reverse("ideas:list"), {"enrich": self.idea.pk})
+    def test_detail_page_marks_the_new_idea_for_background_enrichment(self):
+        response = self.client.get(reverse("ideas:detail", args=[self.idea.pk]), {"enrich": "1"})
 
         self.assertContains(response, f'data-enrich-url="{self.url}"')
+        self.assertContains(response, "AI düşünüyor")
 
-    def test_list_does_not_re_enrich_an_idea_that_is_done(self):
+    def test_detail_page_without_the_marker_does_not_enrich(self):
+        self.assertNotContains(self.client.get(reverse("ideas:detail", args=[self.idea.pk])), "data-enrich-url")
+
+    def test_detail_page_does_not_re_enrich_an_idea_that_is_done(self):
         ai_enrichment.enrich_idea(self.idea, StubAnalyzer())
 
-        response = self.client.get(reverse("ideas:list"), {"enrich": self.idea.pk})
+        response = self.client.get(reverse("ideas:detail", args=[self.idea.pk]), {"enrich": "1"})
 
         self.assertNotContains(response, "data-enrich-url")
 
@@ -143,7 +147,7 @@ class EnrichViewTests(TestCase):
     def test_card_shows_summary_tags_and_suggestions_after_enrichment(self):
         ai_enrichment.enrich_idea(self.idea, StubAnalyzer())
 
-        response = self.client.get(reverse("ideas:list"), {"open": self.idea.pk})
+        response = self.client.get(reverse("ideas:detail", args=[self.idea.pk]))
 
         for expected in ("Tracks daily habits.", "#health", "Streak counter"):
             self.assertContains(response, expected)
