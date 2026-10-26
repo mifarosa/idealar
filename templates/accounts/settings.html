@@ -5,6 +5,7 @@
 <dl class="spec">
   <dt>Kullanıcı</dt><dd>{{ user.get_username }}</dd>
   <dt>Tema</dt><dd>{% include "_theme_switch.html" %}</dd>
+  {% if user.is_staff %}<dt>AI</dt><dd><a href="{% url 'ideas:ai-models' %}">AI modellerini yönet</a></dd>{% endif %}
 </dl>
 <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn" type="submit">Çıkış yap</button></form>
 {% endblock %}

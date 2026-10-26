@@ -2,8 +2,8 @@ import logging
 
 from ai.chat import ACTION_ADD_FEATURE, ACTION_NEW_IDEA, ChatAction, ChatAssistant, ChatTurn
 from ai.errors import AIError
-from ai.providers import build_default_client
 
+from . import ai_registry
 from .chat_context import ChatScope, build_context
 from .errors import ActionNotApplicable
 from .models import (
@@ -26,7 +26,7 @@ TITLE_CHARS = 50
 
 
 def build_assistant(preferred_provider: str | None = None) -> ChatAssistant:
-    return ChatAssistant(build_default_client(preferred=preferred_provider))
+    return ChatAssistant(ai_registry.build_client(preferred=preferred_provider))
 
 
 def _title_from(first_message: str) -> str:

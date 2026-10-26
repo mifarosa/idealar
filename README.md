@@ -53,6 +53,14 @@ Fikir kaydedilince sayfa hemen açılır, AI arkadan başlık, kısa özet, etik
 3. Varsayılan model `claude-opus-5-5`. Not almak için daha ucuz bir model yeterliyse `ANTHROPIC_MODEL=claude-haiku-5-5` yaz; geçerli adları `docker compose exec web python manage.py ai_models` listeler.
 4. Claude bir isteği reddederse veya hata verirse zincir otomatik olarak sıradaki sağlayıcıya geçer; fikrin kaybolmaz.
 
+### Modelleri arayüzden yönetmek
+**Ayarlar → AI modellerini yönet** (yalnızca yönetici/staff hesabı görür). Burada:
+- Model ekleyebilir, düzenleyebilir, silebilir, sırasını değiştirebilir, geçici olarak kapatabilirsin. Üstteki önce denenir; hata verirse sıradakine geçilir.
+- **Dene** tuşu modelin gerçekten cevap verdiğini kontrol eder. **Modeller** tuşu sağlayıcının o anahtarla kullanılabilen model adlarını listeler, birini tek tıkla seçersin (kaldırılan modellerde kurtarıcıdır).
+- Ollama, LM Studio veya OpenAI uyumlu herhangi bir kendi sunucunu (self-host) adresiyle ekleyebilirsin. Docker içinden bilgisayarındaki sunucuya `http://host.docker.internal:PORT` ile ulaşılır.
+- **API anahtarları arayüze yazılmaz.** Her model, anahtarın `.env` içindeki değişken adını (`GROQ_API_KEY`, `ANTHROPIC_API_KEY` gibi, `_API_KEY` ile biten) saklar; anahtarı `.env`'e ekleyip `docker compose up -d` yaparsın.
+- İlk model eklenene kadar `.env` içindeki `AI_PROVIDERS` sırası kullanılır; **.env ayarlarımı listeye aktar** tuşu onu tek tıkla listeye çevirir. Liste doluyken `AI_PROVIDERS` artık dikkate alınmaz.
+
 ### Ollama (yedek, isteğe bağlı)
 1. https://ollama.com/download adresinden Windows sürümünü kur.
 2. Modeli indir: `ollama pull qwen2.5:3b` (yaklaşık 2 GB; Türkçe için makul bir küçük model).

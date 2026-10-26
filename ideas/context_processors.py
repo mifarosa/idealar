@@ -21,6 +21,6 @@ def _section(url_name: str) -> str:
         return "chat"
     if url_name.startswith("project-"):
         return "projects"
-    if url_name == "settings":
+    if url_name == "settings" or url_name.startswith("ai-model"):
         return "settings"
     return "ideas" if url_name in IDEA_VIEWS else ""

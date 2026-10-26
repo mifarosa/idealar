@@ -6,9 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
 
-from ai.providers import PROVIDER_LABELS, configured_provider_names
-
-from . import chat_service
+from . import ai_registry, chat_service
 from .chat_context import ChatScope
 from .models import ROLE_ASSISTANT, ChatMessage, Conversation, Idea, Project
 
@@ -39,17 +37,17 @@ def conversation_url(conversation: Conversation) -> str:
 
 
 def provider_label(name: str) -> str:
-    return PROVIDER_LABELS.get(name, name)
+    return ai_registry.label_for(name)
 
 
 def provider_choices() -> list[tuple[str, str]]:
-    return [(name, provider_label(name)) for name in configured_provider_names()]
+    return ai_registry.choices()
 
 
 def chosen_provider(request) -> str | None:
     """The picker value from the form; anything not currently configured means "automatic"."""
     name = request.POST.get("provider", "")
-    return name if name in configured_provider_names() else None
+    return name if name in dict(ai_registry.choices()) else None
 
 
 class ConversationListView(LoginRequiredMixin, View):

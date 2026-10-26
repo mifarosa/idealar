@@ -6,6 +6,7 @@ fallbacks. A provider whose required key is missing is skipped with a warning.
 import logging
 import os
 from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 
 from .anthropic_client import AnthropicClient
 from .client import LLMClient, OpenAICompatibleClient
@@ -123,3 +124,90 @@ def _build_or_skip(name: str, environ: Mapping[str, str], log_skips: bool = True
         if log_skips:
             logger.warning("AI provider %s skipped: %s", name, error)
         return None
+
+
+# ---------- Models defined by the user (stored in the database, see ideas.models.AIModel) ----------
+
+
+@dataclass(frozen=True)
+class KindInfo:
+    label: str
+    base_url: str  # fixed endpoint; empty means the user supplies it
+    key_env: str  # suggested env variable holding the key; empty means no key
+    needs_key: bool
+    local: bool = False  # slow hardware: longer timeout
+
+
+KINDS: dict[str, KindInfo] = {
+    "groq": KindInfo("Groq", "https://api.groq.com/openai/v1", "GROQ_API_KEY", True),
+    "gemini": KindInfo("Gemini", "https://generativelanguage.googleapis.com/v1beta/openai", "GEMINI_API_KEY", True),
+    "anthropic": KindInfo("Claude", "", "ANTHROPIC_API_KEY", True),
+    "openrouter": KindInfo("OpenRouter", "https://openrouter.ai/api/v1", "OPENROUTER_API_KEY", True),
+    "ollama": KindInfo("Ollama", "", "", False, local=True),
+    "custom": KindInfo("Diğer (OpenAI uyumlu)", "", "", False, local=True),
+}
+
+
+@dataclass(frozen=True)
+class ModelSpec:
+    """One configured model. The key itself never lives here, only the name of the env variable holding it."""
+
+    name: str
+    label: str
+    kind: str
+    model: str
+    base_url: str = ""
+    key_env: str = ""
+
+
+def build_client(spec: ModelSpec, environ: Mapping[str, str] | None = None) -> LLMClient:
+    environ = os.environ if environ is None else environ
+    info = KINDS.get(spec.kind)
+    if info is None:
+        raise AINotConfiguredError(f"Unknown AI kind '{spec.kind}'")
+    api_key = environ.get(spec.key_env, "").strip() if spec.key_env else ""
+    if info.needs_key and not api_key:
+        raise AINotConfiguredError(f"{spec.key_env or 'API key variable'} is not set")
+    timeout = LOCAL_TIMEOUT_SECONDS if info.local else CLOUD_TIMEOUT_SECONDS
+    if spec.kind == "anthropic":
+        return AnthropicClient(spec.name, spec.model, api_key, timeout=timeout)
+    base_url = info.base_url or spec.base_url.rstrip("/")
+    if not base_url:
+        raise AINotConfiguredError(f"{spec.label} has no address")
+    if spec.kind == "ollama":
+        base_url += "/v1"
+    return OpenAICompatibleClient(spec.name, base_url, spec.model, api_key=api_key, timeout=timeout)
+
+
+def build_chain(specs: list[ModelSpec], environ: Mapping[str, str] | None = None, preferred: str | None = None) -> FallbackClient:
+    """Fallback chain from user-defined models in the given order; a model whose key is missing is skipped."""
+    ordered = sorted(specs, key=lambda spec: spec.name != preferred)  # stable: only the preferred one moves up
+    clients = []
+    for spec in ordered:
+        try:
+            clients.append(build_client(spec, environ))
+        except AINotConfiguredError as error:
+            logger.warning("AI model %s skipped: %s", spec.label, error)
+    return FallbackClient(clients)
+
+
+_ENV_MODELS = {
+    "groq": ("GROQ_MODEL", DEFAULT_GROQ_MODEL),
+    "gemini": ("GEMINI_MODEL", DEFAULT_GEMINI_MODEL),
+    "anthropic": ("ANTHROPIC_MODEL", DEFAULT_ANTHROPIC_MODEL),
+    "openrouter": ("OPENROUTER_MODEL", ""),
+    "ollama": ("OLLAMA_MODEL", "qwen2.5:3b"),
+}
+
+
+def specs_from_environment(environ: Mapping[str, str] | None = None) -> list[ModelSpec]:
+    """The current .env chain expressed as model definitions, used to seed the settings page."""
+    environ = os.environ if environ is None else environ
+    specs = []
+    for position, kind in enumerate(_chain_names(environ), start=1):
+        if kind not in _ENV_MODELS:
+            continue
+        model_var, default = _ENV_MODELS[kind]
+        base_url = environ.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/") if kind == "ollama" else ""
+        specs.append(ModelSpec(f"m{position}", KINDS[kind].label, kind, environ.get(model_var, default), base_url, KINDS[kind].key_env))
+    return specs

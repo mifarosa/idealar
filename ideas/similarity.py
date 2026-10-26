@@ -8,7 +8,6 @@ import logging
 import re
 
 from ai.errors import AIError
-from ai.providers import build_default_client
 from ai.similarity import (
     KIND_IDEA,
     KIND_PROJECT,
@@ -18,6 +17,7 @@ from ai.similarity import (
     SimilarMatch,
 )
 
+from . import ai_registry
 from .errors import ActionNotApplicable
 from .models import (
     SIMILARITY_DONE,
@@ -88,7 +88,7 @@ def _pick_for_ai(idea: Idea, candidates: list[tuple[Candidate, set[str]]]) -> li
 
 
 def build_judge() -> SimilarityJudge:
-    return SimilarityJudge(build_default_client())
+    return SimilarityJudge(ai_registry.build_client())
 
 
 def _idea_text(idea: Idea) -> str:

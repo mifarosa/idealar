@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import ai_views, chat_views, feature_views, project_views, views
+from . import ai_settings_views, ai_views, chat_views, feature_views, project_views, views
 
 app_name = "ideas"
 
@@ -27,6 +27,12 @@ urlpatterns = [
     path("features/<int:pk>/edit/", feature_views.FeatureEditView.as_view(), name="feature-edit"),
     path("features/<int:pk>/delete/", feature_views.FeatureDeleteView.as_view(), name="feature-delete"),
     path("features/<int:pk>/copy/", feature_views.FeatureCopyView.as_view(), name="feature-copy"),
+    path("settings/ai/", ai_settings_views.AIModelListView.as_view(), name="ai-models"),
+    path("settings/ai/new/", ai_settings_views.AIModelFormView.as_view(), name="ai-model-create"),
+    path("settings/ai/import-env/", ai_settings_views.AIModelImportEnvView.as_view(), name="ai-model-import-env"),
+    path("settings/ai/<int:pk>/edit/", ai_settings_views.AIModelFormView.as_view(), name="ai-model-update"),
+    path("settings/ai/<int:pk>/models/", ai_settings_views.AIModelAvailableView.as_view(), name="ai-model-available"),
+    path("settings/ai/<int:pk>/<slug:action>/", ai_settings_views.AIModelActionView.as_view(), name="ai-model-action"),
     path("projects/", project_views.ProjectListView.as_view(), name="project-list"),
     path("projects/import/", project_views.ProjectImportView.as_view(), name="project-import"),
     path("projects/new/", project_views.ProjectCreateView.as_view(), name="project-create"),

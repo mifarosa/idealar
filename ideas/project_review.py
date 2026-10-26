@@ -5,9 +5,9 @@ import os
 from django.utils import timezone
 
 from ai.errors import AIError
-from ai.providers import build_default_client
 from ai.repo_review import RepoReview, RepoReviewer
 
+from . import ai_registry
 from .errors import ActionNotApplicable
 from .github_repo import (
     DEFAULT_API_URL,
@@ -30,7 +30,7 @@ def build_github_client() -> GitHubClient:
 
 
 def build_reviewer() -> RepoReviewer:
-    return RepoReviewer(build_default_client(preferred=REVIEW_PROVIDER))
+    return RepoReviewer(ai_registry.build_client(preferred=REVIEW_PROVIDER))
 
 
 def _max_chars() -> int:
@@ -88,7 +88,7 @@ def review_project(project: Project, github_factory=None, reviewer_factory=None)
     project.repo_analysis = _stored_analysis(review, snapshot.files_read, checklist)
     project.repo_analyzed_at = timezone.now()
     project.repo_analysis_error = ""
-    project.repo_analysis_provider = run.served_by if run else ""
+    project.repo_analysis_provider = ai_registry.label_for(run.served_by)[:30] if run else ""
     project.save(update_fields=["repo_analysis", "repo_analyzed_at", "repo_analysis_error", "repo_analysis_provider"])
     return True
 

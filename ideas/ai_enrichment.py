@@ -3,15 +3,15 @@ import logging
 
 from ai.analysis import IdeaAnalyzer
 from ai.errors import AIError
-from ai.providers import build_default_client
 
+from . import ai_registry
 from .models import AI_DONE, AI_FAILED, Idea
 
 logger = logging.getLogger(__name__)
 
 
 def build_analyzer() -> IdeaAnalyzer:
-    return IdeaAnalyzer(build_default_client())
+    return IdeaAnalyzer(ai_registry.build_client())
 
 
 def _idea_text(idea: Idea) -> str:

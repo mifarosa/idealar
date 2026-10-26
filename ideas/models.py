@@ -214,3 +214,26 @@ class ChatMessage(models.Model):
 
     def __str__(self) -> str:
         return f"{self.role}: {self.content[:40]}"
+
+
+class AIModel(models.Model):
+    """An AI model the app may call. Instance-wide (managed by staff); keys stay in .env, only their variable name is stored."""
+
+    kind = models.CharField(max_length=20)
+    label = models.CharField(max_length=60)
+    model_name = models.CharField(max_length=120)
+    base_url = models.CharField(max_length=200, blank=True)
+    key_env = models.CharField(max_length=60, blank=True)
+    enabled = models.BooleanField(default=True)
+    position = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["position", "id"]
+
+    def __str__(self) -> str:
+        return self.label
+
+    @property
+    def chain_name(self) -> str:
+        """Identifier stored on chat messages and used by the picker."""
+        return f"m{self.pk}"

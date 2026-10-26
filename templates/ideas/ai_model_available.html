@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Kullanılabilir modeller · Idealar{% endblock %}
+{% block content %}
+<a class="crumb" href="{% url 'ideas:ai-models' %}"><svg class="icon"><use href="#i-back"/></svg>AI modelleri</a>
+<div class="page-head"><h1>{{ object.label }}: kullanılabilir modeller</h1></div>
+{% if error %}
+<p class="error-text">Liste alınamadı: {{ error }}</p>
+{% else %}
+<p class="muted">Seçtiğin ad “{{ object.label }}” için model adı olarak kaydedilir. Şu an: <strong>{{ object.model_name }}</strong></p>
+<ul class="list">
+  {% for name in names %}
+  <li class="has-tools">
+    <span class="title" style="flex:1;padding:12px 4px;overflow-wrap:anywhere">{{ name }}{% if name == object.model_name %} <span class="muted">(kullanımda)</span>{% endif %}</span>
+    <div class="row-tools">
+      <form method="post" action="{% url 'ideas:ai-model-action' object.pk 'use' %}">{% csrf_token %}
+        <input type="hidden" name="model_name" value="{{ name }}">
+        <button class="btn quiet small" type="submit" {% if name == object.model_name %}disabled{% endif %}>Bunu kullan</button>
+      </form>
+    </div>
+  </li>
+  {% empty %}
+  <li><p class="muted" style="padding:12px 4px">Sağlayıcı boş bir liste döndürdü.</p></li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

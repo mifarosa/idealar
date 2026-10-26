@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Modeli düzenle{% else %}Model ekle{% endif %} · Idealar{% endblock %}
+{% block content %}
+<a class="crumb" href="{% url 'ideas:ai-models' %}"><svg class="icon"><use href="#i-back"/></svg>AI modelleri</a>
+<div class="page-head"><h1>{% if object %}Modeli düzenle{% else %}Model ekle{% endif %}</h1></div>
+<form method="post" class="form">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% for field in form %}
+  <div class="form-field">
+    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {% if field.help_text %}<p class="muted">{{ field.help_text }}</p>{% endif %}
+    {{ field.errors }}
+  </div>
+  {% endfor %}
+  <div class="actions">
+    <button class="btn primary" type="submit">Kaydet</button>
+    <a class="btn quiet" href="{% url 'ideas:ai-models' %}">Vazgeç</a>
+  </div>
+</form>
+{% endblock %}

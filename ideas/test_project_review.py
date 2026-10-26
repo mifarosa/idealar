@@ -127,7 +127,7 @@ class ReviewProjectTests(TestCase):
             self.assertFalse(project_review.review_project(self.project, lambda: self.github(), broken_factory))
 
     def test_gemini_is_the_preferred_reviewer(self):
-        with patch("ideas.project_review.build_default_client") as build:
+        with patch("ideas.ai_registry.build_default_client") as build:
             project_review.build_reviewer()
 
         build.assert_called_once_with(preferred="gemini")

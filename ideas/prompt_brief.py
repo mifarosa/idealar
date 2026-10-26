@@ -3,8 +3,8 @@ import logging
 
 from ai.brief import Brief, BriefWriter
 from ai.errors import AIError
-from ai.providers import build_default_client
 
+from . import ai_registry
 from .build_prompt import MODE_EXTEND
 from .models import Idea
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def build_writer() -> BriefWriter:
-    return BriefWriter(build_default_client())
+    return BriefWriter(ai_registry.build_client())
 
 
 def draft_brief(idea: Idea, mode: str, writer_factory=None) -> Brief | None:

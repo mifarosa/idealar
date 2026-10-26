@@ -180,6 +180,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .list a:hover { background: var(--hover); }
 .list li.has-tools { display: flex; align-items: center; }
 .list li.has-tools > a { flex: 1; min-width: 0; }
+.list li.has-tools.wrap { flex-wrap: wrap; }
 .row-tools { display: flex; align-items: center; gap: 2px; padding-right: 4px; flex: none; }
 .row-tools form { display: inline; }
 [data-rename-text][contenteditable="true"] { outline: 2px solid var(--signal); outline-offset: 2px; background: var(--panel); cursor: text; }
