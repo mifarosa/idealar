@@ -47,6 +47,12 @@ Fikir kaydedilince sayfa hemen açılır, AI arkadan başlık, kısa özet, etik
 2. `.env`: `GEMINI_API_KEY=...` ve `AI_PROVIDERS=groq,gemini,ollama` (sıra = öncelik). Model adı yazmak zorunda değilsin; varsayılan `gemini-flash-lite-latest` (Google'ın güncel hafif modeline işaret eden takma ad). Başka model istersen `GEMINI_MODEL=` yaz; geçerli adları `docker compose exec web python manage.py ai_models` listeler.
 3. Ücretsiz katmanda gönderdiğin içeriğin Google'ın ürünlerini geliştirmek için kullanılabildiği belirtiliyor; fikirlerin gizliyse bunu göz önünde bulundur. Ayrıca günlük istek limiti modele göre çok değişiyor; kendi limitlerini aistudio.google.com/rate-limit sayfasında gör.
 
+### Claude / Anthropic (isteğe bağlı, ücretli)
+1. https://console.anthropic.com/settings/keys adresinden anahtar oluştur (kullandıkça ödenir, ücretsiz katman yok; kullanım limitini konsoldan koyabilirsin).
+2. `.env`: `ANTHROPIC_API_KEY=...` ve `AI_PROVIDERS=groq,anthropic,ollama` (sıra = öncelik; Claude'u ilk yazarsan öncelikli olur, ya da sohbetteki AI seçiciden seç).
+3. Varsayılan model `claude-opus-5-5`. Not almak için daha ucuz bir model yeterliyse `ANTHROPIC_MODEL=claude-haiku-5-5` yaz; geçerli adları `docker compose exec web python manage.py ai_models` listeler.
+4. Claude bir isteği reddederse veya hata verirse zincir otomatik olarak sıradaki sağlayıcıya geçer; fikrin kaybolmaz.
+
 ### Ollama (yedek, isteğe bağlı)
 1. https://ollama.com/download adresinden Windows sürümünü kur.
 2. Modeli indir: `ollama pull qwen2.5:3b` (yaklaşık 2 GB; Türkçe için makul bir küçük model).

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from ai.client import OpenAICompatibleClient
+from ai.client import LLMClient
 from ai.errors import AIError
 from ai.providers import build_default_client
 
@@ -13,7 +13,7 @@ class Command(BaseCommand):
             self.stdout.write(f"[{client.name}] configured model: {client._model}")
             self._print_models(client)
 
-    def _print_models(self, client: OpenAICompatibleClient) -> None:
+    def _print_models(self, client: LLMClient) -> None:
         try:
             models = client.list_models()
         except AIError as error:

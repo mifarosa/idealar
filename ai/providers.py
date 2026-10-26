@@ -7,6 +7,7 @@ import logging
 import os
 from collections.abc import Callable, Mapping
 
+from .anthropic_client import AnthropicClient
 from .client import LLMClient, OpenAICompatibleClient
 from .errors import AINotConfiguredError
 from .fallback import FallbackClient
@@ -20,6 +21,7 @@ LOCAL_TIMEOUT_SECONDS = 90  # small local models on CPU are slow
 DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
 # "-latest" aliases follow Google's current model, so the default does not go stale like a pinned version.
 DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest"
+DEFAULT_ANTHROPIC_MODEL = "claude-opus-5-5"
 
 
 def _required(environ: Mapping[str, str], key: str) -> str:
@@ -60,6 +62,15 @@ def _gemini(environ: Mapping[str, str]) -> LLMClient:
     )
 
 
+def _anthropic(environ: Mapping[str, str]) -> LLMClient:
+    return AnthropicClient(
+        name="anthropic",
+        api_key=_required(environ, "ANTHROPIC_API_KEY"),
+        model=environ.get("ANTHROPIC_MODEL", DEFAULT_ANTHROPIC_MODEL),
+        timeout=CLOUD_TIMEOUT_SECONDS,
+    )
+
+
 def _ollama(environ: Mapping[str, str]) -> LLMClient:
     host = environ.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
     return OpenAICompatibleClient(
@@ -73,12 +84,13 @@ def _ollama(environ: Mapping[str, str]) -> LLMClient:
 PROVIDER_FACTORIES: dict[str, Callable[[Mapping[str, str]], LLMClient]] = {
     "groq": _groq,
     "gemini": _gemini,
+    "anthropic": _anthropic,
     "openrouter": _openrouter,
     "ollama": _ollama,
 }
 
 
-PROVIDER_LABELS = {"groq": "Groq", "gemini": "Gemini", "openrouter": "OpenRouter", "ollama": "Ollama"}
+PROVIDER_LABELS = {"groq": "Groq", "gemini": "Gemini", "anthropic": "Claude", "openrouter": "OpenRouter", "ollama": "Ollama"}
 
 
 def _chain_names(environ: Mapping[str, str]) -> list[str]:
