@@ -1,59 +1,61 @@
 {% extends "base.html" %}
 {% block title %}{{ conversation.title }} · Sohbet{% endblock %}
-{% block container_class %}has-quick-bar{% endblock %}
-{% block content %}
-<div class="row row-between">
-  <div>
-    <a class="muted" href="{{ list_url }}">← {{ scope.title }} sohbetleri</a>
-    <h1>{{ conversation.title }}</h1>
-  </div>
-  <form method="post" action="{% url 'ideas:conversation-delete' conversation.pk %}" onsubmit="return confirm('Bu sohbet silinsin mi?')">
-    {% csrf_token %}
-    <button class="link-button" type="submit">Sil</button>
-  </form>
-</div>
-
-<div class="chat-log">
-  {% for message in chat_messages %}
-  <div class="bubble bubble-{{ message.role }}">
-    <p>{{ message.content|linebreaksbr }}</p>
-    {% if message.provider_label %}
-    <p class="provider-badge muted">✨ {{ message.provider_label }}{% if message.failed_labels %} · {{ message.failed_labels|join:", " }} yanıt vermediği için{% endif %}</p>
-    {% endif %}
-    {% for action in message.action_views %}
-    <div class="action-card">
-      <p>
-        {% if action.type == 'add_feature' %}＋ <strong>{{ action.target_title|default:"Fikir" }}</strong> fikrine özellik: “{{ action.text }}”
-        {% else %}＋ Yeni fikir: “{{ action.text }}”{% endif %}
-      </p>
-      {% if action.status == 'pending' %}
-      <form method="post" action="{% url 'ideas:chat-action' message.pk action.index %}" class="row">
+{% block body %}
+<main class="page">
+  <div class="page-inner">
+    <a class="crumb" href="{{ list_url }}"><svg class="icon"><use href="#i-back"/></svg>Sohbetler</a>
+    <div class="page-head">
+      <h1>{{ conversation.title }}</h1>
+      <form method="post" action="{% url 'ideas:conversation-delete' conversation.pk %}" onsubmit="return confirm('Bu sohbet silinsin mi?')">
         {% csrf_token %}
-        <button class="chip" name="decision" value="apply" type="submit">Ekle</button>
-        <button class="icon-link" name="decision" value="dismiss" type="submit" aria-label="Yoksay">✕</button>
+        <button class="link" type="submit">Sil</button>
       </form>
-      {% elif action.status == 'applied' %}<span class="muted">✓ Eklendi</span>
-      {% else %}<span class="muted">Yoksayıldı</span>{% endif %}
     </div>
-    {% endfor %}
+
+    <div class="chat-log">
+      {% for message in chat_messages %}
+      <div class="bubble bubble-{{ message.role }}">
+        <p>{{ message.content|linebreaksbr }}</p>
+        {% if message.provider_label %}
+        <p class="provider-badge">Yanıtlayan: {{ message.provider_label }}{% if message.failed_labels %} · {{ message.failed_labels|join:", " }} yanıt vermediği için{% endif %}</p>
+        {% endif %}
+        {% for action in message.action_views %}
+        <div class="action-card">
+          <p>
+            {% if action.type == 'add_feature' %}<strong>{{ action.target_title|default:"Fikir" }}</strong> fikrine özellik: “{{ action.text }}”
+            {% else %}Yeni fikir: “{{ action.text }}”{% endif %}
+          </p>
+          {% if action.status == 'pending' %}
+          <form method="post" action="{% url 'ideas:chat-action' message.pk action.index %}" class="actions">
+            {% csrf_token %}
+            <button class="btn small primary" name="decision" value="apply" type="submit">Ekle</button>
+            <button class="btn small quiet" name="decision" value="dismiss" type="submit">Yoksay</button>
+          </form>
+          {% elif action.status == 'applied' %}<span class="muted">Eklendi</span>
+          {% else %}<span class="muted">Yoksayıldı</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      {% if needs_reply %}
+      <form method="post" action="{{ post_url }}" class="chat-retry">
+        {% csrf_token %}
+        <span class="muted">Son mesajına yanıt gelmedi.</span>
+        {% include "ideas/_provider_select.html" %}
+        <button class="btn" type="submit">Tekrar dene</button>
+      </form>
+      {% endif %}
+      <p class="muted typing" hidden role="status">AI yazıyor…</p>
+    </div>
   </div>
-  {% endfor %}
-
-  {% if needs_reply %}
-  <form method="post" action="{{ post_url }}" class="card row chat-retry">
-    {% csrf_token %}
-    <span class="muted">Son mesajına yanıt gelmedi.</span>
-    {% include "ideas/_provider_select.html" %}
-    <button class="button button-secondary" type="submit">Tekrar dene</button>
-  </form>
-  {% endif %}
-  <p class="muted typing" hidden role="status">AI yazıyor…</p>
-</div>
-
-<form method="post" action="{{ post_url }}" class="quick-bar chat-form">
+</main>
+{% endblock %}
+{% block composer %}
+<form method="post" action="{{ post_url }}" class="composer chat-form">
   {% csrf_token %}
   {% include "ideas/_provider_select.html" %}
-  <textarea name="text" rows="1" placeholder="Mesaj yaz…" aria-label="Mesaj" required></textarea>
-  <button class="button" type="submit" aria-label="Gönder">➤</button>
+  <label class="field"><textarea name="text" rows="1" placeholder="Mesaj yaz…" aria-label="Mesaj" required></textarea></label>
+  <button class="send" type="submit" aria-label="Gönder"><svg class="icon"><use href="#i-send"/></svg></button>
 </form>
 {% endblock %}

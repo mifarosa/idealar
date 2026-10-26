@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#E96A26">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block title %}Idealar{% endblock %}</title>
   <link rel="manifest" href="{% url 'pwa:manifest' %}">
@@ -20,31 +20,46 @@
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="{% url 'ideas:list' %}">💡 Idealar</a>
+  {% include "_icons.html" %}
+  <div class="toasts" aria-live="polite">
+    {% for message in messages %}<p class="toast toast-{{ message.tags }}" role="status">{{ message }}</p>{% endfor %}
+  </div>
+
+  <div class="app{% if not user.is_authenticated %} anonymous{% endif %}">
     {% if user.is_authenticated %}
-    <nav class="topnav">
-      <a href="{% url 'ideas:list' %}">Fikirler</a>
-      <a href="{% url 'ideas:project-list' %}">Projeler</a>
-      <a href="{% url 'ideas:chat' %}">💬</a>
-    </nav>
-    <div class="topbar-actions">
-      <button class="theme-toggle" type="button" aria-label="Temayı değiştir" title="Temayı değiştir">🌓 Otomatik</button>
-      <form method="post" action="{% url 'accounts:logout' %}">
-        {% csrf_token %}
-        <button class="link-button" type="submit">Çıkış</button>
-      </form>
-    </div>
-    {% else %}
-    <div class="topbar-actions"><button class="theme-toggle" type="button" aria-label="Temayı değiştir" title="Temayı değiştir">🌓 Otomatik</button></div>
+    <aside class="sidebar">
+      <a class="brand" href="{% url 'ideas:list' %}"><span class="dot"></span>Idealar</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="{% url 'ideas:list' %}" {% if nav_section == 'ideas' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-ideas"/></svg>Fikirler<span class="count">{{ nav_idea_count }}</span></a>
+        <a href="{% url 'ideas:project-list' %}" {% if nav_section == 'projects' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-folder"/></svg>Projeler<span class="count">{{ nav_project_count }}</span></a>
+        <a href="{% url 'ideas:chat' %}" {% if nav_section == 'chat' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-chat"/></svg>Sohbet</a>
+      </nav>
+      <div class="side-foot">
+        {% include "_theme_switch.html" %}
+        <div class="user">
+          <span>{{ user.get_username }}</span>
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="link" type="submit">Çıkış</button></form>
+        </div>
+      </div>
+    </aside>
     {% endif %}
-  </header>
-  <main class="container {% block container_class %}{% endblock %}">
-    {% for message in messages %}
-    <p class="flash flash-{{ message.tags }}" role="status">{{ message }}</p>
-    {% endfor %}
-    {% block content %}{% endblock %}
-  </main>
+
+    <div class="content">
+      {% block body %}
+      <main class="page"><div class="page-inner {% block inner_class %}{% endblock %}">{% block content %}{% endblock %}</div></main>
+      {% endblock %}
+      {% block composer %}{% endblock %}
+    </div>
+  </div>
+
+  {% if user.is_authenticated %}
+  <nav class="tabbar" aria-label="Ana menü">
+    <a href="{% url 'ideas:list' %}" {% if nav_section == 'ideas' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-ideas"/></svg>Fikirler</a>
+    <a href="{% url 'ideas:project-list' %}" {% if nav_section == 'projects' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-folder"/></svg>Projeler</a>
+    <a href="{% url 'ideas:chat' %}" {% if nav_section == 'chat' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-chat"/></svg>Sohbet</a>
+    <a href="{% url 'accounts:settings' %}" {% if nav_section == 'settings' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-settings"/></svg>Ayarlar</a>
+  </nav>
+  {% endif %}
   <script src="{% static 'js/app.js' %}" defer></script>
 </body>
 </html>

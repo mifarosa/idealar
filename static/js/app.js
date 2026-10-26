@@ -1,4 +1,6 @@
-// Registers the service worker so the app can be installed and shows an offline page.
+// Idealar front-end behaviour. Everything degrades gracefully: pages work without JS, JS only speeds things up.
+
+// ---------- Service worker (installable PWA, offline page) ----------
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch((error) => {
@@ -7,25 +9,29 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// Ctrl/Cmd+Enter saves the quick-add form from a hardware keyboard.
-document.addEventListener("keydown", (event) => {
-  const isSubmitShortcut = (event.ctrlKey || event.metaKey) && event.key === "Enter";
-  const textarea = event.target;
-  if (isSubmitShortcut && textarea instanceof HTMLTextAreaElement && textarea.form) {
-    textarea.form.requestSubmit();
-  }
-});
-
-// Feature checkboxes save instantly and refresh the idea's progress without a page reload.
 function csrfToken() {
   return document.querySelector('meta[name="csrf-token"]').content;
 }
 
-function renderProgress(card, { done_count: done, total }) {
+function isTyping(target) {
+  return target instanceof HTMLElement && (target.isContentEditable || target.matches("input, textarea, select"));
+}
+
+// ---------- Toasts: flash messages fade away; errors stay until clicked ----------
+document.querySelectorAll(".toast").forEach((toast) => {
+  toast.addEventListener("click", () => toast.remove());
+  if (!toast.classList.contains("toast-error")) setTimeout(() => toast.remove(), 5000);
+});
+
+// ---------- Feature checklist: instant save, progress updated in place ----------
+function renderProgress(ideaId, { done_count: done, total }) {
   const percent = total ? Math.round((100 * done) / total) : 0;
-  card.querySelector(".progress-label").textContent = `${done}/${total}`;
-  card.querySelector(".progress-fill").style.width = `${percent}%`;
-  card.querySelector(".progress").classList.toggle("progress-complete", total > 0 && done === total);
+  const count = document.querySelector(`#idea-${ideaId} .feature-count`);
+  if (count) count.textContent = `${done} / ${total}`;
+  const row = document.getElementById(`row-${ideaId}`);
+  if (!row) return;
+  row.querySelector(".row-progress").textContent = `${done}/${total}`;
+  row.querySelector(".fill").style.width = `${percent}%`;
 }
 
 async function saveFeatureState(checkbox) {
@@ -36,11 +42,11 @@ async function saveFeatureState(checkbox) {
     body: `done=${checkbox.checked}`,
   });
   if (!response.ok) throw new Error(`Saving feature failed with status ${response.status}`);
-  renderProgress(checkbox.closest(".idea-card"), await response.json());
+  renderProgress(checkbox.closest(".detail").dataset.idea, await response.json());
 }
 
 document.addEventListener("change", (event) => {
-  if (!event.target.matches(".feature-check input")) return;
+  if (!event.target.matches(".feature .check")) return;
   const checkbox = event.target;
   saveFeatureState(checkbox).catch((error) => {
     checkbox.checked = !checkbox.checked;
@@ -49,40 +55,68 @@ document.addEventListener("change", (event) => {
   });
 });
 
-// The capture textarea grows with its content, like a chat input.
-document.addEventListener("input", (event) => {
-  if (!event.target.matches(".quick-bar textarea")) return;
-  event.target.style.height = "auto";
-  event.target.style.height = `${event.target.scrollHeight}px`;
-});
-
-// After quick capture the list page asks the server to fill the new idea with AI, so saving itself
-// is instant. Whatever happens, we end up on the normal page; a failed AI run is shown there.
-async function enrichPendingIdea() {
-  const card = document.querySelector("[data-enrich-url]");
-  if (!card) return;
-  try {
-    // "manual": do not follow the redirect, or its page render would consume the flash message.
-    await fetch(card.dataset.enrichUrl, { method: "POST", redirect: "manual", headers: { "X-CSRFToken": csrfToken() } });
-  } catch (error) {
-    console.error("AI enrichment request failed:", error);
-  }
-  window.location.replace(card.dataset.doneUrl);
+// ---------- Rename a feature in place (pencil button) ----------
+async function saveFeatureName(item, label) {
+  const response = await fetch(item.dataset.editUrl, {
+    method: "POST",
+    headers: { "X-CSRFToken": csrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
+    body: `text=${encodeURIComponent(label.textContent.trim())}`,
+  });
+  if (!response.ok) throw new Error((await response.json()).error || "Kaydedilemedi.");
+  label.textContent = (await response.json()).text;
 }
 
-enrichPendingIdea();
+function startRenaming(item) {
+  const label = item.querySelector(".feature-text");
+  const original = label.textContent;
+  label.contentEditable = "true";
+  label.focus();
+  document.getSelection().selectAllChildren(label);
 
-// Chat: show a typing indicator while the server waits for the AI, and start at the newest message.
-const chatForm = document.querySelector(".chat-form");
-if (chatForm) {
-  window.scrollTo(0, document.body.scrollHeight);
-  chatForm.addEventListener("submit", () => {
-    document.querySelector(".typing").hidden = false;
-    window.scrollTo(0, document.body.scrollHeight);
+  const finish = async (save) => {
+    label.removeEventListener("blur", onBlur);
+    label.contentEditable = "false";
+    if (!save || label.textContent.trim() === original) {
+      label.textContent = original;
+      return;
+    }
+    try {
+      await saveFeatureName(item, label);
+    } catch (error) {
+      label.textContent = original;
+      alert(error.message);
+    }
+  };
+  const onBlur = () => finish(true);
+  label.addEventListener("blur", onBlur);
+  // The text sits inside a <label>; without this, clicking it while editing would toggle the checkbox.
+  label.addEventListener("click", (event) => { if (label.isContentEditable) event.preventDefault(); });
+  label.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") { event.preventDefault(); label.blur(); }
+    if (event.key === "Escape") { label.removeEventListener("blur", onBlur); finish(false); }
   });
 }
 
-// Remember the last chosen AI across pages and visits (per device).
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-edit]");
+  if (button) startRenaming(button.closest(".feature"));
+});
+
+// ---------- AI fills a freshly captured idea; saving itself stays instant ----------
+async function enrichPendingIdea() {
+  const article = document.querySelector("[data-enrich-url]");
+  if (!article) return;
+  try {
+    // "manual": do not follow the redirect, or its page render would consume the flash message.
+    await fetch(article.dataset.enrichUrl, { method: "POST", redirect: "manual", headers: { "X-CSRFToken": csrfToken() } });
+  } catch (error) {
+    console.error("AI enrichment request failed:", error);
+  }
+  window.location.replace(article.dataset.doneUrl);
+}
+enrichPendingIdea();
+
+// ---------- Remember the chosen AI (per device) ----------
 const PROVIDER_STORAGE_KEY = "idealar.provider";
 
 function restoreProviderChoice() {
@@ -105,10 +139,100 @@ document.addEventListener("change", (event) => {
     console.warn("Could not remember the AI choice:", error);
   }
 });
-
 restoreProviderChoice();
 
-// The repository review takes a while: tell the user it is working instead of showing a frozen page.
+// ---------- Theme: Açık / Gri / Koyu, remembered on this device ----------
+const THEME_STORAGE_KEY = "idealar.theme";
+
+function activeTheme() {
+  const explicit = document.documentElement.dataset.theme;
+  if (explicit) return explicit;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function markActiveTheme() {
+  const current = activeTheme();
+  document.querySelectorAll("[data-set]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.set === current)));
+}
+
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-set]");
+  if (!button) return;
+  document.documentElement.dataset.theme = button.dataset.set;
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, button.dataset.set);
+  } catch (error) {
+    console.warn("Could not remember the theme:", error);
+  }
+  markActiveTheme();
+});
+markActiveTheme();
+
+// ---------- Keyboard: Enter sends on computers, N / slash / J / K for speed ----------
+const DESKTOP_INPUT = window.matchMedia("(hover: hover) and (pointer: fine)");
+const MESSAGE_BOX = ".capture textarea, .composer textarea";
+
+document.addEventListener("keydown", (event) => {
+  const box = event.target;
+  const isMessageBox = box instanceof HTMLTextAreaElement && box.matches(MESSAGE_BOX);
+  const plainEnter = event.key === "Enter" && !event.shiftKey && !event.isComposing;
+  const submitShortcut = (event.ctrlKey || event.metaKey) && event.key === "Enter";
+  // On touch devices Enter stays a new line: the on-screen keyboard has no Shift and a send button exists.
+  if (isMessageBox && ((plainEnter && DESKTOP_INPUT.matches) || submitShortcut)) {
+    event.preventDefault();
+    box.form.requestSubmit();
+  }
+});
+
+function focusFirst(selector) {
+  const element = document.querySelector(selector);
+  if (element) element.focus();
+  return Boolean(element);
+}
+
+function moveSelection(step) {
+  const rows = [...document.querySelectorAll(".rows .row")];
+  const current = rows.findIndex((row) => row.hasAttribute("aria-current"));
+  const next = rows[current === -1 ? 0 : current + step];
+  if (next) window.location.href = next.href;
+}
+
+document.addEventListener("keydown", (event) => {
+  if (isTyping(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
+  const handlers = {
+    n: () => focusFirst(".capture textarea"),
+    "/": () => focusFirst("[data-shortcut-search]"),
+    j: () => moveSelection(1),
+    k: () => moveSelection(-1),
+    ArrowDown: () => moveSelection(1),
+    ArrowUp: () => moveSelection(-1),
+  };
+  const handler = handlers[event.key];
+  if (handler && document.querySelector(".rows") && handler() !== false) event.preventDefault();
+});
+
+// ---------- Small conveniences ----------
+document.addEventListener("input", (event) => {
+  if (!event.target.matches(MESSAGE_BOX)) return;
+  event.target.style.height = "auto"; // the textarea grows with its content, like a chat input
+  event.target.style.height = `${event.target.scrollHeight}px`;
+});
+
+document.addEventListener("change", (event) => {
+  if (event.target.matches("[data-autosubmit]")) event.target.form.submit();
+});
+
+const chatForm = document.querySelector(".chat-form");
+if (chatForm) {
+  const page = document.querySelector(".page");
+  if (page) page.scrollTop = page.scrollHeight;
+  chatForm.addEventListener("submit", () => {
+    const typing = document.querySelector(".typing");
+    if (typing) typing.hidden = false;
+    if (page) page.scrollTop = page.scrollHeight;
+  });
+}
+
 const inspectForm = document.querySelector(".inspect-form");
 if (inspectForm) {
   inspectForm.addEventListener("submit", () => {
@@ -116,53 +240,3 @@ if (inspectForm) {
     document.querySelector(".inspect-working").hidden = false;
   });
 }
-
-// Theme switch: Otomatik (system) -> Açık -> Koyu -> Gri. The choice is remembered on this device.
-const THEME_STORAGE_KEY = "idealar.theme";
-const THEMES = [
-  { value: "", label: "🌓 Otomatik" },
-  { value: "light", label: "☀️ Açık" },
-  { value: "dark", label: "🌙 Koyu" },
-  { value: "gray", label: "🌫️ Gri" },
-];
-
-function currentThemeIndex() {
-  const index = THEMES.findIndex((theme) => theme.value === (document.documentElement.dataset.theme || ""));
-  return index === -1 ? 0 : index;
-}
-
-function showTheme(theme) {
-  if (theme.value) document.documentElement.dataset.theme = theme.value;
-  else delete document.documentElement.dataset.theme;
-  document.querySelectorAll(".theme-toggle").forEach((button) => (button.textContent = theme.label));
-}
-
-function saveTheme(theme) {
-  try {
-    if (theme.value) localStorage.setItem(THEME_STORAGE_KEY, theme.value);
-    else localStorage.removeItem(THEME_STORAGE_KEY);
-  } catch (error) {
-    console.warn("Could not remember the theme:", error);
-  }
-}
-
-showTheme(THEMES[currentThemeIndex()]);
-document.addEventListener("click", (event) => {
-  if (!event.target.closest(".theme-toggle")) return;
-  const next = THEMES[(currentThemeIndex() + 1) % THEMES.length];
-  showTheme(next);
-  saveTheme(next);
-});
-
-// On a computer (mouse + keyboard) Enter sends the message and Shift+Enter adds a new line.
-// On touch devices Enter stays a new line because the on-screen keyboard has no Shift and a send button exists.
-const DESKTOP_INPUT = window.matchMedia("(hover: hover) and (pointer: fine)");
-
-document.addEventListener("keydown", (event) => {
-  const textarea = event.target;
-  const isPlainEnter = event.key === "Enter" && !event.shiftKey && !event.isComposing;
-  if (!isPlainEnter || !DESKTOP_INPUT.matches) return;
-  if (!(textarea instanceof HTMLTextAreaElement) || !textarea.matches(".quick-bar textarea")) return;
-  event.preventDefault();
-  textarea.form.requestSubmit();
-});

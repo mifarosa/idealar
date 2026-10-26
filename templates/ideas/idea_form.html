@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{% if object %}Fikri düzenle{% else %}Yeni fikir{% endif %} · Idealar{% endblock %}
 {% block content %}
-<h1>{% if object %}Fikri düzenle{% else %}Yeni fikir{% endif %}</h1>
-<form method="post" class="card stack">
+<a class="crumb" href="{% if object %}{% url 'ideas:detail' object.pk %}{% else %}{% url 'ideas:list' %}{% endif %}"><svg class="icon"><use href="#i-back"/></svg>Geri</a>
+<div class="page-head"><h1>{% if object %}Fikri düzenle{% else %}Yeni fikir{% endif %}</h1></div>
+<form method="post" class="form">
   {% csrf_token %}
   {% include "ideas/_form_fields.html" %}
-  <div class="row">
-    <button class="button" type="submit">Kaydet</button>
-    <a class="button button-secondary" href="{% url 'ideas:list' %}">Vazgeç</a>
-    {% if object %}<a class="button button-danger" href="{% url 'ideas:delete' object.pk %}">Sil</a>{% endif %}
+  <div class="actions">
+    <button class="btn primary" type="submit">Kaydet</button>
+    <a class="btn quiet" href="{% if object %}{% url 'ideas:detail' object.pk %}{% else %}{% url 'ideas:list' %}{% endif %}">Vazgeç</a>
+    {% if object %}<a class="btn quiet danger" href="{% url 'ideas:delete' object.pk %}">Sil</a>{% endif %}
   </div>
 </form>
 {% endblock %}

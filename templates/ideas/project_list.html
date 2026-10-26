@@ -1,23 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Projeler · Idealar{% endblock %}
-{% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="row row-between">
+<div class="page-head">
   <h1>Projeler</h1>
-  <a class="button" href="{% url 'ideas:project-create' %}">+ Yeni proje</a>
+  <a class="btn primary" href="{% url 'ideas:project-create' %}"><svg class="icon"><use href="#i-plus"/></svg>Yeni proje</a>
 </div>
 {% if projects %}
-<ul class="idea-list">
+<ul class="list">
   {% for project in projects %}
-  <li class="card">
-    <a class="idea-link" href="{% url 'ideas:project-detail' project.pk %}">
-      <strong>📁 {{ project.name }}</strong>
-      <span class="muted">{{ project.ideas.all|length }} fikir · {{ project.progress.done }}/{{ project.progress.total }} özellik</span>
+  <li>
+    <a href="{% url 'ideas:project-detail' project.pk %}">
+      <div class="title">{{ project.name }}</div>
+      <div class="meta">{{ project.ideas.all|length }} fikir · {{ project.progress.done }}/{{ project.progress.total }} özellik{% if project.github_url %} · GitHub bağlı{% endif %}</div>
     </a>
   </li>
   {% endfor %}
 </ul>
 {% else %}
-<p class="muted empty">Henüz proje yok.</p>
+<p class="empty">Henüz proje yok.</p>
 {% endif %}
 {% endblock %}

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{% if object %}Projeyi düzenle{% else %}Yeni proje{% endif %} · Idealar{% endblock %}
 {% block content %}
-<h1>{% if object %}Projeyi düzenle{% else %}Yeni proje{% endif %}</h1>
-<form method="post" class="card stack">
+<div class="page-head"><h1>{% if object %}Projeyi düzenle{% else %}Yeni proje{% endif %}</h1></div>
+<form method="post" class="form">
   {% csrf_token %}
   {% include "ideas/_form_fields.html" %}
-  <div class="row">
-    <button class="button" type="submit">Kaydet</button>
-    <a class="button button-secondary" href="{% url 'ideas:project-list' %}">Vazgeç</a>
+  <div class="actions">
+    <button class="btn primary" type="submit">Kaydet</button>
+    <a class="btn quiet" href="{% if object %}{% url 'ideas:project-detail' object.pk %}{% else %}{% url 'ideas:project-list' %}{% endif %}">Vazgeç</a>
   </div>
 </form>
 {% endblock %}

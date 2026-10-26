@@ -1,34 +1,32 @@
 {% extends "base.html" %}
 {% block title %}Sohbetler · {{ scope.title }}{% endblock %}
-{% block container_class %}has-quick-bar{% endblock %}
-{% block content %}
-<a class="muted" href="{{ back_url }}">← Geri</a>
-<h1>💬 {{ scope.title }}</h1>
-
-{% if conversations %}
-<ul class="idea-list">
-  {% for conversation in conversations %}
-  <li class="card">
-    <a class="idea-link" href="{% url 'ideas:conversation' conversation.pk %}">
-      <strong>{{ conversation.title }}</strong>
-      <span class="muted">{{ conversation.message_count }} mesaj · {{ conversation.updated_at|date:"d M H:i" }}</span>
-    </a>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p class="muted empty">
-  {% if scope.kind == 'project' %}Projeyi, fikirlerini ve özelliklerini konuşalım. Ne eksik, neyi önce yapmalısın?
-  {% elif scope.kind == 'idea' %}Bu fikri konuşalım. Hangi özellikler olmalı, ne riskli?
-  {% else %}Fikirlerini konuşalım. Yeni fikir bulmak, öncelik belirlemek ya da birleştirmek için yaz.{% endif %}
-</p>
-{% endif %}
-<p class="muted typing" hidden role="status">AI yazıyor…</p>
-
-<form method="post" action="{{ post_url }}" class="quick-bar chat-form">
+{% block body %}
+<main class="page">
+  <div class="page-inner">
+    <a class="crumb" href="{{ back_url }}"><svg class="icon"><use href="#i-back"/></svg>Geri</a>
+    <div class="page-head"><h1>Sohbet · {{ scope.title }}</h1></div>
+    {% if conversations %}
+    <ul class="list">
+      {% for conversation in conversations %}
+      <li><a href="{% url 'ideas:conversation' conversation.pk %}"><div class="title">{{ conversation.title }}</div><div class="meta">{{ conversation.message_count }} mesaj · {{ conversation.updated_at|date:"d M H:i" }}</div></a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">
+      {% if scope.kind == 'project' %}Projeyi, fikirlerini ve özelliklerini konuşalım. Ne eksik, neyi önce yapmalısın?
+      {% elif scope.kind == 'idea' %}Bu fikri konuşalım. Hangi özellikler olmalı, ne riskli?
+      {% else %}Fikirlerini konuşalım. Yeni fikir bulmak, öncelik belirlemek ya da birleştirmek için yaz.{% endif %}
+    </p>
+    {% endif %}
+    <p class="muted typing" hidden role="status">AI yazıyor…</p>
+  </div>
+</main>
+{% endblock %}
+{% block composer %}
+<form method="post" action="{{ post_url }}" class="composer chat-form">
   {% csrf_token %}
   {% include "ideas/_provider_select.html" %}
-  <textarea name="text" rows="1" placeholder="Yeni sohbet başlat…" aria-label="Yeni sohbet" required></textarea>
-  <button class="button" type="submit" aria-label="Başlat">➤</button>
+  <label class="field"><textarea name="text" rows="1" placeholder="Yeni sohbet başlat…" aria-label="Yeni sohbet" required></textarea></label>
+  <button class="send" type="submit" aria-label="Başlat"><svg class="icon"><use href="#i-send"/></svg></button>
 </form>
 {% endblock %}

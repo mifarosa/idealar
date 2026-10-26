@@ -1,17 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Giriş · Idealar{% endblock %}
-{% block content %}
-<h1>Giriş yap</h1>
-<form method="post" class="card stack">
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-  <label>Kullanıcı adı
-    {{ form.username }}
-  </label>
-  <label>Şifre
-    {{ form.password }}
-  </label>
-  <input type="hidden" name="next" value="{{ next }}">
-  <button class="button" type="submit">Giriş</button>
-</form>
+{% block body %}
+<main class="auth">
+  <div class="brand"><span class="dot"></span>Idealar</div>
+  <form method="post" class="form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="form-field"><label class="form-label" for="{{ form.username.id_for_label }}">Kullanıcı adı</label>{{ form.username }}</div>
+    <div class="form-field"><label class="form-label" for="{{ form.password.id_for_label }}">Şifre</label>{{ form.password }}</div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn primary" type="submit">Giriş</button>
+  </form>
+  {% include "_theme_switch.html" %}
+</main>
 {% endblock %}

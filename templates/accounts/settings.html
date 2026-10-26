@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Ayarlar · Idealar{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Ayarlar</h1></div>
+<dl class="spec">
+  <dt>Kullanıcı</dt><dd>{{ user.get_username }}</dd>
+  <dt>Tema</dt><dd>{% include "_theme_switch.html" %}</dd>
+</dl>
+<form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn" type="submit">Çıkış yap</button></form>
+{% endblock %}
