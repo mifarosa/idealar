@@ -286,6 +286,33 @@ window.addEventListener("pageshow", (event) => {
   document.querySelectorAll(".detail .ai-working").forEach((note) => note.remove());
 });
 
+// Copy buttons: put the text of a target field on the clipboard (with a fallback for non-secure contexts).
+async function copyText(field) {
+  try {
+    await navigator.clipboard.writeText(field.value);
+  } catch (error) {
+    field.select(); // clipboard API needs HTTPS; the old way works everywhere
+    if (!document.execCommand("copy")) throw error;
+  }
+}
+
+document.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-copy-target]");
+  if (!button) return;
+  const field = document.querySelector(button.dataset.copyTarget);
+  const status = document.querySelector(".copy-status");
+  try {
+    await copyText(field);
+    button.textContent = button.dataset.copied;
+    if (status) status.textContent = "Panoya kopyalandı. Claude'a yapıştırabilirsin.";
+    setTimeout(() => { button.textContent = "Kopyala"; }, 2500);
+  } catch (error) {
+    field.focus();
+    field.select();
+    if (status) status.textContent = "Otomatik kopyalanamadı; metin seçili, Ctrl+C ile kopyala.";
+  }
+});
+
 const inspectForm = document.querySelector(".inspect-form");
 if (inspectForm) {
   inspectForm.addEventListener("submit", () => {

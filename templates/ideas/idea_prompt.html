@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Prompt · {{ idea.display_title }}{% endblock %}
+{% block inner_class %}wide{% endblock %}
+{% block content %}
+<a class="crumb" href="{% url 'ideas:detail' idea.pk %}"><svg class="icon"><use href="#i-back"/></svg>{{ idea.display_title }}</a>
+<div class="page-head"><h1>Claude için prompt</h1></div>
+<p class="muted" style="margin-bottom: 16px">Fikirden hazırlanmış bir başlangıç prompt'u. Kopyalayıp Claude'a yapıştır; istersen önce düzenle.</p>
+
+<nav class="tabs" aria-label="Mod" style="margin-bottom: 16px">
+  <a href="?mod={{ mode_new }}" {% if mode == mode_new %}aria-current="true"{% endif %}>Sıfırdan yeni uygulama</a>
+  <a href="?mod={{ mode_extend }}" {% if mode == mode_extend %}aria-current="true"{% endif %}>Mevcut projeye ekle</a>
+</nav>
+
+<textarea id="prompt-text" class="prompt-box" rows="24" spellcheck="false" aria-label="Prompt">{{ prompt_text }}</textarea>
+
+<div class="actions" style="margin-top: 12px">
+  <button class="btn primary" type="button" data-copy-target="#prompt-text" data-copied="Kopyalandı">Kopyala</button>
+  <form method="post" action="{% url 'ideas:idea-prompt' idea.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="mod" value="{{ mode }}">
+    <button class="btn" type="submit" data-pending="Hazırlanıyor…">{% if brief_used %}AI planını yenile{% else %}AI ile detaylandır{% endif %}</button>
+  </form>
+  {% if brief_used %}<a class="btn quiet" href="?mod={{ mode }}">Sade hâline dön</a>{% endif %}
+  <span class="muted copy-status" role="status"></span>
+</div>
+<p class="muted" style="margin-top: 12px">
+  “AI ile detaylandır” MVP kapsamı, teknoloji önerisi, aşamalar ve riskleri ekler (birkaç saniye sürer). Prompt'taki çalışma şekli maddeleri senin tercihlerin; <code>ideas/build_prompt.py</code> içinde değiştirilebilir.
+</p>
+{% endblock %}

@@ -86,6 +86,7 @@
   <div class="actions detail-actions" style="margin-top: 32px">
     <a class="btn" href="{% url 'ideas:idea-chat' idea.pk %}"><svg class="icon"><use href="#i-chat"/></svg>Sohbet</a>
     <a class="btn quiet" href="{% url 'ideas:update' idea.pk %}">Düzenle</a>
+    <a class="btn quiet" href="{% url 'ideas:idea-prompt' idea.pk %}">Claude için prompt</a>
     <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="{% if idea.ai_status == 'done' %}Yenileniyor…{% else %}Dolduruluyor…{% endif %}" data-busy-note="AI başlık, özet, etiket ve önerileri hazırlıyor, ardından benzerlik kontrolü yapıyor. Birkaç saniye sürebilir.">{% if idea.ai_status == 'done' %}AI ile yenile{% else %}AI ile doldur{% endif %}</button></form>
     <form method="post" action="{% url 'ideas:idea-similar-check' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="Aranıyor…" data-busy-note="Tüm fikirlerin ve projelerinle karşılaştırılıyor. Birkaç saniye sürebilir.">Benzerleri ara</button></form>
     <a class="btn quiet danger" href="{% url 'ideas:delete' idea.pk %}">Sil</a>

@@ -265,3 +265,8 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
   .import-main .meta { white-space: normal; }
   .import-tags { flex-basis: 100%; justify-content: flex-start; padding-left: 30px; }
 }
+
+/* Build prompt page */
+.prompt-box { width: 100%; font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); color: var(--ink); padding: 14px; resize: vertical; }
+.prompt-box:focus { outline: 0; border-color: var(--ink); }
+code { font: 13px "SFMono-Regular", Consolas, monospace; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }

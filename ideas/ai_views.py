@@ -1,9 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
-from . import ai_enrichment, similarity
+from . import ai_enrichment, build_prompt, prompt_brief, similarity
 from .errors import ActionNotApplicable
 from .mixins import idea_panel_url
 from .models import SUGGESTION_PENDING, Feature, Idea
@@ -74,3 +74,41 @@ class SuggestionResolveView(OwnedIdeaActionView):
             idea.suggested_features = [item for item in idea.suggested_features if item != text]
             idea.save(update_fields=["suggested_features", "updated_at"])
         return redirect(idea_panel_url(idea.pk))
+
+
+class IdeaPromptView(LoginRequiredMixin, View):
+    """A ready-to-paste prompt that starts building the idea; the AI can optionally add a build plan to it."""
+
+    template_name = "ideas/idea_prompt.html"
+
+    def get(self, request, pk):
+        idea = self._idea(pk)
+        return self._render(request, idea, self._mode(request.GET.get("mod"), idea), brief=None)
+
+    def post(self, request, pk):
+        idea = self._idea(pk)
+        mode = self._mode(request.POST.get("mod"), idea)
+        brief = prompt_brief.draft_brief(idea, mode)
+        if brief is None:
+            messages.error(request, "AI şu an yanıt veremedi; sade prompt gösteriliyor, biraz sonra tekrar deneyebilirsin.")
+        return self._render(request, idea, mode, brief)
+
+    def _idea(self, pk: int) -> Idea:
+        owned = Idea.objects.owned_by(self.request.user).prefetch_related("features", "projects")
+        return get_object_or_404(owned, pk=pk)
+
+    @staticmethod
+    def _mode(requested: str | None, idea: Idea) -> str:
+        valid = (build_prompt.MODE_NEW, build_prompt.MODE_EXTEND)
+        return requested if requested in valid else build_prompt.default_mode(idea)
+
+    def _render(self, request, idea: Idea, mode: str, brief):
+        context = {
+            "idea": idea,
+            "mode": mode,
+            "brief_used": brief is not None,
+            "prompt_text": build_prompt.build_prompt(idea, mode, brief),
+            "mode_new": build_prompt.MODE_NEW,
+            "mode_extend": build_prompt.MODE_EXTEND,
+        }
+        return render(request, self.template_name, context)

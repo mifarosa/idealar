@@ -77,6 +77,14 @@ Tasarım dili işlevsel ve sadedir (Dieter Rams/Braun'dan esinli): ince çizgile
 - **Tema:** Açık / Gri / Koyu. Bilgisayarda sol menünün altında, telefonda *Ayarlar* sekmesinde. Seçimin cihazda hatırlanır; seçmediysen cihazın açık-koyu ayarını izler.
 - **Klavye (bilgisayar):** `N` yeni fikir, `/` arama, `J`/`K` veya ↑/↓ listede gezinme. Mesaj kutularında **Enter gönderir, Shift+Enter yeni satır açar** (telefonda Enter yeni satırdır, ➤ gönderir).
 
+## Claude için prompt
+
+Fikir sayfasındaki **"Claude için prompt"** düğmesi, o fikirden Claude'a yapıştırıp işe başlayabileceğin bir prompt hazırlar: amaç, platformlar, etiketler, **yapılacak ve yapılmış özellikler**, bağlı proje, benzerlik uyarıları ve çalışma şeklin (Türkçe cevap, İngilizce kod yorumu ve commit, mimari kararları önce sor, aşama sonunda dur, testleri çalıştır). **Kopyala** ile panoya alırsın; kutuda düzenleyebilirsin.
+
+- **İki mod:** *Sıfırdan yeni uygulama* ya da *Mevcut projeye ekle* (fikir GitHub adresi olan bir projeye bağlıysa varsayılan odur; prompt Claude'a önce depoyu incelemesini ve mevcut yapıya uymasını söyler).
+- **AI ile detaylandır:** MVP kapsamı, teknoloji önerisi, aşamalar ve riskleri prompt'a ekler (AI zincirini kullanır, birkaç saniye sürer). AI yanıt vermezse sade prompt kalır. Mod değiştirince AI planı sıfırlanır, tekrar istersin.
+- Prompt'taki "çalışma şekli" maddeleri `ideas/build_prompt.py` içindeki `WORKING_RULES` listesindedir; kendi tercihlerine göre değiştirebilirsin.
+
 ## Benzerlik uyarısı
 
 Yeni bir fikir kaydedilince AI, onu **tüm fikirlerin ve projelerinle** karşılaştırır (yeni fikir hazırlanırken kartta "AI düşünüyor" aşamasında, ayrıca "🔎 Benzerleri ara" düğmesiyle istediğin zaman).

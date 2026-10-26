@@ -14,6 +14,7 @@ urlpatterns = [
     path("ideas/<int:pk>/ai/", ai_views.IdeaEnrichView.as_view(), name="idea-enrich"),
     path("ideas/<int:pk>/similar/check/", ai_views.SimilarCheckView.as_view(), name="idea-similar-check"),
     path("ideas/<int:pk>/similar/<int:index>/", ai_views.SimilarDecideView.as_view(), name="idea-similar-decide"),
+    path("ideas/<int:pk>/prompt/", ai_views.IdeaPromptView.as_view(), name="idea-prompt"),
     path("ideas/<int:pk>/suggestions/", ai_views.SuggestionResolveView.as_view(), name="suggestion-resolve"),
     path("chat/", chat_views.ConversationListView.as_view(), name="chat"),
     path("ideas/<int:idea_pk>/chat/", chat_views.ConversationListView.as_view(), name="idea-chat"),
