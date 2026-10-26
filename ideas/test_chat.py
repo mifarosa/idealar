@@ -384,6 +384,51 @@ class ChatViewTests(TestCase):
         self.assertEqual(len(ChatMessage.objects.get(role=ROLE_USER).content), 4000)
 
 
+class ConversationRenameTests(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.client.force_login(self.user)
+        self.conversation = chat_service.start_conversation(ChatScope(self.user), "old name")
+        self.url = reverse("ideas:conversation-rename", args=[self.conversation.pk])
+
+    def test_rename_stores_and_returns_the_new_title(self):
+        response = self.client.post(self.url, {"title": "  Yeni   ad "})
+
+        self.conversation.refresh_from_db()
+        self.assertEqual((response.json(), self.conversation.title), ({"title": "Yeni ad"}, "Yeni ad"))
+
+    def test_very_long_titles_are_cut_to_the_field_limit(self):
+        response = self.client.post(self.url, {"title": "x" * 300})
+
+        self.assertEqual(len(response.json()["title"]), 100)
+
+    def test_empty_title_is_rejected_and_nothing_changes(self):
+        response = self.client.post(self.url, {"title": "   "})
+
+        self.conversation.refresh_from_db()
+        self.assertEqual((response.status_code, self.conversation.title), (400, "old name"))
+
+    def test_other_users_cannot_rename_and_get_is_refused(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+        self.client.force_login(make_user("intruder"))
+
+        self.assertEqual(self.client.post(self.url, {"title": "hacked"}).status_code, 404)
+
+    def test_list_rows_offer_rename_and_delete(self):
+        response = self.client.get(reverse("ideas:chat"))
+
+        self.assertContains(response, f'data-rename-url="{self.url}"')
+        self.assertContains(response, reverse("ideas:conversation-delete", args=[self.conversation.pk]))
+        self.assertContains(response, "data-confirm")
+
+    def test_conversation_page_offers_rename_and_delete(self):
+        response = self.client.get(reverse("ideas:conversation", args=[self.conversation.pk]))
+
+        self.assertContains(response, f'data-rename-url="{self.url}"')
+        self.assertContains(response, "Adı değiştir")
+        self.assertContains(response, "data-confirm")
+
+
 class ChatIsolationTests(TestCase):
     def setUp(self):
         owner = make_user("owner")

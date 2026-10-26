@@ -6,7 +6,7 @@ from django.views import View
 from . import ai_enrichment, similarity
 from .errors import ActionNotApplicable
 from .mixins import idea_panel_url
-from .models import Feature, Idea
+from .models import SUGGESTION_PENDING, Feature, Idea
 
 
 class OwnedIdeaActionView(LoginRequiredMixin, View):
@@ -35,9 +35,18 @@ class SimilarCheckView(OwnedIdeaActionView):
     def post(self, request, pk):
         idea = self.get_idea(pk)
         similarity.check_idea(idea)
+        self._report(request, idea)
+        return redirect(idea_panel_url(idea.pk))
+
+    @staticmethod
+    def _report(request, idea):
+        found = len([hint for hint in idea.similar if hint["status"] == SUGGESTION_PENDING])
         if idea.similarity_status == similarity.SIMILARITY_WORDS_ONLY:
             messages.warning(request, "AI şu an yanıt veremedi; yalnızca kelime benzerliğine baktım.")
-        return redirect(idea_panel_url(idea.pk))
+        elif found:
+            messages.success(request, f"Benzerlik kontrolü tamamlandı: {found} benzer kayıt bulundu.")
+        else:
+            messages.success(request, "Benzerlik kontrolü tamamlandı: benzer kayıt bulunmadı.")
 
 
 class SimilarDecideView(OwnedIdeaActionView):

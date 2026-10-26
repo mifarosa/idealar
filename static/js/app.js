@@ -55,33 +55,32 @@ document.addEventListener("change", (event) => {
   });
 });
 
-// ---------- Rename a feature in place (pencil button) ----------
-async function saveFeatureName(item, label) {
-  const response = await fetch(item.dataset.editUrl, {
+// ---------- Rename in place (features, conversations): pencil button -> type -> Enter ----------
+function postForm(url, fields) {
+  return fetch(url, {
     method: "POST",
     headers: { "X-CSRFToken": csrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
-    body: `text=${encodeURIComponent(label.textContent.trim())}`,
+    body: new URLSearchParams(fields),
   });
-  if (!response.ok) throw new Error((await response.json()).error || "Kaydedilemedi.");
-  label.textContent = (await response.json()).text;
 }
 
-function startRenaming(item) {
-  const label = item.querySelector(".feature-text");
+// Makes `label` editable; `save(text)` must resolve to the stored text or throw an Error with a user-facing message.
+function editInPlace(label, save) {
   const original = label.textContent;
   label.contentEditable = "true";
   label.focus();
   document.getSelection().selectAllChildren(label);
 
-  const finish = async (save) => {
+  const finish = async (shouldSave) => {
     label.removeEventListener("blur", onBlur);
     label.contentEditable = "false";
-    if (!save || label.textContent.trim() === original) {
+    const typed = label.textContent.trim();
+    if (!shouldSave || typed === original) {
       label.textContent = original;
       return;
     }
     try {
-      await saveFeatureName(item, label);
+      label.textContent = await save(typed);
     } catch (error) {
       label.textContent = original;
       alert(error.message);
@@ -89,7 +88,7 @@ function startRenaming(item) {
   };
   const onBlur = () => finish(true);
   label.addEventListener("blur", onBlur);
-  // The text sits inside a <label>; without this, clicking it while editing would toggle the checkbox.
+  // The text may sit inside a <label> or a link; without this, clicking it while editing would toggle or navigate.
   label.addEventListener("click", (event) => { if (label.isContentEditable) event.preventDefault(); });
   label.addEventListener("keydown", (event) => {
     if (event.key === "Enter") { event.preventDefault(); label.blur(); }
@@ -97,9 +96,31 @@ function startRenaming(item) {
   });
 }
 
+async function saveRename(url, field, text) {
+  const response = await postForm(url, { [field]: text });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error || "Kaydedilemedi.");
+  return body[field];
+}
+
 document.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-edit]");
-  if (button) startRenaming(button.closest(".feature"));
+  const featureButton = event.target.closest("[data-edit]");
+  if (featureButton) {
+    const item = featureButton.closest(".feature");
+    editInPlace(item.querySelector(".feature-text"), (text) => saveRename(item.dataset.editUrl, "text", text));
+    return;
+  }
+  const renameButton = event.target.closest("[data-rename-url]");
+  if (renameButton) {
+    const label = renameButton.closest("li, .page-head").querySelector("[data-rename-text]");
+    editInPlace(label, (text) => saveRename(renameButton.dataset.renameUrl, "title", text));
+  }
+});
+
+// Forms that destroy something ask first.
+document.addEventListener("submit", (event) => {
+  const question = event.target.dataset.confirm;
+  if (question && !window.confirm(question)) event.preventDefault();
 });
 
 // ---------- AI fills a freshly captured idea; saving itself stays instant ----------
@@ -232,6 +253,38 @@ if (chatForm) {
     if (page) page.scrollTop = page.scrollHeight;
   });
 }
+
+// Slow AI actions (refresh, similarity search): show that something is happening instead of a frozen page.
+function showBusyNote(text, button) {
+  const detail = document.querySelector(".detail");
+  if (!detail || detail.querySelector(".ai-working")) return;
+  const note = document.createElement("p");
+  note.className = "ai-working";
+  note.setAttribute("role", "status");
+  note.textContent = text;
+  // Right under the buttons, where the user is looking; the top of a long page may be off-screen.
+  (button.closest(".actions") || detail.querySelector("h2")).after(note);
+}
+
+document.addEventListener("submit", (event) => {
+  if (event.defaultPrevented) return; // e.g. the user declined a delete confirmation
+  const button = event.target.querySelector("[data-pending]");
+  if (!button) return;
+  button.dataset.label = button.textContent;
+  button.textContent = button.dataset.pending;
+  button.disabled = true; // also stops accidental double submissions
+  if (button.dataset.busyNote) showBusyNote(button.dataset.busyNote, button);
+});
+
+// Coming back with the browser's back button restores the page as it was; undo the busy state.
+window.addEventListener("pageshow", (event) => {
+  if (!event.persisted) return;
+  document.querySelectorAll("[data-pending][disabled]").forEach((button) => {
+    button.disabled = false;
+    if (button.dataset.label) button.textContent = button.dataset.label;
+  });
+  document.querySelectorAll(".detail .ai-working").forEach((note) => note.remove());
+});
 
 const inspectForm = document.querySelector(".inspect-form");
 if (inspectForm) {

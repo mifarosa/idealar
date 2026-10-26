@@ -8,7 +8,13 @@
     {% if conversations %}
     <ul class="list">
       {% for conversation in conversations %}
-      <li><a href="{% url 'ideas:conversation' conversation.pk %}"><div class="title">{{ conversation.title }}</div><div class="meta">{{ conversation.message_count }} mesaj · {{ conversation.updated_at|date:"d M H:i" }}</div></a></li>
+      <li class="has-tools">
+        <a href="{% url 'ideas:conversation' conversation.pk %}"><div class="title" data-rename-text>{{ conversation.title }}</div><div class="meta">{{ conversation.message_count }} mesaj · {{ conversation.updated_at|date:"d M H:i" }}</div></a>
+        <span class="row-tools">
+          <button class="icon-btn" type="button" data-rename-url="{% url 'ideas:conversation-rename' conversation.pk %}" title="Adı değiştir" aria-label="Sohbet adını değiştir"><svg class="icon"><use href="#i-edit"/></svg></button>
+          <form method="post" action="{% url 'ideas:conversation-delete' conversation.pk %}" data-confirm="“{{ conversation.title|escapejs }}” silinsin mi?">{% csrf_token %}<button class="icon-btn" type="submit" title="Sil" aria-label="Sohbeti sil"><svg class="icon"><use href="#i-close"/></svg></button></form>
+        </span>
+      </li>
       {% endfor %}
     </ul>
     {% else %}

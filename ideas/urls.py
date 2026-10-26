@@ -19,6 +19,7 @@ urlpatterns = [
     path("ideas/<int:idea_pk>/chat/", chat_views.ConversationListView.as_view(), name="idea-chat"),
     path("projects/<int:project_pk>/chat/", chat_views.ConversationListView.as_view(), name="project-chat"),
     path("chat/c/<int:pk>/", chat_views.ConversationView.as_view(), name="conversation"),
+    path("chat/c/<int:pk>/rename/", chat_views.ConversationRenameView.as_view(), name="conversation-rename"),
     path("chat/c/<int:pk>/delete/", chat_views.ConversationDeleteView.as_view(), name="conversation-delete"),
     path("chat/messages/<int:pk>/actions/<int:index>/", chat_views.ChatActionView.as_view(), name="chat-action"),
     path("features/<int:pk>/toggle/", feature_views.FeatureToggleView.as_view(), name="feature-toggle"),

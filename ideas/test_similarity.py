@@ -262,6 +262,26 @@ class SimilarityViewTests(TestCase):
 
         self.assertContains(self.client.get(reverse("ideas:detail", args=[self.idea.pk])), "Benzer bir kayıt bulunmadı")
 
+    def test_check_reports_how_many_similar_records_were_found(self):
+        self.patch_judge(StubJudge([SimilarMatch("idea", self.target.pk, "same", "r")]))
+
+        response = self.client.post(reverse("ideas:idea-similar-check", args=[self.idea.pk]), follow=True)
+
+        self.assertContains(response, "Benzerlik kontrolü tamamlandı: 1 benzer kayıt bulundu")
+
+    def test_check_reports_when_nothing_similar_was_found(self):
+        self.patch_judge(StubJudge([]))
+
+        response = self.client.post(reverse("ideas:idea-similar-check", args=[self.idea.pk]), follow=True)
+
+        self.assertContains(response, "benzer kayıt bulunmadı")
+
+    def test_slow_ai_buttons_carry_pending_labels_for_instant_feedback(self):
+        response = self.client.get(reverse("ideas:detail", args=[self.idea.pk]))
+
+        self.assertContains(response, 'data-pending="Aranıyor…"')
+        self.assertContains(response, 'data-pending="Dolduruluyor…"')
+
     def test_ai_outage_tells_the_user_only_words_were_checked(self):
         self.patch_judge(down_judge())
 

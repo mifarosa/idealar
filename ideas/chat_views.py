@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -12,6 +13,7 @@ from .chat_context import ChatScope
 from .models import ROLE_ASSISTANT, ChatMessage, Conversation, Idea, Project
 
 MAX_USER_MESSAGE_CHARS = 4000
+MAX_TITLE_CHARS = Conversation._meta.get_field("title").max_length
 NO_ANSWER_MESSAGE = "Hiçbir AI yanıt veremedi. Mesajın kaydedildi; başka bir AI seçip tekrar deneyebilirsin."
 
 
@@ -135,6 +137,21 @@ class ConversationDeleteView(LoginRequiredMixin, View):
         conversation.delete()
         messages.success(request, "Sohbet silindi.")
         return redirect(list_url)
+
+
+class ConversationRenameView(LoginRequiredMixin, View):
+    """Renames a conversation in place; answers with JSON so the page can update without reloading."""
+
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        conversation = get_object_or_404(Conversation.objects.filter(owner=request.user), pk=pk)
+        title = " ".join(request.POST.get("title", "").split())[:MAX_TITLE_CHARS]
+        if not title:
+            return JsonResponse({"error": "Sohbet adı boş olamaz."}, status=400)
+        conversation.title = title
+        conversation.save(update_fields=["title"])
+        return JsonResponse({"title": title})
 
 
 class ChatActionView(LoginRequiredMixin, View):

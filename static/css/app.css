@@ -120,6 +120,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .back { display: none; align-items: center; gap: 6px; color: var(--muted); margin-bottom: 12px; padding: 6px 0; text-decoration: none; }
 .detail h2 { font-size: 28px; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 4px; overflow-wrap: anywhere; }
 .lead { color: var(--muted); margin-bottom: 20px; }
+.detail-actions + .ai-working { margin: 12px 0 0; }
 .ai-working { color: var(--ink); border: 1px solid var(--line); border-left: 3px solid var(--signal); padding: 8px 12px; margin-bottom: 16px; background: var(--panel); }
 .spec { display: grid; grid-template-columns: 9rem 1fr; border-top: 1px solid var(--line); margin: 0 0 24px; }
 .spec dt, .spec dd { margin: 0; padding: 8px 0; border-bottom: 1px solid var(--line); }
@@ -162,8 +163,10 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 }
 .form input:focus, .form textarea:focus, .form select:focus { outline: 0; border-color: var(--ink); }
 .form textarea { resize: vertical; }
-.form ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; }
-.form ul label { display: flex; align-items: center; gap: 8px; }
+/* Checkbox groups (platforms, projects, ideas): Django renders them as nested divs; keep them in a wrapping row. */
+.form-field > div[id^="id_"], .form ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.form-field > div[id^="id_"] > div { margin: 0; }
+.form-field > div[id^="id_"] label, .form ul label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .form input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: 2px; margin: 0; display: grid; place-items: center; background: transparent; cursor: pointer; }
 .form input[type="checkbox"]:checked { background: var(--ink); }
 .form input[type="checkbox"]:checked::after { content: ""; width: 4px; height: 9px; border: solid var(--ground); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
@@ -174,6 +177,11 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .list li { border-bottom: 1px solid var(--line); }
 .list a { display: block; padding: 12px 4px; text-decoration: none; }
 .list a:hover { background: var(--hover); }
+.list li.has-tools { display: flex; align-items: center; }
+.list li.has-tools > a { flex: 1; min-width: 0; }
+.row-tools { display: flex; align-items: center; gap: 2px; padding-right: 4px; flex: none; }
+.row-tools form { display: inline; }
+[data-rename-text][contenteditable="true"] { outline: 2px solid var(--signal); outline-offset: 2px; background: var(--panel); cursor: text; }
 .list .title { font-weight: 500; }
 .list .meta { color: var(--muted); font-size: 14px; }
 .split-2 { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 32px; align-items: start; }
