@@ -7,8 +7,8 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 
 APP_NAME = "Idealar"
-THEME_COLOR = "#4f46e5"
-BACKGROUND_COLOR = "#0f172a"
+THEME_COLOR = "#E96A26"
+BACKGROUND_COLOR = "#F5F4F0"
 
 
 def _icon(size: int, purpose: str = "any") -> dict:

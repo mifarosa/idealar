@@ -42,6 +42,20 @@ class FeatureToggleView(OwnedFeatureMixin, View):
         return JsonResponse({"done": feature.is_done, "done_count": progress.done, "total": progress.total})
 
 
+class FeatureEditView(OwnedFeatureMixin, View):
+    """Renames a feature in place; answers with JSON so the page can update without reloading."""
+
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        feature = self.get_feature(pk)
+        form = FeatureForm({"text": request.POST.get("text", ""), "platform": feature.platform}, instance=feature)
+        if not form.is_valid():
+            return JsonResponse({"error": "Özellik metni boş olamaz."}, status=400)
+        form.save()
+        return JsonResponse({"text": feature.text})
+
+
 class FeatureDeleteView(OwnedFeatureMixin, View):
     http_method_names = ["post"]
 

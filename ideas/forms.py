@@ -40,7 +40,10 @@ class FeatureForm(forms.ModelForm):
     class Meta:
         model = Feature
         fields = ["text", "platform"]
-        widgets = {"text": forms.TextInput(attrs={"placeholder": "Yeni özellik…", "aria-label": "Yeni özellik"})}
+        widgets = {
+            "text": forms.TextInput(attrs={"placeholder": "Yeni özellik ekle…", "aria-label": "Yeni özellik"}),
+            "platform": forms.Select(attrs={"class": "select", "aria-label": "Platform"}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

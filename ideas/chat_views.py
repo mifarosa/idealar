@@ -26,7 +26,7 @@ def scope_chat_url(scope: ChatScope) -> str:
 
 def back_url(scope: ChatScope) -> str:
     if scope.idea:
-        return f"{reverse('ideas:list')}?open={scope.idea.pk}#idea-{scope.idea.pk}"
+        return reverse("ideas:detail", args=[scope.idea.pk])
     if scope.project:
         return reverse("ideas:project-detail", args=[scope.project.pk])
     return reverse("ideas:list")

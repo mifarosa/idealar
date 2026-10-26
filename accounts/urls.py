@@ -1,6 +1,8 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
+from . import views
+
 app_name = "accounts"
 
 urlpatterns = [
@@ -10,5 +12,6 @@ urlpatterns = [
         name="login",
     ),
     # Django 5 only accepts POST for logout, which also prevents logout via prefetch/CSRF links.
+    path("settings/", views.SettingsView.as_view(), name="settings"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]

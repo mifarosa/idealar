@@ -124,6 +124,21 @@ class Idea(models.Model):
         return first_line[: TITLE_PREVIEW_LENGTH - 1].rstrip() + "…"
 
     @property
+    def list_summary(self) -> str:
+        """One line for the list: the AI summary, else the note when a title already stands for its first line."""
+        if self.ai_summary:
+            return self.ai_summary
+        if not (self.title or self.ai_title):
+            return ""
+        lines = self.body.strip().splitlines()
+        return lines[0] if lines else ""
+
+    @property
+    def has_note(self) -> bool:
+        """True when the body adds something beyond what the title already shows."""
+        return bool(self.body.strip()) and self.body.strip() != self.display_title
+
+    @property
     def platform_labels(self) -> list[str]:
         return [PLATFORM_LABELS[key] for key in self.platforms if key in PLATFORM_LABELS]
 

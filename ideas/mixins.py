@@ -11,6 +11,6 @@ class UserFormKwargsMixin:
 
 
 def idea_panel_url(idea_pk: int) -> str:
-    """List URL that opens the given idea's card."""
-    return f"{reverse('ideas:list')}?open={idea_pk}#idea-{idea_pk}"
+    """The page that shows the given idea (list + detail on desktop, detail screen on phones)."""
+    return reverse("ideas:detail", args=[idea_pk])
 
