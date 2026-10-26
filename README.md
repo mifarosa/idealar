@@ -86,6 +86,15 @@ Yeni bir fikir kaydedilince AI, onu **tüm fikirlerin ve projelerinle** karşıl
 - Benzer bir **proje** bulunursa **"＋ Bu projeye bağla"**, benzer bir **fikir** bulunursa **"＋ O fikre özellik olarak ekle"** düğmesi çıkar; ✕ ile "farklı, yoksay" dersin. Sen basmadan hiçbir şey değişmez.
 - AI çalışmazsa güçlü kelime örtüşmesi gösterilir ve kartta açıkça "AI kontrolü yapılamadı; yalnızca kelime benzerliğine baktım" yazar. Sessizce eksik sonuç göstermez.
 
+## GitHub'dan projeleri içe aktarma
+
+**Projeler → GitHub'dan içe aktar** sayfasında GitHub kullanıcı adını yazıp depolarını listelersin, hangilerini proje yapmak istediğini işaretlersin. Hiçbir şey kendiliğinden eklenmez.
+
+- Projeye depo adı, açıklaması ve GitHub adresi aktarılır; depoların içeriği okunmaz (içerik incelemesi ayrı bir düğmedir, bkz. aşağıdaki bölüm).
+- Fork'lar ve arşivlenmiş depolar işaretsiz gelir. Daha önce eklediğin depolar "zaten ekli" yazar ve tekrar eklenmez, bu yüzden listeyi istediğin zaman yeniden çekebilirsin.
+- **Herkese açık depolar** için token gerekmez (GitHub saatte 60 isteğe izin verir; 100 depo = 1 istek). **Özel depolar** için `.env`'ye `GITHUB_TOKEN` ekle ve kullanıcı adını boş bırak; token'ın sahibinin tüm depoları (özel olanlar dahil) listelenir. Kullanıcı adını her seferinde yazmamak için `GITHUB_USERNAME=` da ayarlayabilirsin.
+- En fazla 500 depo listelenir. Kullanıcı adı yalnızca harf, rakam ve tire içerebilir; sunucu yalnızca GitHub API'sine bağlanır.
+
 ## GitHub projesini AI ile inceleme
 
 Projeye bir GitHub adresi eklersen (Düzenle → *GitHub adresi*), proje sayfasında **🔍 Projeyi incele** düğmesi çıkar. Sunucu GitHub API'sinden depoyu okur ve AI'a inceletir. Sonuç: kısa özet, kullanılan teknolojiler, **çözülmüş/yapılmış görünenler**, **eksik veya belirsiz olanlar**. Ayrıca projeye bağlı fikirlerdeki özellik listendeki maddelerden kodda yapılmış görünenler için **"✓ Yapıldı olarak işaretle"** düğmesi çıkar (sen basmadan işaretlenmez).

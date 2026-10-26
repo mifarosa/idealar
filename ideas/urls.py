@@ -27,6 +27,7 @@ urlpatterns = [
     path("features/<int:pk>/delete/", feature_views.FeatureDeleteView.as_view(), name="feature-delete"),
     path("features/<int:pk>/copy/", feature_views.FeatureCopyView.as_view(), name="feature-copy"),
     path("projects/", project_views.ProjectListView.as_view(), name="project-list"),
+    path("projects/import/", project_views.ProjectImportView.as_view(), name="project-import"),
     path("projects/new/", project_views.ProjectCreateView.as_view(), name="project-create"),
     path("projects/<int:pk>/", project_views.ProjectDetailView.as_view(), name="project-detail"),
     path("projects/<int:pk>/edit/", project_views.ProjectUpdateView.as_view(), name="project-update"),

@@ -1,12 +1,15 @@
+import os
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from . import project_review
+from . import github_import, project_review
 from .errors import ActionNotApplicable
+from .github_repo import GitHubError
 from .forms import ProjectForm
 from .mixins import UserFormKwargsMixin
 from .models import Project
@@ -96,3 +99,45 @@ class ProjectMatchDecideView(ProjectActionView):
             except ActionNotApplicable:
                 messages.error(request, "Bu özellik artık projenin bir parçası değil.")
         return redirect("ideas:project-detail", pk=project.pk)
+
+
+class ProjectImportView(LoginRequiredMixin, View):
+    """Lists the user's GitHub repositories and imports the ones they tick as projects."""
+
+    template_name = "ideas/project_import.html"
+
+    def get(self, request):
+        if "kullanici" not in request.GET:
+            return self._render(request, username=os.environ.get("GITHUB_USERNAME", ""), repos=None)
+        username = request.GET["kullanici"]
+        return self._render(request, username=username, repos=self._fetch(request, username))
+
+    def post(self, request):
+        username = request.POST.get("kullanici", "")
+        repos = self._fetch(request, username)
+        if repos is None:
+            return self._render(request, username=username, repos=None)
+        chosen = set(request.POST.getlist("repo"))
+        # Only repositories the server just listed can be imported; anything else in the form is ignored.
+        added = github_import.import_repos(request.user, [r for r in repos if r.full_name in chosen])
+        messages.success(request, f"{added} proje eklendi." if added else "Eklenecek yeni proje yoktu.")
+        return redirect("ideas:project-list")
+
+    @staticmethod
+    def _fetch(request, username: str):
+        client = project_review.build_github_client()
+        try:
+            return github_import.list_repos(client, username, has_token=bool(os.environ.get("GITHUB_TOKEN")))
+        except GitHubError as error:
+            messages.error(request, str(error))
+            return None
+
+    def _render(self, request, username: str, repos):
+        known = github_import.already_imported_urls(request.user)
+        rows = None if repos is None else [
+            {"repo": repo, "already": github_import.normalize_url(repo.url) in known,
+             "checked": not (repo.fork or repo.archived or github_import.normalize_url(repo.url) in known)}
+            for repo in repos
+        ]
+        context = {"username": username, "rows": rows, "has_token": bool(os.environ.get("GITHUB_TOKEN"))}
+        return render(request, self.template_name, context)

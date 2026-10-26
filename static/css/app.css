@@ -135,6 +135,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .checks > li { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
 .check { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: 2px; margin: 0; cursor: pointer; flex: none; display: grid; place-items: center; background: transparent; }
 .check:checked { background: var(--ink); }
+.check:disabled { opacity: 0.4; cursor: not-allowed; }
 .check:checked::after { content: ""; width: 4px; height: 9px; border: solid var(--ground); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
 .feature-label { flex: 1; display: flex; align-items: center; gap: 12px; cursor: pointer; min-width: 0; }
 .feature-text { overflow-wrap: anywhere; }
@@ -164,9 +165,9 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .form input:focus, .form textarea:focus, .form select:focus { outline: 0; border-color: var(--ink); }
 .form textarea { resize: vertical; }
 /* Checkbox groups (platforms, projects, ideas): Django renders them as nested divs; keep them in a wrapping row. */
-.form-field > div[id^="id_"], .form ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.form-field > div[id^="id_"], .form ul:not(.list) { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; }
 .form-field > div[id^="id_"] > div { margin: 0; }
-.form-field > div[id^="id_"] label, .form ul label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.form-field > div[id^="id_"] label, .form ul:not(.list) label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .form input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: 2px; margin: 0; display: grid; place-items: center; background: transparent; cursor: pointer; }
 .form input[type="checkbox"]:checked { background: var(--ink); }
 .form input[type="checkbox"]:checked::after { content: ""; width: 4px; height: 9px; border: solid var(--ground); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
@@ -251,3 +252,16 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* GitHub import list */
+.import-row { display: flex; align-items: center; gap: 12px; padding: 10px 4px; cursor: pointer; }
+.import-row:hover { background: var(--hover); }
+.import-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.import-main .meta { color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.import-tags { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; font-size: 13px; }
+@media (max-width: 899px) {
+  .import-row { align-items: flex-start; flex-wrap: wrap; }
+  .import-main { flex: 1 1 calc(100% - 40px); }
+  .import-main .meta { white-space: normal; }
+  .import-tags { flex-basis: 100%; justify-content: flex-start; padding-left: 30px; }
+}
