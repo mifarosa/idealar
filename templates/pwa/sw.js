@@ -1,5 +1,5 @@
 // Idealar service worker: caches the app shell; ideas themselves always come from the server.
-const CACHE_NAME = "idealar-shell-v2";
+const CACHE_NAME = "idealar-shell-v3";
 const PRECACHE_URLS = {{ precache_json|safe }};
 const OFFLINE_URL = "{{ offline_url }}";
 

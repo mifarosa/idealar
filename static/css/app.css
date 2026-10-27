@@ -218,11 +218,11 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 
 /* ---------- Phone ---------- */
 @media (max-width: 899px) {
-  .app { grid-template-columns: 1fr; }
+  .app { grid-template-columns: minmax(0, 1fr); }  /* plain 1fr lets long text stretch the column past the screen */
   .sidebar { display: none; }
   .content { padding-bottom: 56px; }
   .page { padding: 16px 16px 32px; }
-  .split { grid-template-columns: 1fr; }
+  .split { grid-template-columns: minmax(0, 1fr); }
   .list-pane { border: 0; }
   .detail-pane { display: none; padding: 16px 16px 32px; }
   .split[data-view="detail"] .list-pane { display: none; }
