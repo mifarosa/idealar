@@ -5,9 +5,9 @@
   --ground: #F5F4F0; --panel: #FFFFFF; --ink: #191919; --muted: #6B6B67; --line: #D9D7D1;
   --signal: #E96A26; --danger: #B3261E; --hover: #ECEAE4;
 }
-:root[data-theme="gray"] {
-  --ground: #E4E1DC; --panel: #EEECE8; --ink: #191919; --muted: #5C5C5C; --line: #C6C2BB;
-  --signal: #D95B16; --danger: #A31F18; --hover: #DAD7D1;
+:root[data-theme="gray"] {  /* VS Code "Dark+" greys */
+  --ground: #1E1E1E; --panel: #252526; --ink: #D4D4D4; --muted: #9DA0A6; --line: #3C3C3C;
+  --signal: #3794FF; --danger: #F48771; --hover: #2A2D2E;
 }
 :root[data-theme="dark"] {
   --ground: #141414; --panel: #1B1B1B; --ink: #ECEAE6; --muted: #A3A19B; --line: #2E2E2E;
@@ -54,7 +54,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .link:hover { color: var(--ink); }
 
 .seg { display: flex; border: 1px solid var(--line); border-radius: 3px; }
-.seg button { flex: 1; text-align: center; padding: 5px 0; font-size: 13px; color: var(--muted); }
+.seg button { flex: 1; text-align: center; padding: 8px 18px; min-height: 38px; font-size: 14px; white-space: nowrap; color: var(--muted); }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
 
@@ -84,7 +84,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .field { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); padding: 0 10px; min-height: 38px; }
 .field:focus-within { border-color: var(--ink); }
 .field input, .field textarea { flex: 1; border: 0; background: none; outline: 0; min-width: 0; }
-.field textarea { resize: none; padding: 8px 0; max-height: 8rem; width: 100%; }
+.field textarea { resize: none; padding: 6px 0; line-height: 24px; max-height: 8rem; width: 100%; }
 .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
 .select { border: 1px solid var(--line); border-radius: 3px; background: var(--panel); padding: 6px 8px; min-height: 38px; }
 
@@ -205,7 +205,10 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .composer .field { flex: 1; min-width: 0; }
 .send { width: 38px; height: 38px; background: var(--ink); color: var(--ground); border-radius: 3px; display: grid; place-items: center; flex: none; text-align: center; }
 .send:hover { opacity: 0.88; }
-.provider-select { max-width: 8rem; font-size: 13px; }
+.sidebar .seg button { padding: 8px 0; }
+.provider-select { max-width: 8rem; font-size: 13px; height: 38px; flex: none; }  /* same height as the message box and send button */
+.cancel[hidden] { display: none; }
+.capture .cancel { flex: none; height: 38px; padding: 0 12px; }
 
 /* ---------- Toasts (flash messages) ---------- */
 .toasts { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 20; width: min(32rem, calc(100% - 24px)); }
@@ -231,6 +234,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
   .list-head .search kbd, .capture kbd { display: none; }
   .capture { position: fixed; left: 0; right: 0; bottom: 56px; padding: 8px 12px; background: var(--ground); border-top: 1px solid var(--line); z-index: 5; display: flex; gap: 8px; }
   .capture .field { flex: 1; min-width: 0; }
+  .capture .cancel { align-self: flex-end; }
   .capture textarea { width: 100%; }
   .row[aria-current] { background: none; border-left-color: transparent; }  /* no selection concept on a single column */
   .split[data-view="detail"] .capture { display: none; }
@@ -248,7 +252,8 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 
 /* ---------- Desktop-only extras ---------- */
 @media (min-width: 900px) {
-  .capture { padding: 0; display: block; }
+  .capture { padding: 0; display: flex; gap: 8px; align-items: flex-start; }
+  .capture .field { flex: 1; min-width: 0; }
   .capture .send { display: none; }
 }
 

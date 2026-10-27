@@ -9,6 +9,7 @@
       <form class="capture" method="post" action="{% url 'ideas:create' %}">
         {% csrf_token %}
         <label class="field"><svg class="icon"><use href="#i-plus"/></svg>{{ quick_form.body }}<kbd>N</kbd></label>
+        <button class="btn quiet cancel" type="button" hidden>Vazgeç</button>
         <button class="send" type="submit" aria-label="Kaydet"><svg class="icon"><use href="#i-send"/></svg></button>
       </form>
 

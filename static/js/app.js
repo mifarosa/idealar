@@ -232,6 +232,26 @@ document.addEventListener("keydown", (event) => {
   if (handler && document.querySelector(".rows") && handler() !== false) event.preventDefault();
 });
 
+// ---------- Capture bar: a "Vazgeç" button appears while there is something to discard ----------
+const captureForm = document.querySelector(".capture");
+if (captureForm) {
+  const box = captureForm.querySelector("textarea");
+  const cancel = captureForm.querySelector(".cancel");
+  const sync = () => { cancel.hidden = !box.value && document.activeElement !== box; };
+  const discard = () => {
+    box.value = "";
+    box.style.height = "auto";
+    box.blur();
+    sync();
+  };
+  box.addEventListener("input", sync);
+  box.addEventListener("focus", sync);
+  // Not on blur: tapping the cancel button itself blurs the box first and would hide the button before the click lands.
+  cancel.addEventListener("click", discard);
+  box.addEventListener("keydown", (event) => { if (event.key === "Escape") discard(); });
+  sync();
+}
+
 // ---------- Small conveniences ----------
 document.addEventListener("input", (event) => {
   if (!event.target.matches(MESSAGE_BOX)) return;
