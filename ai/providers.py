@@ -136,14 +136,15 @@ class KindInfo:
     key_env: str  # suggested env variable holding the key; empty means no key
     needs_key: bool
     local: bool = False  # slow hardware: longer timeout
+    default_model: str = ""  # used when the user leaves the model name empty
     send_temperature: bool = True  # OpenAI's newer models reject any value except their default
     staff_only: bool = False  # the user supplies the address, so only trusted users may use it (server-side request risk)
 
 
 KINDS: dict[str, KindInfo] = {
-    "groq": KindInfo("Groq", "https://api.groq.com/openai/v1", "GROQ_API_KEY", True),
-    "gemini": KindInfo("Gemini", "https://generativelanguage.googleapis.com/v1beta/openai", "GEMINI_API_KEY", True),
-    "anthropic": KindInfo("Claude", "", "ANTHROPIC_API_KEY", True),
+    "groq": KindInfo("Groq", "https://api.groq.com/openai/v1", "GROQ_API_KEY", True, default_model=DEFAULT_GROQ_MODEL),
+    "gemini": KindInfo("Gemini", "https://generativelanguage.googleapis.com/v1beta/openai", "GEMINI_API_KEY", True, default_model=DEFAULT_GEMINI_MODEL),
+    "anthropic": KindInfo("Claude", "", "ANTHROPIC_API_KEY", True, default_model=DEFAULT_ANTHROPIC_MODEL),
     "openai": KindInfo("ChatGPT (OpenAI)", "https://api.openai.com/v1", "OPENAI_API_KEY", True, send_temperature=False),
     "openrouter": KindInfo("OpenRouter", "https://openrouter.ai/api/v1", "OPENROUTER_API_KEY", True),
     "mistral": KindInfo("Mistral", "https://api.mistral.ai/v1", "MISTRAL_API_KEY", True),

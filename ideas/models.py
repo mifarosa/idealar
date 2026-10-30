@@ -225,7 +225,7 @@ class AIModel(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ai_models")
     kind = models.CharField(max_length=20)
     label = models.CharField(max_length=60)
-    model_name = models.CharField(max_length=120)
+    model_name = models.CharField(max_length=120, blank=True)  # empty until the user picks one from the provider's list
     base_url = models.CharField(max_length=200, blank=True)  # staff-only kinds (Ollama, other servers)
     api_key_sealed = models.TextField(blank=True)
     key_hint = models.CharField(max_length=4, blank=True)

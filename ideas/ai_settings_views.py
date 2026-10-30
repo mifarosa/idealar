@@ -53,6 +53,7 @@ class AIModelListView(LoginRequiredMixin, View):
         for model in models:
             model.kind_label = KINDS[model.kind].label if model.kind in KINDS else model.kind
             model.key_missing = not key_is_set(model)
+            model.name_missing = not model.model_name
         return render(request, "ideas/ai_models.html", {"models": models, "can_import_env": request.user.is_staff and not models})
 
 
@@ -134,6 +135,9 @@ class AIModelActionView(LoginRequiredMixin, View):
             messages.success(request, f"“{model.label}” artık {name} modelini kullanıyor.")
 
     def do_test(self, request, model):
+        if not model.model_name:
+            messages.error(request, f"“{model.label}” için önce bir model seç: “Modeller” tuşuna bas.")
+            return
         try:
             client = build_client(ai_registry.spec_for(model))
             client.chat_json('Reply only with the JSON object {"ok": true}.', [{"role": "user", "content": "ping"}])

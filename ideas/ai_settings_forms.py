@@ -25,7 +25,7 @@ class AIModelForm(forms.ModelForm):
         labels = {"label": "Görünen ad", "model_name": "Model adı", "base_url": "Adres", "enabled": "Kullanımda"}
         help_texts = {
             "label": "Boş bırakırsan sağlayıcı adı kullanılır.",
-            "model_name": "Adı sağlayıcının sitesinden al. Kaydettikten sonra listedeki \"Modeller\" tuşu anahtarının kullanabildiği adları gösterir.",
+            "model_name": "Boş bırakabilirsin: Groq, Gemini ve Claude için hazır bir model seçilir. Diğerlerinde kaydettikten sonra listedeki \"Modeller\" tuşundan seçersin.",
             "base_url": "Yalnızca Ollama ve \"Diğer\" için. Ollama: http://host.docker.internal:11434 · LM Studio: http://host.docker.internal:1234/v1",
         }
 
@@ -34,6 +34,7 @@ class AIModelForm(forms.ModelForm):
         self.user = user
         self.fields["kind"].choices = [(kind, info.label) for kind, info in KINDS.items() if user.is_staff or not info.staff_only]
         self.fields["label"].required = False  # falls back to the provider name
+        self.fields["model_name"].required = False  # falls back to the provider's default, or is picked from the list later
         saved = self.instance.pk and self.instance.key_hint
         self.fields["api_key"].help_text = (
             f"Kayıtlı anahtar: …{saved}. Değiştirmek istemiyorsan boş bırak."
@@ -63,6 +64,8 @@ class AIModelForm(forms.ModelForm):
         info = KINDS[kind]
         if not cleaned.get("label"):
             cleaned["label"] = info.label
+        if not cleaned.get("model_name"):
+            cleaned["model_name"] = info.default_model
         has_saved_key = bool(self.instance.pk and self.instance.api_key_sealed and self.instance.kind == kind)
         if info.needs_key and not cleaned.get("api_key") and not has_saved_key:
             self.add_error("api_key", "Bu sağlayıcı için API anahtarı gerekli.")

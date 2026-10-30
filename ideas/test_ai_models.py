@@ -455,3 +455,31 @@ class NavigationTests(TestCase):
         page = self.client.get(reverse("ideas:list")).content.decode()
 
         self.assertEqual(page.count(f'href="{reverse("accounts:settings")}"'), 2)  # sidebar + tab bar
+
+
+class ModelNameOptionalTests(TestCase):
+    def setUp(self):
+        self.user = make_user("owner", staff=False)
+        self.client.force_login(self.user)
+
+    def add(self, kind):
+        return self.client.post(reverse("ideas:ai-model-create"), {"kind": kind, "label": "", "model_name": "", "api_key": "sk-test-key-123456", "enabled": "on"})
+
+    def test_leaving_the_name_empty_picks_the_providers_default(self):
+        for kind, expected in (("groq", "openai/gpt-oss-120b"), ("gemini", "gemini-flash-lite-latest"), ("anthropic", "claude-opus-5-5")):
+            self.add(kind)
+            self.assertEqual(AIModel.objects.get(kind=kind).model_name, expected)
+
+    def test_providers_without_a_default_save_with_an_empty_name_and_are_not_used_until_one_is_picked(self):
+        self.add("openai")
+        model = AIModel.objects.get()
+
+        self.assertEqual(model.model_name, "")
+        self.assertFalse(ai_registry.has_models(self.user))
+        page = self.client.get(reverse("ideas:ai-models"))
+        self.assertContains(page, "model seçilmedi")
+        test = self.client.post(reverse("ideas:ai-model-action", args=[model.pk, "test"]), follow=True)
+        self.assertContains(test, "önce bir model seç")
+
+        self.client.post(reverse("ideas:ai-model-action", args=[model.pk, "use"]), {"model_name": "some-model"})
+        self.assertTrue(ai_registry.has_models(self.user))

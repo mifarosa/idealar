@@ -13,9 +13,9 @@ CHAIN_NAME = re.compile(r"m(\d+)")
 
 
 def usable_models(user) -> list[AIModel]:
-    """Enabled models of this user. A model of a staff-only kind is ignored once its owner is no longer staff."""
+    """Enabled, fully set up models of this user. A model of a staff-only kind is ignored once its owner is no longer staff."""
     models = AIModel.objects.filter(owner=user, enabled=True)
-    return [m for m in models if user.is_staff or not KINDS.get(m.kind, KINDS["custom"]).staff_only]
+    return [m for m in models if m.model_name and (user.is_staff or not KINDS.get(m.kind, KINDS["custom"]).staff_only)]
 
 
 def spec_for(model: AIModel) -> ModelSpec:
