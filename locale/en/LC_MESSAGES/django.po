@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 01:47+0300\n"
+"POT-Creation-Date: 2026-10-31 01:49+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -674,7 +674,7 @@ msgstr "Title (optional)"
 msgid "Açıklama"
 msgstr "Description"
 
-#: ideas/forms.py:32 templates/base.html:38 templates/base.html:67
+#: ideas/forms.py:32 templates/base.html:57 templates/base.html:86
 #: templates/ideas/project_detail.html:6 templates/ideas/project_import.html:6
 #: templates/ideas/project_list.html:3 templates/ideas/project_list.html:6
 msgid "Projeler"
@@ -952,7 +952,6 @@ msgid "Durum güncellendi."
 msgstr "Status updated."
 
 #: support/views.py:119
-#| msgid "Sohbet silindi."
 msgid "Kayıt silindi."
 msgstr "Ticket deleted."
 
@@ -981,7 +980,8 @@ msgstr "Dark"
 msgid "Yeni"
 msgstr "New"
 
-#: templates/accounts/login.html:3
+#: templates/accounts/login.html:3 templates/base.html:21
+#: templates/base.html:29
 msgid "Idealar · fikirlerini yapay zekâyla düşün"
 msgstr "Idealar · think through your ideas with AI"
 
@@ -1080,7 +1080,7 @@ msgid "Kapat"
 msgstr "Close"
 
 #: templates/accounts/settings.html:3 templates/accounts/settings.html:5
-#: templates/base.html:41 templates/base.html:70
+#: templates/base.html:60 templates/base.html:89
 #: templates/ideas/ai_models.html:5
 msgid "Ayarlar"
 msgstr "Settings"
@@ -1110,51 +1110,68 @@ msgstr "Sign out"
 msgid "Idealar"
 msgstr "Idealar"
 
-#: templates/base.html:36 templates/base.html:65
+#: templates/base.html:17 templates/base.html:22 templates/base.html:30
+#| msgid ""
+#| "Idealar, yapay zekâlı bir fikir defteri. Aklına geleni yazarsın; notlarının "
+#| "hepsini okuyan bir yardımcı bağlantıları, tekrarları ve eksikleri sana "
+#| "gösterir."
+msgid ""
+"Fikirlerini yaz; notlarının hepsini okuyan yapay zekâ bağlantıları, "
+"tekrarları ve eksikleri sana göstersin."
+msgstr ""
+"Write your ideas; an AI that reads all your notes shows you the connections,"
+" the duplicates and the gaps."
+
+#: templates/base.html:26
+#| msgid "Idealar · fikirlerini yapay zekâyla düşün"
+msgid "Idealar: fikirlerini yaz, yapay zekân hepsini bilsin."
+msgstr "Idealar: write your ideas, let your AI know them all."
+
+#: templates/base.html:55 templates/base.html:84
 msgid "Ana menü"
 msgstr "Main menu"
 
-#: templates/base.html:37 templates/base.html:66
+#: templates/base.html:56 templates/base.html:85
 #: templates/ideas/_idea_detail.html:4 templates/ideas/idea_list.html:8
 #: templates/ideas/project_detail.html:61
 msgid "Fikirler"
 msgstr "Ideas"
 
-#: templates/base.html:39 templates/base.html:68
+#: templates/base.html:58 templates/base.html:87
 #: templates/ideas/_idea_detail.html:113
 msgid "Sohbet"
 msgstr "Chat"
 
-#: templates/base.html:40 templates/base.html:69
+#: templates/base.html:59 templates/base.html:88
 #: templates/ideas/project_detail.html:11 templates/kanban/board.html:3
 #: templates/kanban/board.html:7
 msgid "Kanban"
 msgstr "Kanban"
 
-#: templates/base.html:42 templates/support/ticket_detail.html:5
+#: templates/base.html:61 templates/support/ticket_detail.html:5
 #: templates/support/ticket_form.html:5 templates/support/ticket_list.html:3
 #: templates/support/ticket_list.html:6
 msgid "Öneri & şikayet"
 msgstr "Suggestions & complaints"
 
-#: templates/base.html:43 templates/support/inbox.html:3
+#: templates/base.html:62 templates/support/inbox.html:3
 #: templates/support/inbox.html:6 templates/support/ticket_detail.html:5
 msgid "Gelen kutusu"
 msgstr "Inbox"
 
-#: templates/base.html:49
+#: templates/base.html:68
 msgid "Çıkış"
 msgstr "Sign out"
 
-#: templates/base.html:56
+#: templates/base.html:75
 msgid "Yapay zekâ özellikleri için kendi AI anahtarını ekle →"
 msgstr "Add your own AI key to use the AI features →"
 
-#: templates/base.html:76
+#: templates/base.html:95
 msgid "Onayla"
 msgstr "Confirm"
 
-#: templates/base.html:77 templates/ideas/ai_model_form.html:20
+#: templates/base.html:96 templates/ideas/ai_model_form.html:20
 #: templates/ideas/feature_copy.html:12
 #: templates/ideas/idea_confirm_delete.html:11
 #: templates/ideas/idea_form.html:12 templates/ideas/idea_list.html:13
@@ -1163,28 +1180,28 @@ msgstr "Confirm"
 msgid "Vazgeç"
 msgstr "Cancel"
 
-#: templates/base.html:83
+#: templates/base.html:102
 msgid "Kaydedilemedi, bağlantını kontrol et."
 msgstr "Could not be saved, check your connection."
 
-#: templates/base.html:84
+#: templates/base.html:103
 msgid "Kaydedilemedi."
 msgstr "Could not be saved."
 
-#: templates/base.html:85
+#: templates/base.html:104
 msgid "Kart taşınamadı."
 msgstr "The card could not be moved."
 
-#: templates/base.html:86
+#: templates/base.html:105
 msgid "Panoya kopyalandı. Claude'a yapıştırabilirsin."
 msgstr "Copied to the clipboard. You can paste it into Claude."
 
-#: templates/base.html:87 templates/ideas/feature_copy.html:11
+#: templates/base.html:106 templates/ideas/feature_copy.html:11
 #: templates/ideas/idea_prompt.html:18
 msgid "Kopyala"
 msgstr "Copy"
 
-#: templates/base.html:88
+#: templates/base.html:107
 msgid "Otomatik kopyalanamadı; metin seçili, Ctrl+C ile kopyala."
 msgstr "Automatic copy failed; the text is selected, copy it with Ctrl+C."
 
@@ -2131,7 +2148,6 @@ msgid "Bu kayıt ve içindeki yazışma silinsin mi?"
 msgstr "Delete this ticket and its conversation?"
 
 #: templates/support/ticket_detail.html:47
-#| msgid "Kartı sil"
 msgid "Kaydı sil"
 msgstr "Delete ticket"
 

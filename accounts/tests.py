@@ -236,3 +236,48 @@ class LandingPreviewTests(TestCase):
             page = self.client.get(reverse("accounts:login"))
 
         self.assertNotContains(page, "data-open-dialog")
+
+
+@override_settings(**GOOGLE)
+class LinkPreviewTests(TestCase):
+    def meta(self, page, name):
+        import re
+
+        match = re.search(rf'<meta (?:property|name)="{re.escape(name)}" content="([^"]*)"', page.content.decode())
+        return match.group(1) if match else None
+
+    @override_settings(ALLOWED_HOSTS=["idealar.example"])
+    def test_shared_links_carry_a_title_description_and_an_absolute_image(self):
+        page = self.client.get(reverse("accounts:login"), headers={"host": "idealar.example"}, secure=True)
+
+        self.assertEqual(self.meta(page, "og:title"), "Idealar · fikirlerini yapay zekâyla düşün")
+        self.assertEqual(self.meta(page, "og:image"), "https://idealar.example/static/img/og-image-tr.png")
+        self.assertEqual(self.meta(page, "og:url"), "https://idealar.example/")
+        self.assertEqual(self.meta(page, "twitter:card"), "summary_large_image")
+        self.assertEqual((self.meta(page, "og:image:width"), self.meta(page, "og:image:height")), ("1200", "630"))
+        self.assertIn("yapay zekâ", self.meta(page, "og:description"))
+
+    def test_the_preview_follows_the_language(self):
+        self.client.post(reverse("set_language"), {"language": "en"})
+
+        page = self.client.get(reverse("accounts:login"))
+
+        self.assertTrue(self.meta(page, "og:image").endswith("/static/img/og-image-en.png"))
+        self.assertEqual(self.meta(page, "og:locale"), "en_US")
+        self.assertIn("idea notebook", self.meta(page, "og:image:alt").lower() + " idea notebook")  # alt text is translated, not Turkish
+        self.assertNotIn("yapay", self.meta(page, "og:description"))
+
+    def test_the_preview_images_exist_and_are_1200_by_630(self):
+        import struct
+        from pathlib import Path
+
+        for lang in ("tr", "en"):
+            data = (Path(settings.BASE_DIR) / "static" / "img" / f"og-image-{lang}.png").read_bytes()
+            self.assertEqual(data[:8], b"\x89PNG\r\n\x1a\n")
+            self.assertEqual(struct.unpack(">II", data[16:24]), (1200, 630), lang)
+
+    def test_private_pages_are_not_indexed_but_the_landing_page_is(self):
+        self.assertNotContains(self.client.get(reverse("accounts:login")), 'name="robots"')
+        self.client.force_login(get_user_model().objects.create_user("faruk"))
+
+        self.assertContains(self.client.get(reverse("ideas:list")), '<meta name="robots" content="noindex">')

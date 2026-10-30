@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; }
+  body { background: #F5F4F0; color: #191919; font-family: "Inter", "Helvetica Neue", Arial, sans-serif; display: flex; align-items: center; padding: 0 72px; gap: 56px; position: relative; overflow: hidden; }
+  body::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: #E96A26; }
+  .left { flex: 1.5; }
+  .brand { display: flex; align-items: center; gap: 18px; font-size: 40px; font-weight: 600; margin-bottom: 44px; }
+  .brand svg { width: 72px; height: 72px; border-radius: 16px; }
+  h1 { font-size: 58px; line-height: 1.08; letter-spacing: -0.025em; font-weight: 600; margin-bottom: 26px; }
+  p.sub { font-size: 29px; line-height: 1.35; color: #6B6B67; max-width: 560px; }
+  .mock { flex: 1; max-width: 470px; background: #fff; border: 2px solid #D9D7D1; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 18px 40px rgba(0,0,0,0.08); }
+  .row { display: flex; justify-content: space-between; border: 2px solid #D9D7D1; border-radius: 8px; padding: 14px 16px; font-size: 25px; font-weight: 600; }
+  .row i { font-style: normal; color: #6B6B67; font-weight: 400; }
+  .new { border-left: 7px solid #E96A26; }
+  .card { border: 2px solid #D9D7D1; border-left: 7px solid #E96A26; border-radius: 8px; background: #F5F4F0; padding: 16px 18px; font-size: 23px; line-height: 1.4; }
+  .tag { display: inline-block; font-size: 17px; color: #6B6B67; border: 1.5px solid #D9D7D1; border-radius: 5px; padding: 1px 8px; margin-bottom: 10px; }
+  .actions { display: flex; gap: 10px; margin-top: 14px; font-size: 20px; }
+  .actions span { border: 2px solid #D9D7D1; border-radius: 6px; padding: 4px 14px; }
+  .actions span:first-child { background: #191919; color: #fff; border-color: #191919; }
+</style></head><body>
+  <div class="left">
+    <div class="brand">
+      <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#E96A26"/><g fill="#fff"><circle cx="32" cy="24" r="4.8"/><rect x="40" y="8" width="8" height="32" rx="4"/><rect x="28" y="45" width="8" height="11" rx="4"/></g><circle cx="32" cy="24" r="12" fill="none" stroke="#fff" stroke-width="8"/></svg>
+      Idealar
+    </div>
+    <h1 id="h1"></h1>
+    <p class="sub" id="sub"></p>
+  </div>
+  <div class="mock">
+    <div class="row"><span id="r1"></span><i>3 / 5</i></div>
+    <div class="row"><span id="r2"></span><i>1 / 4</i></div>
+    <div class="row new"><span id="r3"></span></div>
+    <div class="card"><span class="tag" id="tag"></span><div id="text"></div><div class="actions"><span id="a1"></span><span id="a2"></span></div></div>
+  </div>
+<script>
+  const copy = {
+    tr: { h1: "Fikirlerini yaz.<br>Yapay zekân hepsini bilsin.", sub: "Notlarının hepsini okuyan, yapay zekâlı fikir defteri.", r1: "Alışkanlık sayacı", r2: "Uyku günlüğü", r3: "Yeni fikir: günlük su takibi…", tag: "tüm notlarına göre", text: "<b>Alışkanlık sayacı</b> ile bağlantılı: ikisi de günlük kayıt tutuyor.", a1: "Özellik olarak ekle", a2: "Gizle" },
+    en: { h1: "Write your ideas.<br>Let your AI know them all.", sub: "The idea notebook whose AI reads all your notes.", r1: "Habit tracker", r2: "Sleep log", r3: "New idea: daily water tracking…", tag: "based on all your notes", text: "Linked to <b>Habit tracker</b>: both keep a daily log.", a1: "Add as a feature", a2: "Hide" },
+  }[new URLSearchParams(location.search).get("lang") || "en"];
+  for (const [id, html] of Object.entries(copy)) document.getElementById(id === "h1" ? "h1" : id).innerHTML = html;
+</script></body></html>

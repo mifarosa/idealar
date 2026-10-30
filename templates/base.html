@@ -11,6 +11,25 @@
   <link rel="icon" href="{% static 'icons/icon-192.png' %}" type="image/png">
   <link rel="apple-touch-icon" href="{% static 'icons/apple-touch-icon.png' %}">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  {% if user.is_authenticated %}<meta name="robots" content="noindex">{% endif %}
+  {% with site=request.scheme|add:"://"|add:request.get_host image="img/og-image-"|add:LANGUAGE_CODE|add:".png" %}
+  {# What chat and social apps show when the address is shared #}
+  <meta name="description" content="{% trans "Fikirlerini yaz; notlarının hepsini okuyan yapay zekâ bağlantıları, tekrarları ve eksikleri sana göstersin." %}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Idealar">
+  <meta property="og:url" content="{{ site }}/">
+  <meta property="og:title" content="{% trans "Idealar · fikirlerini yapay zekâyla düşün" %}">
+  <meta property="og:description" content="{% trans "Fikirlerini yaz; notlarının hepsini okuyan yapay zekâ bağlantıları, tekrarları ve eksikleri sana göstersin." %}">
+  <meta property="og:image" content="{{ site }}{% static image %}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{% trans "Idealar: fikirlerini yaz, yapay zekân hepsini bilsin." %}">
+  <meta property="og:locale" content="{% if LANGUAGE_CODE == 'en' %}en_US{% else %}tr_TR{% endif %}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% trans "Idealar · fikirlerini yapay zekâyla düşün" %}">
+  <meta name="twitter:description" content="{% trans "Fikirlerini yaz; notlarının hepsini okuyan yapay zekâ bağlantıları, tekrarları ve eksikleri sana göstersin." %}">
+  <meta name="twitter:image" content="{{ site }}{% static image %}">
+  {% endwith %}
   <script>
     // Apply the saved theme before first paint so there is no flash of the wrong colors.
     try {
