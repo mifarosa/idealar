@@ -65,14 +65,17 @@ class ChatContextTests(TestCase):
         for expected in (f"[id={self.idea.pk}]", "remind me to drink", "iOS", "[x] Daily goal", "[ ] Charts"):
             self.assertIn(expected, context)
 
-    def test_project_context_lists_its_ideas_only(self):
+    def test_project_context_lists_its_ideas_and_offers_other_ideas_for_linking(self):
         Idea.objects.create(owner=self.user, body="unrelated idea")
 
         context = build_context(ChatScope(self.user, project=self.project))
 
         self.assertIn("Mobile apps", context)
         self.assertIn("Water reminder", context)
-        self.assertNotIn("unrelated idea", context)
+        linkable, _, project_part = context.partition("Project: Mobile apps")
+        self.assertNotIn("unrelated idea", project_part)  # not part of the project...
+        self.assertIn("unrelated idea", linkable)  # ...but offered as an idea that could be linked
+        self.assertIn("can be linked", linkable)
 
     def test_general_context_has_all_own_ideas_but_never_other_users(self):
         Idea.objects.create(owner=make_user("other"), body="somebody else's secret")
@@ -118,7 +121,10 @@ class ChatServiceTests(TestCase):
         reply = chat_service.ask_assistant(self.conversation, stub_factory(assistant))
 
         self.assertEqual(reply.role, ROLE_ASSISTANT)
-        self.assertEqual(reply.actions, [{"type": "add_feature", "text": "Streaks", "idea_id": self.idea.pk, "status": ACTION_PENDING}])
+        self.assertEqual(
+            reply.actions,
+            [{"type": "add_feature", "text": "Streaks", "idea_id": self.idea.pk, "project_id": None, "status": ACTION_PENDING}],
+        )
 
     def test_reply_stores_which_provider_answered_and_which_failed(self):
         assistant = StubAssistant()
@@ -464,3 +470,82 @@ class ChatIsolationTests(TestCase):
         self.client.logout()
 
         self.assertEqual(self.client.get(reverse("ideas:chat")).status_code, 302)
+
+
+class LinkProjectTests(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.idea = Idea.objects.create(owner=self.user, body="water reminder app")
+        self.project = Project.objects.create(owner=self.user, name="Apple Store")
+        self.stranger_project = Project.objects.create(owner=make_user("other"), name="Theirs")
+        self.general = ChatScope(self.user)
+
+    def reply(self, scope, *actions):
+        conversation = chat_service.start_conversation(scope, "hi")
+        assistant = StubAssistant(actions=list(actions))
+        return chat_service.ask_assistant(conversation, stub_factory(assistant))
+
+    def test_general_context_lists_projects_with_ids_and_the_projects_of_each_idea(self):
+        self.idea.projects.add(self.project)
+
+        context = build_context(self.general)
+
+        self.assertIn(f"[project id={self.project.pk}] Apple Store", context)
+        self.assertIn("(in project: Apple Store)", context)
+        self.assertNotIn("Theirs", context)
+
+    def test_link_action_is_kept_when_both_ids_are_the_users_and_applies_after_confirmation(self):
+        message = self.reply(self.general, ChatAction("link_project", "fits the store", self.idea.pk, self.project.pk))
+
+        self.assertEqual([(a["type"], a["idea_id"], a["project_id"]) for a in message.actions], [("link_project", self.idea.pk, self.project.pk)])
+        self.assertEqual(self.idea.projects.count(), 0)  # nothing happens before the user confirms
+
+        chat_service.decide_action(message, 0, apply=True)
+
+        self.assertEqual(list(self.idea.projects.all()), [self.project])
+
+    def test_link_action_with_foreign_or_invented_ids_is_dropped(self):
+        message = self.reply(
+            self.general,
+            ChatAction("link_project", "x", self.idea.pk, self.stranger_project.pk),
+            ChatAction("link_project", "x", 9999, self.project.pk),
+            ChatAction("link_project", "x", self.idea.pk, None),
+        )
+
+        self.assertEqual(message.actions, [])
+
+    def test_in_a_project_chat_the_project_is_forced_and_in_an_idea_chat_the_idea_is(self):
+        in_project = self.reply(ChatScope(self.user, project=self.project), ChatAction("link_project", "x", self.idea.pk, self.stranger_project.pk))
+        in_idea = self.reply(ChatScope(self.user, idea=self.idea), ChatAction("link_project", "x", 9999, self.project.pk))
+
+        self.assertEqual((in_project.actions[0]["project_id"], in_idea.actions[0]["idea_id"]), (self.project.pk, self.idea.pk))
+
+    def test_new_idea_can_name_a_project_in_the_general_chat(self):
+        message = self.reply(
+            self.general,
+            ChatAction("new_idea", "Store listing text", project_id=self.project.pk),
+            ChatAction("new_idea", "Other", project_id=self.stranger_project.pk),
+        )
+
+        chat_service.decide_action(message, 0, apply=True)
+        chat_service.decide_action(message, 1, apply=True)
+
+        self.assertEqual(list(Idea.objects.get(body="Store listing text").projects.all()), [self.project])
+        self.assertEqual(Idea.objects.get(body="Other").projects.count(), 0)  # a foreign project id is ignored
+
+    def test_applying_fails_cleanly_when_the_project_was_deleted_meanwhile(self):
+        message = self.reply(self.general, ChatAction("link_project", "x", self.idea.pk, self.project.pk))
+        self.project.delete()
+
+        with self.assertRaises(chat_service.ActionNotApplicable):
+            chat_service.decide_action(message, 0, apply=True)
+
+    def test_card_names_the_idea_and_the_project(self):
+        self.client.force_login(self.user)
+        message = self.reply(self.general, ChatAction("link_project", "fits the store", self.idea.pk, self.project.pk))
+
+        page = self.client.get(reverse("ideas:conversation", args=[message.conversation.pk]))
+
+        self.assertContains(page, "fikrini")
+        self.assertContains(page, "Apple Store")
+        self.assertContains(page, "Bağla")

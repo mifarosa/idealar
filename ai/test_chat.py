@@ -105,3 +105,24 @@ class ProviderInfoTests(SimpleTestCase):
         result = respond({"reply": "ok"})
 
         self.assertEqual((result.provider, result.failed_providers), ("recording", ()))
+
+
+class LinkProjectParseTests(SimpleTestCase):
+    def parse(self, *actions):
+        client = type("C", (LLMClient,), {"name": "c", "chat_json": lambda self, s, m: {"reply": "ok", "actions": list(actions)}})()
+        return ChatAssistant(client).respond("ctx", []).actions
+
+    def test_link_project_needs_no_text_and_reads_both_ids(self):
+        [action] = self.parse({"type": "link_project", "idea_id": "4", "project_id": 9})
+
+        self.assertEqual((action.type, action.idea_id, action.project_id, action.text), ("link_project", 4, 9, ""))
+
+    def test_new_idea_may_carry_a_project_id(self):
+        [action] = self.parse({"type": "new_idea", "text": "Store text", "project_id": 3})
+
+        self.assertEqual(action.project_id, 3)
+
+    def test_junk_ids_become_none(self):
+        [action] = self.parse({"type": "link_project", "idea_id": True, "project_id": "x"})
+
+        self.assertEqual((action.idea_id, action.project_id), (None, None))

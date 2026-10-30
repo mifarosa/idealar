@@ -1,6 +1,6 @@
 import logging
 
-from ai.chat import ACTION_ADD_FEATURE, ACTION_NEW_IDEA, ChatAction, ChatAssistant, ChatTurn
+from ai.chat import ACTION_ADD_FEATURE, ACTION_LINK_PROJECT, ACTION_NEW_IDEA, ChatAction, ChatAssistant, ChatTurn
 from ai.errors import AIError
 
 from . import ai_failure, ai_registry
@@ -16,6 +16,7 @@ from .models import (
     Conversation,
     Feature,
     Idea,
+    Project,
 )
 
 logger = logging.getLogger(__name__)
@@ -80,20 +81,34 @@ def ask_assistant(conversation: Conversation, assistant_factory=None, provider: 
 
 
 def _pending_actions(scope: ChatScope, actions: list[ChatAction]) -> list[dict]:
-    allowed_ids = {idea.pk for idea in scope.visible_ideas()}
+    visible_ids = {idea.pk for idea in scope.visible_ideas()}
+    owned_idea_ids = set(Idea.objects.owned_by(scope.owner).values_list("pk", flat=True))
+    owned_project_ids = set(Project.objects.filter(owner=scope.owner).values_list("pk", flat=True))
     stored = []
     for action in actions:
-        idea_id = _target_idea_id(scope, action)
-        if action.type == ACTION_ADD_FEATURE and idea_id not in allowed_ids:
+        idea_id, project_id = _target_idea_id(scope, action), _target_project_id(scope, action)
+        if action.type == ACTION_ADD_FEATURE and idea_id not in visible_ids:
             continue  # the model named an idea outside this conversation
-        stored.append({"type": action.type, "text": action.text, "idea_id": idea_id, "status": ACTION_PENDING})
+        if action.type == ACTION_LINK_PROJECT and (idea_id not in owned_idea_ids or project_id not in owned_project_ids):
+            continue  # the model invented an id, or one that is not the user's
+        if action.type == ACTION_NEW_IDEA and project_id not in owned_project_ids:
+            project_id = None
+        stored.append(
+            {"type": action.type, "text": action.text, "idea_id": idea_id, "project_id": project_id, "status": ACTION_PENDING}
+        )
     return stored
 
 
 def _target_idea_id(scope: ChatScope, action: ChatAction) -> int | None:
-    if action.type == ACTION_ADD_FEATURE and scope.idea:
+    if action.type in (ACTION_ADD_FEATURE, ACTION_LINK_PROJECT) and scope.idea:
         return scope.idea.pk
     return action.idea_id
+
+
+def _target_project_id(scope: ChatScope, action: ChatAction) -> int | None:
+    if action.type in (ACTION_NEW_IDEA, ACTION_LINK_PROJECT) and scope.project:
+        return scope.project.pk
+    return action.project_id if action.type in (ACTION_NEW_IDEA, ACTION_LINK_PROJECT) else None
 
 
 def decide_action(message: ChatMessage, index: int, apply: bool) -> None:
@@ -111,10 +126,30 @@ def _apply(scope: ChatScope, action: dict) -> None:
     if action["type"] == ACTION_ADD_FEATURE:
         idea = _idea_in_scope(scope, action["idea_id"])
         Feature.objects.create(idea=idea, text=action["text"])
+    elif action["type"] == ACTION_LINK_PROJECT:
+        idea = _owned_idea(scope, action["idea_id"])
+        _owned_project(scope, action.get("project_id")).ideas.add(idea)
     elif action["type"] == ACTION_NEW_IDEA:
+        # Messages stored before link_project existed carry no project_id; a project chat still files into its project.
+        project_id = action.get("project_id") or (scope.project.pk if scope.project else None)
+        project = _owned_project(scope, project_id) if project_id else None
         idea = Idea.objects.create(owner=scope.owner, body=action["text"])
-        if scope.project:
-            idea.projects.add(scope.project)
+        if project:
+            idea.projects.add(project)
+
+
+def _owned_idea(scope: ChatScope, idea_id: int | None) -> Idea:
+    idea = Idea.objects.owned_by(scope.owner).filter(pk=idea_id).first() if idea_id else None
+    if idea is None:
+        raise ActionNotApplicable("Target idea is no longer available")
+    return idea
+
+
+def _owned_project(scope: ChatScope, project_id: int | None) -> Project:
+    project = Project.objects.filter(owner=scope.owner, pk=project_id).first() if project_id else None
+    if project is None:
+        raise ActionNotApplicable("Target project is no longer available")
+    return project
 
 
 def _idea_in_scope(scope: ChatScope, idea_id: int | None) -> Idea:

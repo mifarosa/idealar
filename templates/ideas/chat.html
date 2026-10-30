@@ -26,12 +26,13 @@
         <div class="action-card">
           <p>
             {% if action.type == 'add_feature' %}<strong>{{ action.target_title|default:"Fikir" }}</strong> fikrine özellik: “{{ action.text }}”
-            {% else %}Yeni fikir: “{{ action.text }}”{% endif %}
+            {% elif action.type == 'link_project' %}<strong>{{ action.target_title|default:"Fikir" }}</strong> fikrini <strong>{{ action.project_name|default:"projeye" }}</strong> projesine bağla{% if action.text %}: {{ action.text }}{% endif %}
+            {% else %}Yeni fikir{% if action.project_name %} (<strong>{{ action.project_name }}</strong> projesine){% endif %}: “{{ action.text }}”{% endif %}
           </p>
           {% if action.status == 'pending' %}
           <form method="post" action="{% url 'ideas:chat-action' message.pk action.index %}" class="actions">
             {% csrf_token %}
-            <button class="btn small primary" name="decision" value="apply" type="submit">Ekle</button>
+            <button class="btn small primary" name="decision" value="apply" type="submit">{% if action.type == 'link_project' %}Bağla{% else %}Ekle{% endif %}</button>
             <button class="btn small quiet" name="decision" value="dismiss" type="submit">Yoksay</button>
           </form>
           {% elif action.status == 'applied' %}<span class="muted">Eklendi</span>

@@ -14,6 +14,8 @@ MAX_FEATURE_CHARS = 300
 MAX_IDEA_CHARS = 500
 ACTION_ADD_FEATURE = "add_feature"
 ACTION_NEW_IDEA = "new_idea"
+ACTION_LINK_PROJECT = "link_project"
+MAX_REASON_CHARS = 200
 
 SYSTEM_PROMPT = """You are a candid, practical product and engineering sparring partner for a solo developer who
 collects app ideas. Talk like a thoughtful colleague: give opinions and trade-offs, ask a sharp question when
@@ -25,11 +27,15 @@ You are given the current context (an idea, a project, or the idea list) with id
   "reply": "your message to the developer",
   "actions": [
     {"type": "add_feature", "idea_id": <id from the context>, "text": "short feature, under 12 words"},
-    {"type": "new_idea", "text": "a new idea note"}
+    {"type": "new_idea", "text": "a new idea note", "project_id": <project id or omit>},
+    {"type": "link_project", "idea_id": <id>, "project_id": <id>, "text": "why it belongs there, under 12 words"}
   ]
 }
 Rules for actions: propose at most 3, and only when you are concretely recommending something to add; otherwise
-use an empty list. Use add_feature only with an idea_id that appears in the context. Never say you already added
+use an empty list. Use add_feature only with an idea_id that appears in the context. Use link_project to attach an existing idea to a
+project (both ids must appear in the context); use new_idea with a project_id when the new idea belongs to a listed
+project. When the developer asks to add an idea to a project, propose link_project (or new_idea with project_id)
+instead of only talking about it. Never say you already added
 something: the developer confirms each action with a button. Do not repeat features that already exist."""
 
 
@@ -44,6 +50,7 @@ class ChatAction:
     type: str
     text: str
     idea_id: int | None = None
+    project_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -81,13 +88,16 @@ def _parse_actions(raw) -> list[ChatAction]:
 
 
 def _parse_action(item) -> ChatAction | None:
-    if not isinstance(item, dict) or not isinstance(item.get("text"), str):
+    if not isinstance(item, dict):
         return None
-    text, kind = item["text"].strip(), item.get("type")
+    raw_text, kind = item.get("text"), item.get("type")
+    text = raw_text.strip() if isinstance(raw_text, str) else ""
     if kind == ACTION_ADD_FEATURE and text:
         return ChatAction(kind, text[:MAX_FEATURE_CHARS], _parse_idea_id(item.get("idea_id")))
     if kind == ACTION_NEW_IDEA and text:
-        return ChatAction(kind, text[:MAX_IDEA_CHARS])
+        return ChatAction(kind, text[:MAX_IDEA_CHARS], project_id=_parse_idea_id(item.get("project_id")))
+    if kind == ACTION_LINK_PROJECT:
+        return ChatAction(kind, text[:MAX_REASON_CHARS], _parse_idea_id(item.get("idea_id")), _parse_idea_id(item.get("project_id")))
     return None
 
 

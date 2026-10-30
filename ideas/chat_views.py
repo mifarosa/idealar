@@ -121,9 +121,16 @@ class ConversationView(LoginRequiredMixin, View):
         chat_messages = list(conversation.messages.all())
         idea_ids = {a["idea_id"] for m in chat_messages for a in m.actions if a.get("idea_id")}
         titles = {i.pk: i.display_title for i in Idea.objects.owned_by(conversation.owner).filter(pk__in=idea_ids)}
+        project_ids = {a["project_id"] for m in chat_messages for a in m.actions if a.get("project_id")}
+        project_names = dict(Project.objects.filter(owner=conversation.owner, pk__in=project_ids).values_list("pk", "name"))
         for message in chat_messages:
             message.action_views = [
-                {**action, "index": index, "target_title": titles.get(action.get("idea_id"), "")}
+                {
+                    **action,
+                    "index": index,
+                    "target_title": titles.get(action.get("idea_id"), ""),
+                    "project_name": project_names.get(action.get("project_id"), ""),
+                }
                 for index, action in enumerate(message.actions)
             ]
             message.provider_label = provider_label(message.provider) if message.provider else ""
