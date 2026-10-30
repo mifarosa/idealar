@@ -35,6 +35,15 @@ Fikir kaydedilince sayfa hemen açılır, AI arkadan başlık, kısa özet, etik
 - Sağlayıcı sırası ve ayarları `.env` içindedir (`AI_PROVIDERS=groq,ollama`). Yeni sağlayıcı eklemek veya değiştirmek tek dosyadır: `ai/providers.py`.
 - **Gizlilik:** Groq'a fikirlerinin metni gönderilir. Bunu istemiyorsan `.env`'de `AI_PROVIDERS=ollama` yap; o zaman her şey bilgisayarından çıkmaz.
 
+### Google ile giriş
+Giriş yalnızca Google iledir (şifreli form kalktı). Yönetici (staff) şifresi yalnızca `/admin/` sayfasında geçerlidir.
+1. https://console.cloud.google.com/apis/credentials → *Create credentials → OAuth client ID* → türü **Web application**.
+2. *Authorized redirect URI*: `https://idealar.mifarosa.com/accounts/google/callback/` (kendi alan adın).
+3. İlk kez ayarlıyorsan *OAuth consent screen* ekranını doldur (uygulama adı, e-posta; kapsamlar: `openid`, `email`, `profile`) ve yayın durumunu **In production** yap, yoksa yalnızca test kullanıcıları girebilir.
+4. `.env`: `GOOGLE_CLIENT_ID=...` ve `GOOGLE_CLIENT_SECRET=...`, sonra `docker compose up -d`.
+5. **Mevcut hesabını Google'a bağla:** `docker compose exec web python manage.py link_google KULLANICI_ADIN e-postan@gmail.com`. Google'la ilk girişte hesap e-postadan eşleşir ve verilerin yerinde kalır.
+6. Yeni kişilerin kendiliğinden kayıt olması `GOOGLE_SIGNUP=true` ile açılır; varsayılan kapalıdır. Kendi AI anahtarını getirme özelliği hazır olana kadar kapalı tut, yoksa tanımadığın kişiler senin AI anahtarlarını kullanır.
+
 ### Groq anahtarı
 1. https://console.groq.com/keys adresinden ücretsiz hesap aç ve bir API anahtarı oluştur.
 2. `.env` içine `GROQ_API_KEY=...` yaz (anahtarı kimseyle paylaşma, git'e girmez).

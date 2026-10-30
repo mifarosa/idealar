@@ -1,4 +1,5 @@
 """Django settings. All deployment-specific values come from environment / .env."""
+import os
 from pathlib import Path
 
 import dj_database_url
@@ -77,6 +78,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# Sign in with Google (console.cloud.google.com -> APIs & Services -> Credentials -> OAuth client ID, type "Web").
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+# Whether an unknown Google account may create a new user. Existing users are always matched by e-mail.
+GOOGLE_SIGNUP = env_bool("GOOGLE_SIGNUP", default=False)
 
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "ideas:list"
