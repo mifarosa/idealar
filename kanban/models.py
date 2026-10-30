@@ -13,6 +13,8 @@ class Task(models.Model):
     project = models.ForeignKey("ideas.Project", null=True, blank=True, on_delete=models.CASCADE, related_name="tasks")
     idea = models.ForeignKey("ideas.Idea", null=True, blank=True, on_delete=models.SET_NULL, related_name="tasks")
     title = models.CharField(max_length=200)
+    # True for cards that stand for an idea: they show the idea's own title and progress, and cannot be renamed here.
+    mirrors_idea = models.BooleanField(default=False)
     status = models.CharField(max_length=6, choices=STATUS_CHOICES, default=STATUS_TODO)
     position = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -20,6 +22,9 @@ class Task(models.Model):
     class Meta:
         ordering = ["position", "id"]
         indexes = [models.Index(fields=["owner", "project", "status", "position"])]
+        constraints = [
+            models.UniqueConstraint(fields=["owner", "project", "idea"], condition=models.Q(mirrors_idea=True), name="one_card_per_idea_per_board")
+        ]
 
     def __str__(self) -> str:
         return self.title

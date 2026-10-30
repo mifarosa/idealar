@@ -35,12 +35,14 @@ class BoardView(BoardMixin, View):
         grouped = services.columns(request.user, project)
         ideas = Idea.objects.owned_by(request.user)
         if project:
-            ideas = ideas.filter(projects=project)
+            ideas = ideas.exclude(projects=project)  # these can be added to the project
+        else:
+            ideas = ideas.exclude(tasks__project__isnull=True, tasks__mirrors_idea=True)  # not on the personal board yet
         context = {
             "project": project,
             "projects": Project.objects.filter(owner=request.user),
             "columns": [(value, label, grouped[value]) for value, label in STATUS_CHOICES],
-            "ideas": ideas,
+            "ideas": ideas.distinct(),
             "status_choices": STATUS_CHOICES,
             "card_count": sum(len(cards) for cards in grouped.values()),
         }
@@ -55,19 +57,28 @@ class TaskAddView(BoardMixin, View):
         form = TaskForm(request.POST)
         if form.is_valid():
             status = request.POST.get("status")
-            idea = self._idea(request, project)
-            services.add_task(request.user, project, form.cleaned_data["title"], status if status in STATUSES else STATUS_TODO, idea)
+            services.add_task(request.user, project, form.cleaned_data["title"], status if status in STATUSES else STATUS_TODO)
         else:
             messages.error(request, "Kartın bir başlığı olmalı.")
         return redirect(board_url(project))
 
-    @staticmethod
-    def _idea(request, project):
+
+class IdeaAddView(BoardMixin, View):
+    """Adds one of the user's ideas to a board: a project board links the idea to the project, the personal one just lists it."""
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        project = self.get_project(request.POST.get("proje"))
         raw = request.POST.get("idea", "")
-        if not raw.isdigit():
-            return None
-        ideas = Idea.objects.owned_by(request.user)
-        return (ideas.filter(projects=project) if project else ideas).filter(pk=int(raw)).first()
+        idea = Idea.objects.owned_by(request.user).filter(pk=int(raw)).first() if raw.isdigit() else None
+        if idea is None:
+            messages.error(request, "Bu fikir bulunamadı.")
+        else:
+            if project:
+                idea.projects.add(project)  # the board picks it up from the link
+            services.add_idea_card(request.user, project, idea)
+        return redirect(board_url(project))
 
 
 class TaskMoveView(BoardMixin, View):
@@ -94,6 +105,8 @@ class TaskRenameView(BoardMixin, View):
     def post(self, request, pk):
         task = self.get_task(pk)
         title = request.POST.get("title", "").strip()
+        if task.mirrors_idea:
+            return JsonResponse({"error": "Fikrin adını fikir sayfasından değiştirebilirsin."}, status=400)
         if not title or len(title) > Task._meta.get_field("title").max_length:
             return JsonResponse({"error": "Başlık boş olamaz ve çok uzun olmamalı."}, status=400)
         task.title = title
@@ -106,5 +119,7 @@ class TaskDeleteView(BoardMixin, View):
 
     def post(self, request, pk):
         task = self.get_task(pk)
+        if task.mirrors_idea and task.project and task.idea:
+            task.idea.projects.remove(task.project)  # otherwise the board would simply bring the card back
         task.delete()
         return redirect(board_url(task.project))

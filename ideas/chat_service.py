@@ -3,6 +3,8 @@ import logging
 from ai.chat import ACTION_ADD_FEATURE, ACTION_LINK_PROJECT, ACTION_NEW_IDEA, ChatAction, ChatAssistant, ChatTurn
 from ai.errors import AIError
 
+from kanban import services as kanban
+
 from . import ai_failure, ai_registry
 from .chat_context import ChatScope, build_context
 from .errors import ActionNotApplicable
@@ -136,6 +138,8 @@ def _apply(scope: ChatScope, action: dict) -> None:
         idea = Idea.objects.create(owner=scope.owner, body=action["text"])
         if project:
             idea.projects.add(project)
+        else:
+            kanban.add_idea_card(scope.owner, None, idea)  # without a project the idea lands on the personal board
 
 
 def _owned_idea(scope: ChatScope, idea_id: int | None) -> Idea:

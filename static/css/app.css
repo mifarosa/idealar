@@ -332,6 +332,9 @@ code { font: 13px "SFMono-Regular", Consolas, monospace; border: 1px solid var(-
 .card { border: 1px solid var(--line); border-radius: 3px; background: var(--ground); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; cursor: grab; overflow-wrap: anywhere; }
 .card.dragging { opacity: 0.4; }
 .card .tag { align-self: flex-start; text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.card-title { text-decoration: none; }
+a.card-title:hover { text-decoration: underline; }
+.card-meta { display: flex; gap: 6px; flex-wrap: wrap; }
 .card-tools { display: flex; gap: 2px; justify-content: flex-end; }
 .card-tools form { display: inline; }
 .card-add { display: flex; flex-direction: column; gap: 6px; }

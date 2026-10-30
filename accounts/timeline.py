@@ -17,7 +17,7 @@ class Feature:
 
 
 TIMELINE = (
-    Feature(date(2026, 10, 30), "Kanban: kişisel ve proje panoları", "Yapılacak, yapılıyor, bitti. Kartları sürükleyip bırak; her projenin ve kendi işlerinin ayrı panosu var."),
+    Feature(date(2026, 10, 30), "Kanban: kişisel ve proje panoları", "Yapılacak, yapılıyor, bitti. Projeye bağlı fikirler panoda kendiliğinden kart olur; kartları sürükleyip bırak. Kişisel pano evdeki küçük işler için serbest, istersen oraya fikir de ekleyebilirsin."),
     Feature(date(2026, 10, 30), "Öneri ve şikayet kutusu", "Bir şey bozuksa ya da bir fikrin varsa yaz; yanıtı ve durumu (açık, inceleniyor, çözüldü) aynı yerden takip et."),
     Feature(date(2026, 10, 30), "Sohbetten projeye ekle", "AI ile konuşurken “bu fikri şu projeye bağla” de; öneriyi tek tıkla onaylarsın."),
     Feature(date(2026, 10, 30), "Tüm notlarını okuyan öneriler", "Yeni bir fikir yazınca AI diğer bütün notlarına bakar: ilgili notlar, birleştirilebilecekler, ödünç alınabilecek özellikler, yeni fikirler."),

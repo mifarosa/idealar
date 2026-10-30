@@ -103,23 +103,15 @@ class ViewTests(TestCase):
         self.assertNotContains(project, "Write copy")
         self.assertContains(project, "Apple Store")
 
-    def test_a_card_can_link_one_of_the_users_ideas_but_not_a_foreign_one(self):
-        foreign_idea = Idea.objects.create(owner=self.stranger, title="Secret", body="x")
-
-        self.add(idea=str(self.idea.pk), title="linked")
-        self.add(idea=str(foreign_idea.pk), title="foreign link")
-
-        self.assertEqual(Task.objects.get(title="linked").idea, self.idea)
-        self.assertIsNone(Task.objects.get(title="foreign link").idea)
-
-    def test_project_boards_only_offer_the_ideas_of_that_project(self):
+    def test_project_boards_offer_only_ideas_not_in_the_project_yet(self):
         self.idea.projects.add(self.project)
         Idea.objects.create(owner=self.user, title="Unrelated", body="x")
 
         page = self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
 
-        self.assertContains(page, "Water app")
-        self.assertNotContains(page, "Unrelated")
+        self.assertContains(page, "Unrelated")  # offered in the "add an idea" list
+        self.assertEqual(page.content.decode().count('<option value="' + str(self.idea.pk) + '">'), 0)  # already on the board
+        self.assertContains(page, "Water app")  # as a card
 
     def test_someone_elses_project_board_is_a_404_and_cannot_receive_cards(self):
         self.assertEqual(self.client.get(reverse("kanban:board"), {"proje": self.foreign_project.pk}).status_code, 404)
@@ -210,3 +202,189 @@ class ViewTests(TestCase):
         page = self.client.get(reverse("ideas:list"))
 
         self.assertEqual(page.content.decode().count(f'href="{reverse("kanban:board")}"'), 2)
+
+
+class IdeaCardTests(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.client.force_login(self.user)
+        self.project = Project.objects.create(owner=self.user, name="Apple Store")
+        self.idea = Idea.objects.create(owner=self.user, title="Water app", body="x")
+
+    def statuses(self, project):
+        return {t.idea.display_title: t.status for t in services.board_tasks(self.user, project).filter(mirrors_idea=True)}
+
+    def test_ideas_linked_to_a_project_appear_on_its_board_in_the_first_column(self):
+        self.idea.projects.add(self.project)
+
+        page = self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+
+        self.assertEqual(self.statuses(self.project), {"Water app": "todo"})
+        self.assertContains(page, "Water app")
+
+    def test_moving_an_idea_card_sticks_and_new_links_arrive_without_disturbing_it(self):
+        self.idea.projects.add(self.project)
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+        card = Task.objects.get(idea=self.idea)
+        self.client.post(reverse("kanban:move", args=[card.pk]), {"status": "doing", "index": "0"})
+        other = Idea.objects.create(owner=self.user, title="Second", body="y")
+        other.projects.add(self.project)
+
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+
+        self.assertEqual(self.statuses(self.project), {"Water app": "doing", "Second": "todo"})
+
+    def test_unlinking_an_idea_removes_its_card(self):
+        self.idea.projects.add(self.project)
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+
+        self.idea.projects.remove(self.project)
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+
+        self.assertEqual(self.statuses(self.project), {})
+
+    def test_project_boards_never_mirror_ideas_of_other_users(self):
+        stranger_idea = Idea.objects.create(owner=make_user("other"), title="Theirs", body="x")
+        stranger_idea.projects.add(self.project)  # should not be possible through the UI, but must not leak either
+
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+
+        self.assertEqual(self.statuses(self.project), {})
+
+    def test_the_personal_board_does_not_mirror_anything_by_itself(self):
+        self.idea.projects.add(self.project)
+
+        self.client.get(reverse("kanban:board"))
+
+        self.assertEqual(self.statuses(None), {})
+
+    def test_adding_an_idea_to_the_personal_board_makes_a_card_once(self):
+        for _ in range(2):
+            self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk)})
+
+        self.assertEqual(self.statuses(None), {"Water app": "todo"})
+        self.assertNotContains(self.client.get(reverse("kanban:board")), f'<option value="{self.idea.pk}">')
+
+    def test_adding_an_idea_on_a_project_board_links_it_to_the_project(self):
+        self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk), "proje": str(self.project.pk)})
+
+        self.assertEqual(list(self.idea.projects.all()), [self.project])
+        self.assertEqual(self.statuses(self.project), {"Water app": "todo"})
+
+    def test_only_own_ideas_and_projects_can_be_added(self):
+        stranger = make_user("other")
+        foreign_idea = Idea.objects.create(owner=stranger, title="Theirs", body="x")
+        foreign_project = Project.objects.create(owner=stranger, name="Theirs")
+
+        self.client.post(reverse("kanban:add-idea"), {"idea": str(foreign_idea.pk)})
+        denied = self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk), "proje": str(foreign_project.pk)})
+
+        self.assertEqual(denied.status_code, 404)
+        self.assertFalse(Task.objects.exists())
+
+    def test_removing_an_idea_card_from_a_project_board_unlinks_the_idea_but_keeps_it(self):
+        self.idea.projects.add(self.project)
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+        card = Task.objects.get(idea=self.idea)
+
+        self.client.post(reverse("kanban:delete", args=[card.pk]))
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})  # the card must not come back
+
+        self.assertFalse(Task.objects.exists())
+        self.assertTrue(Idea.objects.filter(pk=self.idea.pk).exists())
+        self.assertEqual(self.idea.projects.count(), 0)
+
+    def test_removing_an_idea_card_from_the_personal_board_keeps_the_idea_and_its_projects(self):
+        self.idea.projects.add(self.project)
+        self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk)})
+        card = Task.objects.get(idea=self.idea, project=None)
+
+        self.client.post(reverse("kanban:delete", args=[card.pk]))
+
+        self.assertFalse(Task.objects.filter(project=None).exists())
+        self.assertEqual(list(self.idea.projects.all()), [self.project])
+
+    def test_idea_cards_cannot_be_renamed_from_the_board(self):
+        self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk)})
+        card = Task.objects.get()
+
+        response = self.client.post(reverse("kanban:rename", args=[card.pk]), {"title": "Other"})
+
+        self.assertEqual(response.status_code, 400)
+        self.idea.refresh_from_db()
+        self.assertEqual(self.idea.title, "Water app")
+
+    def test_deleting_an_idea_removes_its_card_from_every_board(self):
+        self.idea.projects.add(self.project)
+        self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk)})
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+
+        self.idea.delete()
+        personal = self.client.get(reverse("kanban:board"))
+
+        self.assertEqual(personal.status_code, 200)
+        self.assertFalse(Task.objects.filter(mirrors_idea=True).exists())
+
+    def test_the_card_shows_the_ideas_live_title_and_feature_progress(self):
+        from ideas.models import Feature
+
+        self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk)})
+        Feature.objects.create(idea=self.idea, text="a", is_done=True)
+        Feature.objects.create(idea=self.idea, text="b")
+        self.idea.title = "Renamed elsewhere"
+        self.idea.save()
+
+        page = self.client.get(reverse("kanban:board"))
+
+        self.assertContains(page, "Renamed elsewhere")
+        self.assertContains(page, "1/2 özellik")
+
+
+class ChatToBoardTests(TestCase):
+    def setUp(self):
+        from ai.chat import ChatAction
+        from ideas import chat_service
+        from ideas.chat_context import ChatScope
+
+        self.user = make_user()
+        self.project = Project.objects.create(owner=self.user, name="Apple Store")
+        self.ChatAction, self.chat_service, self.ChatScope = ChatAction, chat_service, ChatScope
+
+    def propose(self, scope, *actions):
+        from ai.chat import ChatAssistant, ChatReply
+
+        class Stub(ChatAssistant):
+            def __init__(self):
+                pass
+
+            def respond(self, context, history):
+                return ChatReply("ok", list(actions))
+
+        conversation = self.chat_service.start_conversation(scope, "hi")
+        return self.chat_service.ask_assistant(conversation, lambda: Stub())
+
+    def test_an_idea_accepted_in_the_general_chat_lands_on_the_personal_board(self):
+        message = self.propose(self.ChatScope(self.user), self.ChatAction("new_idea", "Evde yapılacak bir şey"))
+
+        self.chat_service.decide_action(message, 0, apply=True)
+
+        idea = Idea.objects.get()
+        card = Task.objects.get()
+        self.assertEqual((card.idea, card.project, card.status, card.mirrors_idea), (idea, None, "todo", True))
+
+    def test_an_idea_from_a_project_chat_lands_on_that_projects_board_and_not_the_personal_one(self):
+        message = self.propose(self.ChatScope(self.user, project=self.project), self.ChatAction("new_idea", "Store listing"))
+
+        self.chat_service.decide_action(message, 0, apply=True)
+        self.client.force_login(self.user)
+        self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
+
+        self.assertEqual(list(Task.objects.values_list("project", flat=True)), [self.project.pk])
+
+    def test_declining_the_suggestion_creates_nothing(self):
+        message = self.propose(self.ChatScope(self.user), self.ChatAction("new_idea", "Nope"))
+
+        self.chat_service.decide_action(message, 0, apply=False)
+
+        self.assertFalse(Idea.objects.exists())
+        self.assertFalse(Task.objects.exists())
