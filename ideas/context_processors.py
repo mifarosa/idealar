@@ -11,8 +11,8 @@ def navigation(request):
         return {}
     match = request.resolver_match
     name = match.url_name if match else ""
-    if match and match.namespace == "support":
-        name = "support"
+    if match and match.namespace in ("support", "kanban"):
+        name = match.namespace
     return {
         "nav_section": _section(name),
         "nav_idea_count": Idea.objects.owned_by(request.user).count(),
@@ -26,8 +26,8 @@ def _section(url_name: str) -> str:
         return "chat"
     if url_name.startswith("project-"):
         return "projects"
-    if url_name == "support":
-        return "support"
+    if url_name in ("support", "kanban"):
+        return url_name
     if url_name == "settings" or url_name.startswith("ai-model"):
         return "settings"
     return "ideas" if url_name in IDEA_VIEWS else ""

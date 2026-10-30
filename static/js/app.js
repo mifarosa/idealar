@@ -252,6 +252,43 @@ if (captureForm) {
   sync();
 }
 
+// ---------- Kanban: drag a card to another column or position ----------
+function dropIndex(list, y) {
+  const cards = [...list.querySelectorAll(".card:not(.dragging)")];
+  const after = cards.findIndex((card) => y < card.getBoundingClientRect().top + card.offsetHeight / 2);
+  return after === -1 ? cards.length : after;
+}
+
+document.querySelectorAll("[data-drop-zone]").forEach((list) => {
+  list.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    list.classList.add("drag-over");
+  });
+  list.addEventListener("dragleave", () => list.classList.remove("drag-over"));
+  list.addEventListener("drop", async (event) => {
+    event.preventDefault();
+    list.classList.remove("drag-over");
+    const card = document.querySelector(".card.dragging");
+    if (!card) return;
+    const index = dropIndex(list, event.clientY);
+    const status = list.closest(".column").dataset.status;
+    const response = await postForm(card.dataset.moveUrl, { status, index });
+    if (response.ok) window.location.reload(); // counts and arrow buttons depend on the column
+    else alert("Kart taşınamadı.");
+  });
+});
+document.addEventListener("dragstart", (event) => {
+  const card = event.target.closest && event.target.closest(".card");
+  if (card) {
+    card.classList.add("dragging");
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", card.dataset.task);
+  }
+});
+document.addEventListener("dragend", (event) => {
+  if (event.target.classList) event.target.classList.remove("dragging");
+});
+
 // ---------- Small conveniences ----------
 document.addEventListener("input", (event) => {
   if (!event.target.matches(MESSAGE_BOX)) return;

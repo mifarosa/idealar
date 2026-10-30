@@ -62,6 +62,9 @@ Giriş yalnızca Google iledir (şifreli form kalktı). Yönetici (staff) şifre
 3. Varsayılan model `claude-opus-5-5`. Not almak için daha ucuz bir model yeterliyse `ANTHROPIC_MODEL=claude-haiku-5-5` yaz; geçerli adları `docker compose exec web python manage.py ai_models` listeler.
 4. Claude bir isteği reddederse veya hata verirse zincir otomatik olarak sıradaki sağlayıcıya geçer; fikrin kaybolmaz.
 
+### Kanban
+Sol menüdeki **Kanban** iki tür pano verir: **Kişisel pano** (projeye bağlı olmayan işlerin) ve her **projenin** kendi panosu (sağ üstteki listeden ya da proje sayfasındaki Kanban tuşundan). Üç sütun vardır: Yapılacak, Yapılıyor, Bitti. Kart eklemek için sütunun altındaki kutuya yaz; isteğe bağlı olarak bir fikre bağlayabilirsin. Bilgisayarda kartları sürükleyip bırakırsın (sütunlar arası ve sütun içinde sıra), telefonda ve sürüklemenin çalışmadığı yerlerde kartın üzerindeki ok tuşları kartı yan sütuna taşır. Panolar kullanıcıya özeldir; başkasının panosu açılmaz. Bir proje silinirse panosundaki kartlar da silinir.
+
 ### Öneri ve şikayet kutusu (ticket)
 Her kullanıcı sol menüdeki **Öneri & şikayet** sayfasından öneri, şikayet ya da hata bildirimi yazar ve yanıtları aynı sayfada takip eder. Kullanıcı yalnızca **kendi** kayıtlarını görür; başkasının kaydını açamaz.
 Site sahibi **Gelen kutusu**'nda tüm kayıtları görür, durum değiştirir (açık, inceleniyor, çözüldü, kapalı) ve yanıt verir. Yetki, yönetici bayrağına değil **e-posta adresine** bağlıdır: `.env`'e `TICKET_ADMIN_EMAILS=senin@gmail.com` yaz (virgülle birden fazla olabilir), `docker compose up -d` yap ve o adresle Google'dan giriş yap. Değer boşsa kimse gelen kutusunu açamaz. Kullanıcı yanıtlarda senin kimliğini değil "Destek" adını görür. Bir kullanıcı günde en fazla 10 kayıt açabilir. Uygulama e-posta göndermez; yeni kayıtları gelen kutusundaki sayıdan takip edersin.

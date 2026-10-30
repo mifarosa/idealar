@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Kanban · Idealar{% endblock %}
+{% block inner_class %}wide{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Kanban <span class="muted" style="font-size:14px;font-weight:400">{{ card_count }} kart</span></h1>
+  <form method="get" class="actions">
+    <select class="select" name="proje" aria-label="Pano" data-autosubmit>
+      <option value="">Kişisel pano</option>
+      {% for item in projects %}<option value="{{ item.pk }}" {% if project and item.pk == project.pk %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="board" data-move-url-template="{% url 'kanban:move' 0 %}">
+  {% for status, label, cards in columns %}
+  <section class="column" data-status="{{ status }}" aria-label="{{ label }}">
+    <h2>{{ label }} <span class="muted">{{ cards|length }}</span></h2>
+    <ul class="cards" data-drop-zone>
+      {% for task in cards %}
+      <li class="card" draggable="true" data-task="{{ task.pk }}" data-move-url="{% url 'kanban:move' task.pk %}">
+        <span class="card-title" data-rename-text>{{ task.title }}</span>
+        {% if task.idea %}<a class="tag" href="{% url 'ideas:detail' task.idea.pk %}">{{ task.idea.display_title|truncatechars:28 }}</a>{% endif %}
+        <span class="card-tools">
+          {% if status != 'todo' %}<form method="post" action="{% url 'kanban:move' task.pk %}">{% csrf_token %}<input type="hidden" name="direction" value="left"><button class="icon-btn" type="submit" title="Sola taşı" aria-label="Sola taşı">←</button></form>{% endif %}
+          {% if status != 'done' %}<form method="post" action="{% url 'kanban:move' task.pk %}">{% csrf_token %}<input type="hidden" name="direction" value="right"><button class="icon-btn" type="submit" title="Sağa taşı" aria-label="Sağa taşı">→</button></form>{% endif %}
+          <button class="icon-btn" type="button" data-rename-url="{% url 'kanban:rename' task.pk %}" title="Adı değiştir" aria-label="Adı değiştir"><svg class="icon"><use href="#i-edit"/></svg></button>
+          <form method="post" action="{% url 'kanban:delete' task.pk %}" data-confirm="Bu kart silinsin mi?">{% csrf_token %}<button class="icon-btn" type="submit" title="Sil" aria-label="Kartı sil"><svg class="icon"><use href="#i-close"/></svg></button></form>
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+    <form method="post" action="{% url 'kanban:add' %}" class="card-add">
+      {% csrf_token %}
+      <input type="hidden" name="proje" value="{% if project %}{{ project.pk }}{% endif %}">
+      <input type="hidden" name="status" value="{{ status }}">
+      <label class="field"><svg class="icon"><use href="#i-plus"/></svg><input type="text" name="title" maxlength="200" placeholder="Kart ekle…" aria-label="{{ label }} sütununa kart ekle" required></label>
+      {% if ideas %}
+      <select class="select" name="idea" aria-label="Fikre bağla">
+        <option value="">Fikre bağlı değil</option>
+        {% for idea in ideas %}<option value="{{ idea.pk }}">{{ idea.display_title|truncatechars:40 }}</option>{% endfor %}
+      </select>
+      {% endif %}
+    </form>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

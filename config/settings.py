@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "accounts",
     "ideas",
     "support",
+    "kanban",
     "pwa",
 ]
 

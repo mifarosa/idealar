@@ -6,5 +6,6 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("", include("pwa.urls")),
     path("", include("support.urls")),
+    path("", include("kanban.urls")),
     path("", include("ideas.urls")),
 ]

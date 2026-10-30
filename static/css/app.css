@@ -243,7 +243,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
   .row[aria-current] { background: none; border-left-color: transparent; }  /* no selection concept on a single column */
   .split[data-view="detail"] .capture { display: none; }
   .rows { padding-bottom: 64px; }
-  .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; height: 56px; background: var(--ground); border-top: 1px solid var(--line); z-index: 6; }
+  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; height: 56px; background: var(--ground); border-top: 1px solid var(--line); z-index: 6; }
   .tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 11px; color: var(--muted); text-decoration: none; border-top: 2px solid transparent; margin-top: -1px; }
   .tabbar a[aria-current] { color: var(--ink); border-color: var(--signal); }
   .detail h2 { font-size: 24px; }
@@ -322,3 +322,18 @@ code { font: 13px "SFMono-Regular", Consolas, monospace; border: 1px solid var(-
 .status-open { border-color: var(--signal); color: var(--ink); }
 .status-done { color: var(--muted); }
 .status-closed { color: var(--muted); text-decoration: line-through; }
+
+/* ---------- Kanban ---------- */
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.column { border: 1px solid var(--line); border-radius: 3px; background: var(--panel); padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.column h2 { font-size: 14px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
+.cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-height: 28px; }
+.cards.drag-over { outline: 2px dashed var(--signal); outline-offset: 2px; }
+.card { border: 1px solid var(--line); border-radius: 3px; background: var(--ground); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; cursor: grab; overflow-wrap: anywhere; }
+.card.dragging { opacity: 0.4; }
+.card .tag { align-self: flex-start; text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.card-tools { display: flex; gap: 2px; justify-content: flex-end; }
+.card-tools form { display: inline; }
+.card-add { display: flex; flex-direction: column; gap: 6px; }
+.card-add .select { font-size: 13px; min-height: 32px; }
+@media (max-width: 899px) { .board { grid-template-columns: minmax(0, 1fr); } .card { cursor: default; } }
