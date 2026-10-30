@@ -483,3 +483,16 @@ class ModelNameOptionalTests(TestCase):
 
         self.client.post(reverse("ideas:ai-model-action", args=[model.pk, "use"]), {"model_name": "some-model"})
         self.assertTrue(ai_registry.has_models(self.user))
+
+
+class ProblemShownOnListTests(TestCase):
+    def test_the_list_says_why_a_model_cannot_be_used(self):
+        user = make_user("owner", staff=False)
+        self.client.force_login(user)
+        AIModel.objects.create(owner=user, kind="groq", label="Groq", model_name="m", **sealed(user))
+
+        with self.settings(KEYS_ENCRYPTION_KEY="a-brand-new-secret-a-brand-new-secret"):
+            page = self.client.get(reverse("ideas:ai-models"))
+
+        self.assertContains(page, "Kullanılamıyor: kayıtlı anahtar okunamıyor")
+        self.assertNotContains(self.client.get(reverse("ideas:ai-models")), "Kullanılamıyor")

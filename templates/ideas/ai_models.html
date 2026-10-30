@@ -23,7 +23,7 @@
   <li class="has-tools wrap">
     <a href="{% url 'ideas:ai-model-update' model.pk %}">
       <span class="title">{{ model.label }}{% if not model.enabled %} <span class="muted">(kapalı)</span>{% endif %}</span><br>
-      <span class="meta">{{ model.kind_label }} · {% if model.name_missing %}<span class="error-text">model seçilmedi: "Modeller" tuşuna bas</span>{% else %}{{ model.model_name }}{% endif %}{% if model.key_missing %} · <span class="error-text">anahtar yok</span>{% elif model.key_hint %} · anahtar …{{ model.key_hint }}{% endif %}</span>
+      <span class="meta">{{ model.kind_label }}{% if model.model_name %} · {{ model.model_name }}{% endif %}{% if model.key_hint %} · anahtar …{{ model.key_hint }}{% endif %}{% if model.problem %}<br><span class="error-text">Kullanılamıyor: {{ model.problem }}</span>{% endif %}</span>
     </a>
     <div class="row-tools">
       <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'up' %}">{% csrf_token %}<button class="btn quiet small" type="submit" aria-label="Yukarı taşı" {% if forloop.first %}disabled{% endif %}>↑</button></form>

@@ -27,6 +27,35 @@ def spec_for(model: AIModel) -> ModelSpec:
     return ModelSpec(model.chain_name, model.label, model.kind, model.model_name, model.base_url, api_key=key)
 
 
+def problem(model: AIModel, user) -> str:
+    """Why this model cannot be used right now, or "" when it can."""
+    info = KINDS.get(model.kind)
+    if not model.enabled:
+        return "kapalı"
+    if info is None or (info.staff_only and not user.is_staff):
+        return "bu tür yalnızca yönetici hesabında çalışır"
+    if not model.model_name:
+        return "model seçilmedi (\"Modeller\" tuşuna bas)"
+    if info.needs_key and not model.api_key_sealed:
+        return "anahtar kayıtlı değil"
+    if model.api_key_sealed and not _readable(model):
+        return "kayıtlı anahtar okunamıyor (şifreleme anahtarı değişmiş); modeli düzenleyip anahtarı yeniden gir"
+    return ""
+
+
+def diagnose(user) -> list[tuple[str, str]]:
+    """(label, why) for every model of the user that cannot be used right now, in list order."""
+    return [(model.label, why) for model in AIModel.objects.filter(owner=user) if (why := problem(model, user))]
+
+
+def _readable(model: AIModel) -> bool:
+    try:
+        unseal(model.api_key_sealed, model.owner_id)
+    except KeyUnreadable:
+        return False
+    return True
+
+
 def has_models(user) -> bool:
     return bool(usable_models(user))
 

@@ -32,9 +32,13 @@ def _reason(error: AIError) -> str:
     return "hata verdi"
 
 
-def describe(error: AIError) -> str:
+def describe(error: AIError, owner=None) -> str:
+    """`owner` lets "nothing is configured" say which of the user's models are unusable and why."""
     if isinstance(error, AllProvidersFailed):
         return "; ".join(f"{ai_registry.label_for(name)}: {_reason(failure)}" for name, failure in error.failures)
     if isinstance(error, AINotConfiguredError):
+        problems = ai_registry.diagnose(owner) if owner is not None else []
+        if problems:
+            return "Modellerin var ama hiçbiri kullanılamıyor. " + "; ".join(f"{label}: {why}" for label, why in problems) + "."
         return NO_MODEL
     return _reason(error).capitalize()

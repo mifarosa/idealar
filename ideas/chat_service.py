@@ -70,7 +70,7 @@ def ask_assistant(conversation: Conversation, assistant_factory=None, provider: 
         reply = assistant.respond(build_context(scope), history)
     except AIError as error:
         logger.warning("AI chat failed (%s scope): %s", scope.kind, error)
-        conversation.failure_reason = ai_failure.describe(error)  # read by the view; not stored
+        conversation.failure_reason = ai_failure.describe(error, conversation.owner)  # read by the view; not stored
         return None
     return _add_message(
         conversation,

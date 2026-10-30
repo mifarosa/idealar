@@ -4,7 +4,7 @@ from django.urls import reverse
 from unittest.mock import patch
 
 from ai.errors import AINotConfiguredError, AIProviderError, AIRateLimitError, AIResponseError, AllProvidersFailed
-from ideas import ai_failure
+from ideas import ai_failure, ai_registry
 from ideas.key_vault import seal
 from ideas.models import AIModel, Idea
 
@@ -54,3 +54,56 @@ class ChatFailureMessageTests(TestCase):
 
         self.assertContains(response, "Hiçbir AI yanıt veremedi")
         self.assertContains(response, "Sebep: Groq: modeli bulamadı (404)")
+
+
+class DiagnoseTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user("owner")
+
+    def make(self, label="G", **fields):
+        defaults = {"kind": "groq", "model_name": "m", "api_key_sealed": seal("k", self.user.pk), "key_hint": ""}
+        return AIModel.objects.create(owner=self.user, label=label, **{**defaults, **fields})
+
+    def reasons(self):
+        return dict(ai_registry.diagnose(self.user))
+
+    def test_every_way_a_model_can_be_unusable_is_named(self):
+        self.make("Off", enabled=False)
+        self.make("NoName", model_name="")
+        self.make("NoKey", api_key_sealed="")
+        self.make("Local", kind="ollama", base_url="http://h:1", api_key_sealed="")
+
+        reasons = self.reasons()
+
+        self.assertEqual(reasons["Off"], "kapalı")
+        self.assertIn("model seçilmedi", reasons["NoName"])
+        self.assertIn("anahtar kayıtlı değil", reasons["NoKey"])
+        self.assertIn("yalnızca yönetici", reasons["Local"])
+
+    def test_an_unreadable_key_is_explained(self):
+        self.make("Groq")
+
+        with self.settings(KEYS_ENCRYPTION_KEY="a-brand-new-secret-a-brand-new-secret"):
+            self.assertIn("okunamıyor", self.reasons()["Groq"])
+
+    def test_working_models_are_not_listed(self):
+        self.make("Fine")
+
+        self.assertEqual(ai_registry.diagnose(self.user), [])
+
+    def test_the_chat_message_lists_the_reasons_when_models_exist_but_none_work(self):
+        self.make("Groq")
+        self.client.force_login(self.user)
+
+        with self.settings(KEYS_ENCRYPTION_KEY="a-brand-new-secret-a-brand-new-secret"):
+            response = self.client.post(reverse("ideas:chat"), {"text": "selam"}, follow=True)
+
+        self.assertContains(response, "Modellerin var ama hiçbiri kullanılamıyor")
+        self.assertContains(response, "Groq: kayıtlı anahtar okunamıyor")
+
+    def test_a_user_with_no_models_still_gets_the_add_a_model_hint(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(reverse("ideas:chat"), {"text": "selam"}, follow=True)
+
+        self.assertContains(response, "bir model ve anahtarı ekle")

@@ -41,19 +41,13 @@ def get_own(user, pk) -> AIModel:
     return model
 
 
-def key_is_set(model: AIModel) -> bool:
-    info = KINDS.get(model.kind)
-    return not info or not info.needs_key or bool(model.api_key_sealed)
-
-
 @method_decorator(never_cache, name="dispatch")
 class AIModelListView(LoginRequiredMixin, View):
     def get(self, request):
         models = list(own_models(request.user))
         for model in models:
             model.kind_label = KINDS[model.kind].label if model.kind in KINDS else model.kind
-            model.key_missing = not key_is_set(model)
-            model.name_missing = not model.model_name
+            model.problem = ai_registry.problem(model, request.user) if model.enabled else ""
         return render(request, "ideas/ai_models.html", {"models": models, "can_import_env": request.user.is_staff and not models})
 
 
