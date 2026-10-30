@@ -1,5 +1,6 @@
 """Which AI models a user has brought: their own list, with keys unsealed only for the moment of a call."""
 import logging
+from django.utils.translation import gettext as _
 import re
 
 from ai.fallback import FallbackClient
@@ -31,15 +32,15 @@ def problem(model: AIModel, user) -> str:
     """Why this model cannot be used right now, or "" when it can."""
     info = KINDS.get(model.kind)
     if not model.enabled:
-        return "kapalı"
+        return _("kapalı")
     if info is None or (info.staff_only and not user.is_staff):
-        return "bu tür yalnızca yönetici hesabında çalışır"
+        return _("bu tür yalnızca yönetici hesabında çalışır")
     if not model.model_name:
-        return "model seçilmedi (\"Modeller\" tuşuna bas)"
+        return _("model seçilmedi (\"Modeller\" tuşuna bas)")
     if info.needs_key and not model.api_key_sealed:
-        return "anahtar kayıtlı değil"
+        return _("anahtar kayıtlı değil")
     if model.api_key_sealed and not _readable(model):
-        return "kayıtlı anahtar okunamıyor (şifreleme anahtarı değişmiş); modeli düzenleyip anahtarı yeniden gir"
+        return _("kayıtlı anahtar okunamıyor (şifreleme anahtarı değişmiş); modeli düzenleyip anahtarı yeniden gir")
     return ""
 
 
@@ -54,6 +55,13 @@ def _readable(model: AIModel) -> bool:
     except KeyUnreadable:
         return False
     return True
+
+
+def kind_label(kind: str) -> str:
+    """Provider names are brands and stay as they are; only the generic "other server" kind is translated."""
+    if kind == "custom":
+        return _("Diğer (OpenAI uyumlu)")
+    return KINDS[kind].label if kind in KINDS else kind
 
 
 def has_models(user) -> bool:
@@ -79,5 +87,5 @@ def label_for(name: str) -> str:
     match = CHAIN_NAME.fullmatch(name)
     if match:
         label = AIModel.objects.filter(pk=int(match.group(1))).values_list("label", flat=True).first()
-        return label or "silinmiş model"
+        return label or _("silinmiş model")
     return PROVIDER_LABELS.get(name, name)

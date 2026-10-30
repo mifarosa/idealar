@@ -1,11 +1,12 @@
 from django.conf import settings
+from django.utils.translation import gettext_lazy
 from django.db import models
 
 KIND_SUGGESTION, KIND_COMPLAINT, KIND_BUG = "suggestion", "complaint", "bug"
-KIND_CHOICES = [(KIND_SUGGESTION, "Öneri"), (KIND_COMPLAINT, "Şikayet"), (KIND_BUG, "Hata bildirimi")]
+KIND_CHOICES = [(KIND_SUGGESTION, gettext_lazy("Öneri")), (KIND_COMPLAINT, gettext_lazy("Şikayet")), (KIND_BUG, gettext_lazy("Hata bildirimi"))]
 
 STATUS_OPEN, STATUS_IN_PROGRESS, STATUS_DONE, STATUS_CLOSED = "open", "in_progress", "done", "closed"
-STATUS_CHOICES = [(STATUS_OPEN, "Açık"), (STATUS_IN_PROGRESS, "İnceleniyor"), (STATUS_DONE, "Çözüldü"), (STATUS_CLOSED, "Kapalı")]
+STATUS_CHOICES = [(STATUS_OPEN, gettext_lazy("Açık")), (STATUS_IN_PROGRESS, gettext_lazy("İnceleniyor")), (STATUS_DONE, gettext_lazy("Çözüldü")), (STATUS_CLOSED, gettext_lazy("Kapalı"))]
 ACTIVE_STATUSES = (STATUS_OPEN, STATUS_IN_PROGRESS)
 
 MAX_TEXT_CHARS = 4000

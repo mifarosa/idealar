@@ -1,14 +1,15 @@
-{% load static %}<!doctype html>
-<html lang="tr">
+{% load static i18n %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:'tr' }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#E96A26">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <title>{% block title %}Idealar{% endblock %}</title>
+  <title>{% block title %}{% trans "Idealar" %}{% endblock %}</title>
   <link rel="manifest" href="{% url 'pwa:manifest' %}">
-  <link rel="icon" href="{% static 'icons/icon-192.png' %}">
-  <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
+  <link rel="icon" href="{% static 'img/logo.svg' %}" type="image/svg+xml">
+  <link rel="icon" href="{% static 'icons/icon-192.png' %}" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'icons/apple-touch-icon.png' %}">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <script>
     // Apply the saved theme before first paint so there is no flash of the wrong colors.
@@ -28,28 +29,31 @@
   <div class="app{% if not user.is_authenticated %} anonymous{% endif %}">
     {% if user.is_authenticated %}
     <aside class="sidebar">
-      <a class="brand" href="{% url 'ideas:list' %}"><span class="dot"></span>Idealar</a>
-      <nav class="nav" aria-label="Ana menü">
-        <a href="{% url 'ideas:list' %}" {% if nav_section == 'ideas' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-ideas"/></svg>Fikirler<span class="count">{{ nav_idea_count }}</span></a>
-        <a href="{% url 'ideas:project-list' %}" {% if nav_section == 'projects' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-folder"/></svg>Projeler<span class="count">{{ nav_project_count }}</span></a>
-        <a href="{% url 'ideas:chat' %}" {% if nav_section == 'chat' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-chat"/></svg>Sohbet</a>
-        <a href="{% url 'kanban:board' %}" {% if nav_section == 'kanban' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-board"/></svg>Kanban</a>
-        <a href="{% url 'accounts:settings' %}" {% if nav_section == 'settings' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-settings"/></svg>Ayarlar</a>
-        <a href="{% url 'support:list' %}" {% if nav_section == 'support' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-help"/></svg>Öneri &amp; şikayet</a>
-        {% if can_manage_tickets %}<a href="{% url 'support:inbox' %}"><svg class="icon"><use href="#i-chat"/></svg>Gelen kutusu<span class="count">{{ open_ticket_count }}</span></a>{% endif %}
+      <div class="brand-row">
+        <a class="brand" href="{% url 'ideas:list' %}">{% include "_logo.html" %}</a>
+        {% include "_language_switch.html" %}
+      </div>
+      <nav class="nav" aria-label="{% trans "Ana menü" %}">
+        <a href="{% url 'ideas:list' %}" {% if nav_section == 'ideas' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-ideas"/></svg>{% trans "Fikirler" %}<span class="count">{{ nav_idea_count }}</span></a>
+        <a href="{% url 'ideas:project-list' %}" {% if nav_section == 'projects' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-folder"/></svg>{% trans "Projeler" %}<span class="count">{{ nav_project_count }}</span></a>
+        <a href="{% url 'ideas:chat' %}" {% if nav_section == 'chat' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-chat"/></svg>{% trans "Sohbet" %}</a>
+        <a href="{% url 'kanban:board' %}" {% if nav_section == 'kanban' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-board"/></svg>{% trans "Kanban" %}</a>
+        <a href="{% url 'accounts:settings' %}" {% if nav_section == 'settings' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-settings"/></svg>{% trans "Ayarlar" %}</a>
+        <a href="{% url 'support:list' %}" {% if nav_section == 'support' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-help"/></svg>{% trans "Öneri & şikayet" %}</a>
+        {% if can_manage_tickets %}<a href="{% url 'support:inbox' %}"><svg class="icon"><use href="#i-chat"/></svg>{% trans "Gelen kutusu" %}<span class="count">{{ open_ticket_count }}</span></a>{% endif %}
       </nav>
       <div class="side-foot">
         {% include "_theme_switch.html" %}
         <div class="user">
           <span>{{ user.get_username }}</span>
-          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="link" type="submit">Çıkış</button></form>
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="link" type="submit">{% trans "Çıkış" %}</button></form>
         </div>
       </div>
     </aside>
     {% endif %}
 
     <div class="content">
-      {% if ai_missing %}<a class="ai-notice" href="{% url 'ideas:ai-models' %}">Yapay zekâ özellikleri için kendi AI anahtarını ekle →</a>{% endif %}
+      {% if ai_missing %}<a class="ai-notice" href="{% url 'ideas:ai-models' %}">{% trans "Yapay zekâ özellikleri için kendi AI anahtarını ekle →" %}</a>{% endif %}
       {% block body %}
       <main class="page"><div class="page-inner {% block inner_class %}{% endblock %}">{% block content %}{% endblock %}</div></main>
       {% endblock %}
@@ -58,14 +62,25 @@
   </div>
 
   {% if user.is_authenticated %}
-  <nav class="tabbar" aria-label="Ana menü">
-    <a href="{% url 'ideas:list' %}" {% if nav_section == 'ideas' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-ideas"/></svg>Fikirler</a>
-    <a href="{% url 'ideas:project-list' %}" {% if nav_section == 'projects' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-folder"/></svg>Projeler</a>
-    <a href="{% url 'ideas:chat' %}" {% if nav_section == 'chat' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-chat"/></svg>Sohbet</a>
-    <a href="{% url 'kanban:board' %}" {% if nav_section == 'kanban' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-board"/></svg>Kanban</a>
-    <a href="{% url 'accounts:settings' %}" {% if nav_section == 'settings' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-settings"/></svg>Ayarlar</a>
+  <nav class="tabbar" aria-label="{% trans "Ana menü" %}">
+    <a href="{% url 'ideas:list' %}" {% if nav_section == 'ideas' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-ideas"/></svg>{% trans "Fikirler" %}</a>
+    <a href="{% url 'ideas:project-list' %}" {% if nav_section == 'projects' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-folder"/></svg>{% trans "Projeler" %}</a>
+    <a href="{% url 'ideas:chat' %}" {% if nav_section == 'chat' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-chat"/></svg>{% trans "Sohbet" %}</a>
+    <a href="{% url 'kanban:board' %}" {% if nav_section == 'kanban' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-board"/></svg>{% trans "Kanban" %}</a>
+    <a href="{% url 'accounts:settings' %}" {% if nav_section == 'settings' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-settings"/></svg>{% trans "Ayarlar" %}</a>
   </nav>
   {% endif %}
+  <script>
+    // Texts the scripts show (alerts, copy feedback) in the language of the page.
+    window.IDEALAR_TEXT = {
+      saveFailed: "{% trans 'Kaydedilemedi, bağlantını kontrol et.' as text %}{{ text|escapejs }}",
+      notSaved: "{% trans 'Kaydedilemedi.' as text %}{{ text|escapejs }}",
+      cardMoveFailed: "{% trans 'Kart taşınamadı.' as text %}{{ text|escapejs }}",
+      copied: "{% trans "Panoya kopyalandı. Claude'a yapıştırabilirsin." as text %}{{ text|escapejs }}",
+      copy: "{% trans 'Kopyala' as text %}{{ text|escapejs }}",
+      copyFailed: "{% trans 'Otomatik kopyalanamadı; metin seçili, Ctrl+C ile kopyala.' as text %}{{ text|escapejs }}"
+    };
+  </script>
   <script src="{% static 'js/app.js' %}" defer></script>
 </body>
 </html>

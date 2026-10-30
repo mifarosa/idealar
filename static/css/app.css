@@ -41,6 +41,10 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .app.anonymous { grid-template-columns: 1fr; }
 .sidebar { border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 16px 12px; gap: 24px; overflow: auto; }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 17px; padding: 0 8px; text-decoration: none; }
+.brand-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 8px 0 0; }
+.logo { width: 26px; height: 26px; flex: none; border-radius: 6px; }
+.lang-switch .seg { border-radius: 3px; }
+.lang-switch .seg button { min-height: 26px; padding: 2px 8px; font-size: 12px; flex: none; }
 .dot { width: 8px; height: 8px; background: var(--signal); border-radius: 50%; flex: none; }
 .nav { display: flex; flex-direction: column; gap: 2px; }
 .nav a { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 3px; text-decoration: none; }
@@ -208,6 +212,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .send { width: 38px; height: 38px; background: var(--ink); color: var(--ground); border-radius: 3px; display: grid; place-items: center; flex: none; text-align: center; }
 .send:hover { opacity: 0.88; }
 .sidebar .seg button { padding: 8px 0; }
+.sidebar .lang-switch .seg button, .login-card .lang-switch .seg button { min-height: 26px; padding: 2px 8px; font-size: 12px; flex: none; }
 .provider-select { max-width: 8rem; font-size: 13px; height: 38px; flex: none; }  /* same height as the message box and send button */
 .cancel[hidden] { display: none; }
 .capture .cancel { flex: none; height: 38px; padding: 0 12px; }
@@ -222,6 +227,7 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 /* ---------- Auth ---------- */
 .auth { max-width: 24rem; margin: 15vh auto 0; padding: 0 16px; display: flex; flex-direction: column; gap: 20px; }
 .auth .brand { padding: 0; font-size: 20px; }
+.brand-row .brand { padding: 0 0 0 8px; }
 
 /* ---------- Phone ---------- */
 @media (max-width: 899px) {
@@ -286,7 +292,8 @@ code { font: 13px "SFMono-Regular", Consolas, monospace; border: 1px solid var(-
 .landing-grid { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 56px; max-width: 70rem; margin: 0 auto; padding: 48px 32px 64px; align-items: start; }
 .landing .pitch { grid-column: 1; grid-row: 1; min-width: 0; }
 .landing .login-card { grid-column: 2; grid-row: 1; position: sticky; top: 48px; display: flex; flex-direction: column; gap: 16px; padding: 24px; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); }
-.login-card .brand { padding: 0; font-size: 20px; }
+.login-card .brand, .login-card .brand-row .brand { padding: 0; font-size: 20px; }
+.login-card .brand-row { padding: 0; }
 .login-card h2 { font-size: 18px; }
 .google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; text-decoration: none; }
 .pitch h1 { font-size: 40px; line-height: 1.12; letter-spacing: -0.02em; margin-bottom: 16px; }

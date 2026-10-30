@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}{{ ticket.title }} · Idealar{% endblock %}
 {% block content %}
-<a class="crumb" href="{% if manager and ticket.owner_id != user.pk %}{% url 'support:inbox' %}{% else %}{% url 'support:list' %}{% endif %}"><svg class="icon"><use href="#i-back"/></svg>{% if manager and ticket.owner_id != user.pk %}Gelen kutusu{% else %}Öneri &amp; şikayet{% endif %}</a>
+<a class="crumb" href="{% if manager and ticket.owner_id != user.pk %}{% url 'support:inbox' %}{% else %}{% url 'support:list' %}{% endif %}"><svg class="icon"><use href="#i-back"/></svg>{% if manager and ticket.owner_id != user.pk %}{% trans "Gelen kutusu" %}{% else %}{% trans "Öneri & şikayet" %}{% endif %}</a>
 <div class="page-head"><h1>{{ ticket.title }}</h1></div>
 <p class="meta">
   <span class="tag">{{ ticket.get_kind_display }}</span> <span class="tag status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
@@ -14,7 +15,7 @@
   {% for message in thread %}
   <div class="bubble {% if message.from_admin %}bubble-assistant{% else %}bubble-user{% endif %}" style="max-width: none">
     <p>{{ message.body|linebreaksbr }}</p>
-    <p class="provider-badge">{% if message.from_admin %}Destek{% else %}{% if message.author_id == ticket.owner_id %}Kullanıcı{% else %}{{ message.author.get_username }}{% endif %}{% endif %} · {{ message.created_at|date:"d M Y H:i" }}</p>
+    <p class="provider-badge">{% if message.from_admin %}{% trans "Destek" %}{% else %}{% if message.author_id == ticket.owner_id %}{% trans "Kullanıcı" %}{% else %}{{ message.author.get_username }}{% endif %}{% endif %} · {{ message.created_at|date:"d M Y H:i" }}</p>
   </div>
   {% endfor %}
 </div>
@@ -23,7 +24,7 @@
 <form method="post" class="form actions" style="margin-bottom: 24px">
   {% csrf_token %}<input type="hidden" name="action" value="status">
   {{ status_form.status }}
-  <button class="btn" type="submit">Durumu kaydet</button>
+  <button class="btn" type="submit">{% trans "Durumu kaydet" %}</button>
 </form>
 {% endif %}
 
@@ -32,12 +33,12 @@
   {% csrf_token %}
   {{ reply_form.body.errors }}
   <div class="form-field">
-    <label class="form-label" for="{{ reply_form.body.id_for_label }}">{% if manager and ticket.owner_id != user.pk %}Kullanıcıya yanıt{% else %}Yanıt ekle{% endif %}</label>
+    <label class="form-label" for="{{ reply_form.body.id_for_label }}">{% if manager and ticket.owner_id != user.pk %}{% trans "Kullanıcıya yanıt" %}{% else %}{% trans "Yanıt ekle" %}{% endif %}</label>
     {{ reply_form.body }}
   </div>
-  <div class="actions"><button class="btn primary" type="submit">Gönder</button></div>
+  <div class="actions"><button class="btn primary" type="submit">{% trans "Gönder" %}</button></div>
 </form>
 {% else %}
-<p class="muted">Bu kayıt kapatıldı. Yeni bir konu için yeni kayıt açabilirsin.</p>
+<p class="muted">{% trans "Bu kayıt kapatıldı. Yeni bir konu için yeni kayıt açabilirsin." %}</p>
 {% endif %}
 {% endblock %}

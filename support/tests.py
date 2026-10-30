@@ -133,7 +133,7 @@ class UserSideTests(TestCase):
 
     def test_the_inbox_link_is_hidden_from_regular_users(self):
         self.assertNotContains(self.client.get(reverse("support:list")), "Gelen kutusu")
-        self.assertContains(self.client.get(reverse("support:list")), "Öneri &amp; şikayet")
+        self.assertContains(self.client.get(reverse("support:list")), "Öneri & şikayet")
 
 
 @override_settings(TICKET_ADMIN_EMAILS=[OWNER_EMAIL])

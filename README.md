@@ -62,6 +62,12 @@ Giriş yalnızca Google iledir (şifreli form kalktı). Yönetici (staff) şifre
 3. Varsayılan model `claude-opus-5-5`. Not almak için daha ucuz bir model yeterliyse `ANTHROPIC_MODEL=claude-haiku-5-5` yaz; geçerli adları `docker compose exec web python manage.py ai_models` listeler.
 4. Claude bir isteği reddederse veya hata verirse zincir otomatik olarak sıradaki sağlayıcıya geçer; fikrin kaybolmaz.
 
+### Diller (Türkçe / İngilizce) ve logo
+Arayüz iki dillidir. Logonun yanındaki **TR / EN** düğmesi dili değiştirir ve seçim tarayıcıda (çerez) hatırlanır; hiç seçmemiş birine tarayıcısının dili gösterilir, desteklenmeyen dillerde Türkçe açılır. Yapay zekâ cevapları senin yazdığın dilde gelir; "Claude için hazır prompt" metni de seçili dilde üretilir. Fikir, proje ve sohbet içerikleri senin yazdığındır, çevrilmez.
+- **Çeviri nasıl çalışır:** Kaynak dil Türkçedir (kodda ve şablonlarda `{% trans %}` / `gettext` içinde); İngilizce karşılıklar `locale/en/LC_MESSAGES/django.po` dosyasındadır.
+- **Yeni metin eklediğinde:** metni `_()` / `{% trans %}` içine yaz, sonra `python manage.py makemessages -l en --ignore=".venv/*" -e html,py,txt` çalıştır, `django.po` içindeki yeni boş girdilerin İngilizcesini yaz ve `python manage.py compilemessages` ile `django.mo`'yu üret. `django.mo` repoda tutulur (Docker imajında gettext olmadığı için derlenmiş hâli commit'lenir). Testler eksik, bulanık (fuzzy) ya da derlenmemiş çeviri varsa hata verir.
+- Logo `static/img/logo.svg` dosyasındadır; PNG ikonlar `python scripts/make_icons.py` ile üretilir.
+
 ### Kanban
 Sol menüdeki **Kanban** iki tür pano verir: **Kişisel pano** ve her **projenin** kendi panosu (sağ üstteki listeden ya da proje sayfasındaki Kanban tuşundan). Üç sütun vardır: Yapılacak, Yapılıyor, Bitti.
 - **Proje panosu:** Projeye bağlı her fikir panoda kendiliğinden bir kart olarak **Yapılacak** sütununda durur (fikrin adı ve kaç özelliğinin bittiği görünür) ve sütunlar arasında taşınır. Projeye yeni fikir bağlayınca ya da sohbette bağlama önerisini onaylayınca kart kendiliğinden gelir. Sütunun altındaki **Projeye fikir ekle…** listesiyle de fikir bağlayabilirsin. Fikir kartındaki çarpı, fikri projeden çıkarır (fikrin kendisi silinmez). Fikrin adını fikir sayfasından değiştirirsin. Fikir olmayan serbest kartlar da eklenebilir.

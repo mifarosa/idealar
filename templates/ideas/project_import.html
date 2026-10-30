@@ -1,19 +1,20 @@
 {% extends "base.html" %}
-{% block title %}GitHub'dan içe aktar · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "GitHub'dan içe aktar" %} · Idealar{% endblock %}
 {% block inner_class %}wide{% endblock %}
 {% block content %}
-<a class="crumb" href="{% url 'ideas:project-list' %}"><svg class="icon"><use href="#i-back"/></svg>Projeler</a>
-<div class="page-head"><h1>GitHub'dan içe aktar</h1></div>
+<a class="crumb" href="{% url 'ideas:project-list' %}"><svg class="icon"><use href="#i-back"/></svg>{% trans "Projeler" %}</a>
+<div class="page-head"><h1>{% trans "GitHub'dan içe aktar" %}</h1></div>
 
 <form method="get" class="form" style="margin-bottom: 24px">
   <div class="form-field">
-    <label class="form-label" for="kullanici">GitHub kullanıcı adı{% if has_token %} (boş bırakırsan token'ın sahibinin tüm depoları, özel olanlar dahil){% endif %}</label>
+    <label class="form-label" for="kullanici">{% trans "GitHub kullanıcı adı" %}{% if has_token %} {% trans "(boş bırakırsan token'ın sahibinin tüm depoları, özel olanlar dahil)" %}{% endif %}</label>
     <div class="actions">
-      <input id="kullanici" type="text" name="kullanici" value="{{ username }}" placeholder="kullanici-adi" autocomplete="off" style="max-width: 20rem">
-      <button class="btn primary" type="submit">Depoları getir</button>
+      <input id="kullanici" type="text" name="kullanici" value="{{ username }}" placeholder="{% trans "kullanici-adi" %}" autocomplete="off" style="max-width: 20rem">
+      <button class="btn primary" type="submit">{% trans "Depoları getir" %}</button>
     </div>
   </div>
-  <p class="muted">Yalnızca depo adı, açıklaması ve adresi projeye aktarılır; depoların içeriği okunmaz. Herkese açık depolar için token gerekmez.</p>
+  <p class="muted">{% trans "Yalnızca depo adı, açıklaması ve adresi projeye aktarılır; depoların içeriği okunmaz. Herkese açık depolar için token gerekmez." %}</p>
 </form>
 
 {% if rows is not None %}
@@ -31,10 +32,10 @@
             {% if row.repo.description %}<span class="meta">{{ row.repo.description }}</span>{% endif %}
           </span>
           <span class="import-tags">
-            {% if row.already %}<span class="tag">zaten ekli</span>{% endif %}
-            {% if row.repo.private %}<span class="tag">özel</span>{% endif %}
-            {% if row.repo.fork %}<span class="tag">fork</span>{% endif %}
-            {% if row.repo.archived %}<span class="tag">arşiv</span>{% endif %}
+            {% if row.already %}<span class="tag">{% trans "zaten ekli" %}</span>{% endif %}
+            {% if row.repo.private %}<span class="tag">{% trans "özel" %}</span>{% endif %}
+            {% if row.repo.fork %}<span class="tag">{% trans "fork" %}</span>{% endif %}
+            {% if row.repo.archived %}<span class="tag">{% trans "arşiv" %}</span>{% endif %}
             {% if row.repo.language %}<span class="tag">{{ row.repo.language }}</span>{% endif %}
             {% if row.repo.pushed_at %}<span class="muted">{{ row.repo.pushed_at }}</span>{% endif %}
           </span>
@@ -43,12 +44,12 @@
       {% endfor %}
     </ul>
     <div class="actions">
-      <button class="btn primary" type="submit">Seçilenleri proje olarak ekle</button>
-      <span class="muted">Fork ve arşivlenmiş depolar varsayılan olarak seçili gelmez.</span>
+      <button class="btn primary" type="submit">{% trans "Seçilenleri proje olarak ekle" %}</button>
+      <span class="muted">{% trans "Fork ve arşivlenmiş depolar varsayılan olarak seçili gelmez." %}</span>
     </div>
   </form>
   {% else %}
-  <p class="empty">Bu hesapta depo bulunamadı.</p>
+  <p class="empty">{% trans "Bu hesapta depo bulunamadı." %}</p>
   {% endif %}
 {% endif %}
 {% endblock %}

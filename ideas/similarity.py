@@ -5,6 +5,7 @@ Two stages: a cheap word-overlap pass picks which existing ideas/projects the AI
 unavailable, strong word overlap alone is reported and clearly marked as such.
 """
 import logging
+from django.utils.translation import gettext as _
 import re
 
 from ai.errors import AIError
@@ -113,7 +114,7 @@ def _words_only_matches(idea: Idea, candidates: list[tuple[Candidate, set[str]]]
     for candidate, words in candidates:
         if word_overlap(idea_words, words) >= WORDS_ONLY_THRESHOLD:
             shared = ", ".join(sorted(idea_words & words)[:5])
-            match = SimilarMatch(candidate.kind, candidate.id, VERDICT_SIMILAR, f"Ortak kelimeler: {shared}")
+            match = SimilarMatch(candidate.kind, candidate.id, VERDICT_SIMILAR, _("Ortak kelimeler: {words}").format(words=shared))
             entries.append(_entry(match, candidate.title, "words"))
     return entries
 

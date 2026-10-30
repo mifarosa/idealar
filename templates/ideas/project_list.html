@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Projeler · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Projeler" %} · Idealar{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Projeler</h1>
+  <h1>{% trans "Projeler" %}</h1>
   <div class="actions">
-    <a class="btn" href="{% url 'ideas:project-import' %}">GitHub'dan içe aktar</a>
-    <a class="btn primary" href="{% url 'ideas:project-create' %}"><svg class="icon"><use href="#i-plus"/></svg>Yeni proje</a>
+    <a class="btn" href="{% url 'ideas:project-import' %}">{% trans "GitHub'dan içe aktar" %}</a>
+    <a class="btn primary" href="{% url 'ideas:project-create' %}"><svg class="icon"><use href="#i-plus"/></svg>{% trans "Yeni proje" %}</a>
   </div>
 </div>
 {% if projects %}
@@ -14,12 +15,12 @@
   <li>
     <a href="{% url 'ideas:project-detail' project.pk %}">
       <div class="title">{{ project.name }}</div>
-      <div class="meta">{{ project.ideas.all|length }} fikir · {{ project.progress.done }}/{{ project.progress.total }} özellik{% if project.github_url %} · GitHub bağlı{% endif %}</div>
+      <div class="meta">{% blocktranslate count counter=project.ideas.all|length with done=project.progress.done total=project.progress.total %}{{ counter }} fikir{% plural %}{{ counter }} fikir{% endblocktranslate %} · {% blocktranslate with done=project.progress.done total=project.progress.total %}{{ done }}/{{ total }} özellik{% endblocktranslate %}{% if project.github_url %} · {% trans "GitHub bağlı" %}{% endif %}</div>
     </a>
   </li>
   {% endfor %}
 </ul>
 {% else %}
-<p class="empty">Henüz proje yok. <a class="link" href="{% url 'ideas:project-import' %}">GitHub'dan içe aktar</a> ya da yeni proje oluştur.</p>
+<p class="empty">{% url 'ideas:project-import' as import_url %}{% blocktranslate trimmed %}Henüz proje yok. <a class="link" href="{{ import_url }}">GitHub'dan içe aktar</a> ya da yeni proje oluştur.{% endblocktranslate %}</p>
 {% endif %}
 {% endblock %}

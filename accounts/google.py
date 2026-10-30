@@ -4,6 +4,7 @@ Authlib handles state, nonce and ID-token signature checks; this module only dec
 verified Google identity belongs to.
 """
 from functools import lru_cache
+from django.utils.translation import gettext as _
 
 from authlib.integrations.django_client import OAuth
 from django.conf import settings
@@ -40,7 +41,7 @@ def user_for(userinfo: dict):
     """The local user for a verified Google identity: known identity, else a user with that e-mail, else a new one."""
     sub, email = userinfo.get("sub"), (userinfo.get("email") or "").strip().lower()
     if not sub or not email or userinfo.get("email_verified") is not True:
-        raise SignInRefused("Google hesabının e-postası doğrulanmamış.")
+        raise SignInRefused(_("Google hesabının e-postası doğrulanmamış."))
 
     known = GoogleAccount.objects.select_related("user").filter(sub=sub).first()
     if known:
@@ -52,18 +53,18 @@ def user_for(userinfo: dict):
         if len(matches) == 1:
             user = matches[0]
         elif matches:
-            raise SignInRefused("Bu e-posta birden fazla hesapta kayıtlı; yöneticiye başvur.")
+            raise SignInRefused(_("Bu e-posta birden fazla hesapta kayıtlı; yöneticiye başvur."))
         elif settings.GOOGLE_SIGNUP:
             user = User.objects.create_user(_free_username(email), email=email, first_name=(userinfo.get("given_name") or "")[:150])
         else:
-            raise SignInRefused("Kayıtlar şu an kapalı.")
+            raise SignInRefused(_("Kayıtlar şu an kapalı."))
         GoogleAccount.objects.create(user=user, sub=sub)
     return _active(user)
 
 
 def _active(user):
     if not user.is_active:
-        raise SignInRefused("Bu hesap kapatılmış.")
+        raise SignInRefused(_("Bu hesap kapatılmış."))
     return user
 
 

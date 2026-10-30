@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}{% if object %}Modeli düzenle{% else %}Model ekle{% endif %} · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% if object %}{% trans "Modeli düzenle" %}{% else %}{% trans "Model ekle" %}{% endif %} · Idealar{% endblock %}
 {% block content %}
-<a class="crumb" href="{% url 'ideas:ai-models' %}"><svg class="icon"><use href="#i-back"/></svg>AI modelleri</a>
-<div class="page-head"><h1>{% if object %}Modeli düzenle{% else %}Model ekle{% endif %}</h1></div>
+<a class="crumb" href="{% url 'ideas:ai-models' %}"><svg class="icon"><use href="#i-back"/></svg>{% trans "AI modelleri" %}</a>
+<div class="page-head"><h1>{% if object %}{% trans "Modeli düzenle" %}{% else %}{% trans "Model ekle" %}{% endif %}</h1></div>
 <form method="post" class="form">
   {% csrf_token %}
   {{ form.non_field_errors }}
@@ -15,8 +16,8 @@
   </div>
   {% endfor %}
   <div class="actions">
-    <button class="btn primary" type="submit">Kaydet</button>
-    <a class="btn quiet" href="{% url 'ideas:ai-models' %}">Vazgeç</a>
+    <button class="btn primary" type="submit">{% trans "Kaydet" %}</button>
+    <a class="btn quiet" href="{% url 'ideas:ai-models' %}">{% trans "Vazgeç" %}</a>
   </div>
 </form>
 {% endblock %}

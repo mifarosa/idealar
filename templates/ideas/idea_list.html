@@ -1,16 +1,17 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}{% if view_mode == 'detail' and selected %}{{ selected.display_title }} · {% endif %}Fikirler · Idealar{% endblock %}
 {% block body %}
 <div class="split" data-view="{{ view_mode }}">
-  <section class="list-pane" aria-label="Fikir listesi">
+  <section class="list-pane" aria-label="{% trans "Fikir listesi" %}">
     <div class="list-head">
-      <h1>Fikirler <span>{{ count_all }}</span></h1>
+      <h1>{% trans "Fikirler" %} <span>{{ count_all }}</span></h1>
 
       <form class="capture" method="post" action="{% url 'ideas:create' %}">
         {% csrf_token %}
         <label class="field"><svg class="icon"><use href="#i-plus"/></svg>{{ quick_form.body }}<kbd>N</kbd></label>
-        <button class="btn quiet cancel" type="button" hidden>Vazgeç</button>
-        <button class="send" type="submit" aria-label="Kaydet"><svg class="icon"><use href="#i-send"/></svg></button>
+        <button class="btn quiet cancel" type="button" hidden>{% trans "Vazgeç" %}</button>
+        <button class="send" type="submit" aria-label="{% trans "Kaydet" %}"><svg class="icon"><use href="#i-send"/></svg></button>
       </form>
 
 
@@ -19,24 +20,24 @@
         {% if project_filter %}<input type="hidden" name="proje" value="{{ project_filter }}">{% endif %}
         {% if sort != 'yeni' %}<input type="hidden" name="sirala" value="{{ sort }}">{% endif %}
         <svg class="icon"><use href="#i-search"/></svg>
-        <input type="search" name="q" value="{{ search_text }}" placeholder="Ara" aria-label="Ara" data-shortcut-search>
+        <input type="search" name="q" value="{{ search_text }}" placeholder="{% trans "Ara" %}" aria-label="{% trans "Ara" %}" data-shortcut-search>
         <kbd>/</kbd>
       </form>
 
-      <nav class="tabs" aria-label="Durum">
-        <a href="{% url 'ideas:list' %}?{% if search_text %}q={{ search_text|urlencode }}&{% endif %}{% if project_filter %}proje={{ project_filter }}&{% endif %}{% if sort != 'yeni' %}sirala={{ sort }}{% endif %}" {% if not status_filter %}aria-current="true"{% endif %}>Hepsi<b>{{ count_all }}</b></a>
-        <a href="{% url 'ideas:list' %}?durum=devam&{% if search_text %}q={{ search_text|urlencode }}&{% endif %}{% if project_filter %}proje={{ project_filter }}&{% endif %}{% if sort != 'yeni' %}sirala={{ sort }}{% endif %}" {% if status_filter == 'devam' %}aria-current="true"{% endif %}>Devam eden<b>{{ count_in_progress }}</b></a>
-        <a href="{% url 'ideas:list' %}?durum=biten&{% if search_text %}q={{ search_text|urlencode }}&{% endif %}{% if project_filter %}proje={{ project_filter }}&{% endif %}{% if sort != 'yeni' %}sirala={{ sort }}{% endif %}" {% if status_filter == 'biten' %}aria-current="true"{% endif %}>Biten<b>{{ count_finished }}</b></a>
+      <nav class="tabs" aria-label="{% trans "Durum" %}">
+        <a href="{% url 'ideas:list' %}?{% if search_text %}q={{ search_text|urlencode }}&{% endif %}{% if project_filter %}proje={{ project_filter }}&{% endif %}{% if sort != 'yeni' %}sirala={{ sort }}{% endif %}" {% if not status_filter %}aria-current="true"{% endif %}>{% trans "Hepsi" %}<b>{{ count_all }}</b></a>
+        <a href="{% url 'ideas:list' %}?durum=devam&{% if search_text %}q={{ search_text|urlencode }}&{% endif %}{% if project_filter %}proje={{ project_filter }}&{% endif %}{% if sort != 'yeni' %}sirala={{ sort }}{% endif %}" {% if status_filter == 'devam' %}aria-current="true"{% endif %}>{% trans "Devam eden" %}<b>{{ count_in_progress }}</b></a>
+        <a href="{% url 'ideas:list' %}?durum=biten&{% if search_text %}q={{ search_text|urlencode }}&{% endif %}{% if project_filter %}proje={{ project_filter }}&{% endif %}{% if sort != 'yeni' %}sirala={{ sort }}{% endif %}" {% if status_filter == 'biten' %}aria-current="true"{% endif %}>{% trans "Biten" %}<b>{{ count_finished }}</b></a>
       </nav>
 
       <form method="get" class="filters" action="{% url 'ideas:list' %}">
         {% if search_text %}<input type="hidden" name="q" value="{{ search_text }}">{% endif %}
         {% if status_filter %}<input type="hidden" name="durum" value="{{ status_filter }}">{% endif %}
-        <select class="select" name="proje" aria-label="Proje" data-autosubmit>
-          <option value="">Tüm projeler</option>
+        <select class="select" name="proje" aria-label="{% trans "Proje" %}" data-autosubmit>
+          <option value="">{% trans "Tüm projeler" %}</option>
           {% for project in projects %}<option value="{{ project.pk }}" {% if project.pk == project_filter %}selected{% endif %}>{{ project.name }}</option>{% endfor %}
         </select>
-        <select class="select" name="sirala" aria-label="Sıralama" data-autosubmit>
+        <select class="select" name="sirala" aria-label="{% trans "Sıralama" %}" data-autosubmit>
           {% for value, label in sort_choices %}<option value="{{ value }}" {% if value == sort %}selected{% endif %}>{{ label }}</option>{% endfor %}
         </select>
       </form>
@@ -54,19 +55,19 @@
         </div>
       </a>
       {% empty %}
-      <p class="empty">{% if search_text or status_filter or project_filter %}Eşleşen fikir yok.{% else %}Henüz fikir yok. İlkini yukarıdaki kutuya yaz.{% endif %}</p>
+      <p class="empty">{% if search_text or status_filter or project_filter %}{% trans "Eşleşen fikir yok." %}{% else %}{% trans "Henüz fikir yok. İlkini yukarıdaki kutuya yaz." %}{% endif %}</p>
       {% endfor %}
       {% if is_paginated %}
       <nav class="pager">
-        {% if page_obj.has_previous %}<a class="link" href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">← Yeni</a>{% else %}<span></span>{% endif %}
-        {% if page_obj.has_next %}<a class="link" href="?page={{ page_obj.next_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">Eski →</a>{% endif %}
+        {% if page_obj.has_previous %}<a class="link" href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">{% trans "← Yeni" %}</a>{% else %}<span></span>{% endif %}
+        {% if page_obj.has_next %}<a class="link" href="?page={{ page_obj.next_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">{% trans "Eski →" %}</a>{% endif %}
       </nav>
       {% endif %}
     </div>
   </section>
 
   <main class="detail-pane">
-    {% if selected %}{% include "ideas/_idea_detail.html" with idea=selected %}{% else %}<p class="empty">Henüz fikir yok.</p>{% endif %}
+    {% if selected %}{% include "ideas/_idea_detail.html" with idea=selected %}{% else %}<p class="empty">{% trans "Henüz fikir yok." %}</p>{% endif %}
   </main>
 </div>
 {% endblock %}

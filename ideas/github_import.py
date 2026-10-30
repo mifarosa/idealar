@@ -1,5 +1,6 @@
 """Lists a GitHub account's repositories so they can be imported as projects (nothing is imported automatically)."""
 import re
+from django.utils.translation import gettext as _
 from dataclasses import dataclass
 
 from .github_repo import GitHubClient, GitHubError
@@ -26,7 +27,7 @@ class RemoteRepo:
 def validate_username(username: str) -> str:
     username = username.strip()
     if username and not USERNAME_PATTERN.match(username):
-        raise GitHubError("GitHub kullanıcı adı geçersiz.")
+        raise GitHubError(_("GitHub kullanıcı adı geçersiz."))
     return username
 
 
@@ -54,7 +55,7 @@ def list_repos(client: GitHubClient, username: str, has_token: bool) -> list[Rem
     """Public repositories of `username`; with an empty username and a token, the token owner's (incl. private)."""
     username = validate_username(username)
     if not username and not has_token:
-        raise GitHubError("Kullanıcı adı yaz (ya da .env'ye GITHUB_TOKEN ekle).")
+        raise GitHubError(_("Kullanıcı adı yaz (ya da .env'ye GITHUB_TOKEN ekle)."))
     repos: list[RemoteRepo] = []
     for page in range(1, MAX_PAGES + 1):
         items = client.get_json(_page_path(username, page))

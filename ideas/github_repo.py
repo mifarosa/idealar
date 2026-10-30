@@ -4,6 +4,7 @@ Only github.com/<owner>/<repo> addresses are accepted and only the configured AP
 so a project URL can never make the server fetch arbitrary addresses.
 """
 import base64
+from django.utils.translation import gettext as _
 import json
 import re
 import urllib.error
@@ -66,7 +67,7 @@ class RepoSnapshot:
 def parse_repo_url(url: str) -> RepoRef:
     match = REPO_URL_PATTERN.match(url.strip())
     if not match:
-        raise GitHubError("GitHub adresi https://github.com/sahip/depo biçiminde olmalı.")
+        raise GitHubError(_("GitHub adresi https://github.com/sahip/depo biçiminde olmalı."))
     return RepoRef(owner=match.group(1), name=match.group(2))
 
 
@@ -84,7 +85,7 @@ class GitHubClient:
         except urllib.error.HTTPError as error:
             raise GitHubError(self._message_for_status(error), status=error.code) from error
         except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as error:
-            raise GitHubError(f"GitHub'a ulaşılamadı: {error}") from error
+            raise GitHubError(_("GitHub'a ulaşılamadı: {error}").format(error=error)) from error
 
     def _headers(self) -> dict:
         headers = {"Accept": "application/vnd.github+json", "User-Agent": USER_AGENT}
@@ -94,11 +95,11 @@ class GitHubClient:
 
     def _message_for_status(self, error: urllib.error.HTTPError) -> str:
         if error.code == 404:
-            hint = "" if self._token else " Özel depo ise .env'ye GITHUB_TOKEN eklemelisin."
-            return f"Depo bulunamadı.{hint}"
+            hint = "" if self._token else " " + _("Özel depo ise .env'ye GITHUB_TOKEN eklemelisin.")
+            return _("Depo bulunamadı.") + hint
         if error.code in (401, 403):
-            return "GitHub erişimi reddetti (istek limiti dolmuş ya da GITHUB_TOKEN geçersiz olabilir)."
-        return f"GitHub hata verdi (HTTP {error.code})."
+            return _("GitHub erişimi reddetti (istek limiti dolmuş ya da GITHUB_TOKEN geçersiz olabilir).")
+        return _("GitHub hata verdi (HTTP {code}).").format(code=error.code)
 
 
 def _decode_content(payload: dict, limit: int) -> str:

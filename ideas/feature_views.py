@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext as _, ngettext
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -25,7 +26,7 @@ class FeatureAddView(LoginRequiredMixin, View):
             form.instance.idea = idea
             form.save()
         else:
-            messages.error(request, "Özellik metni boş olamaz.")
+            messages.error(request, _("Özellik metni boş olamaz."))
         return redirect(idea_panel_url(idea.pk))
 
 
@@ -51,7 +52,7 @@ class FeatureEditView(OwnedFeatureMixin, View):
         feature = self.get_feature(pk)
         form = FeatureForm({"text": request.POST.get("text", ""), "platform": feature.platform}, instance=feature)
         if not form.is_valid():
-            return JsonResponse({"error": "Özellik metni boş olamaz."}, status=400)
+            return JsonResponse({"error": _("Özellik metni boş olamaz.")}, status=400)
         form.save()
         return JsonResponse({"text": feature.text})
 
@@ -89,5 +90,5 @@ class FeatureCopyView(OwnedFeatureMixin, FormView):
         targets = form.cleaned_data["ideas"]
         for idea in targets:
             self.feature.copy_to(idea)
-        messages.success(self.request, f"{len(targets)} fikre kopyalandı.")
+        messages.success(self.request, ngettext("{n} fikre kopyalandı.", "{n} fikre kopyalandı.", len(targets)).format(n=len(targets)))
         return redirect(idea_panel_url(self.feature.idea_id))

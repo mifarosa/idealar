@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -59,7 +60,7 @@ class TaskAddView(BoardMixin, View):
             status = request.POST.get("status")
             services.add_task(request.user, project, form.cleaned_data["title"], status if status in STATUSES else STATUS_TODO)
         else:
-            messages.error(request, "Kartın bir başlığı olmalı.")
+            messages.error(request, _("Kartın bir başlığı olmalı."))
         return redirect(board_url(project))
 
 
@@ -73,7 +74,7 @@ class IdeaAddView(BoardMixin, View):
         raw = request.POST.get("idea", "")
         idea = Idea.objects.owned_by(request.user).filter(pk=int(raw)).first() if raw.isdigit() else None
         if idea is None:
-            messages.error(request, "Bu fikir bulunamadı.")
+            messages.error(request, _("Bu fikir bulunamadı."))
         else:
             if project:
                 idea.projects.add(project)  # the board picks it up from the link
@@ -94,7 +95,7 @@ class TaskMoveView(BoardMixin, View):
             return redirect(board_url(task.project))
         status, index = request.POST.get("status", ""), request.POST.get("index", "")
         if status not in STATUSES or not index.isdigit():
-            return JsonResponse({"error": "Geçersiz taşıma."}, status=400)
+            return JsonResponse({"error": _("Geçersiz taşıma.")}, status=400)
         services.move_task(task, status, int(index))
         return JsonResponse({"ok": True})
 
@@ -106,9 +107,9 @@ class TaskRenameView(BoardMixin, View):
         task = self.get_task(pk)
         title = request.POST.get("title", "").strip()
         if task.mirrors_idea:
-            return JsonResponse({"error": "Fikrin adını fikir sayfasından değiştirebilirsin."}, status=400)
+            return JsonResponse({"error": _("Fikrin adını fikir sayfasından değiştirebilirsin.")}, status=400)
         if not title or len(title) > Task._meta.get_field("title").max_length:
-            return JsonResponse({"error": "Başlık boş olamaz ve çok uzun olmamalı."}, status=400)
+            return JsonResponse({"error": _("Başlık boş olamaz ve çok uzun olmamalı.")}, status=400)
         task.title = title
         task.save(update_fields=["title"])
         return JsonResponse({"title": task.title})

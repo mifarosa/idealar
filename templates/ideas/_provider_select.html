@@ -1,6 +1,6 @@
-{% if providers %}
-<select name="provider" class="select provider-select" aria-label="Hangi AI cevap versin?">
-  <option value="">Otomatik</option>
+{% load i18n %}{% if providers %}
+<select name="provider" class="select provider-select" aria-label="{% trans "Hangi AI cevap versin?" %}">
+  <option value="">{% trans "Otomatik" %}</option>
   {% for value, label in providers %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
 </select>
 {% endif %}

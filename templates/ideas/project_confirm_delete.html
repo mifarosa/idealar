@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Projeyi sil · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Projeyi sil" %} · Idealar{% endblock %}
 {% block content %}
-<div class="page-head"><h1>Projeyi sil</h1></div>
+<div class="page-head"><h1>{% trans "Projeyi sil" %}</h1></div>
 <form method="post" class="form panel">
   {% csrf_token %}
-  <p>“{{ object.name }}” silinecek. Bağlı fikirler silinmez, yalnızca bağlantı kalkar.</p>
+  <p>{% blocktranslate with name=object.name %}“{{ name }}” silinecek. Bağlı fikirler silinmez, yalnızca bağlantı kalkar.{% endblocktranslate %}</p>
   <div class="actions">
-    <button class="btn danger" type="submit">Evet, sil</button>
-    <a class="btn quiet" href="{% url 'ideas:project-detail' object.pk %}">Vazgeç</a>
+    <button class="btn danger" type="submit">{% trans "Evet, sil" %}</button>
+    <a class="btn quiet" href="{% url 'ideas:project-detail' object.pk %}">{% trans "Vazgeç" %}</a>
   </div>
 </form>
 {% endblock %}

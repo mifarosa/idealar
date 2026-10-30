@@ -1,4 +1,5 @@
 from datetime import timedelta
+from django.utils.translation import gettext as _
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -38,7 +39,7 @@ class TicketCreateView(LoginRequiredMixin, View):
     def post(self, request):
         since = timezone.now() - timedelta(days=1)
         if Ticket.objects.filter(owner=request.user, created_at__gte=since).count() >= MAX_TICKETS_PER_DAY:
-            messages.error(request, "Bugün çok fazla kayıt açtın; yarın tekrar yazabilirsin.")
+            messages.error(request, _("Bugün çok fazla kayıt açtın; yarın tekrar yazabilirsin."))
             return redirect("support:list")
         form = TicketForm(request.POST)
         if not form.is_valid():
@@ -46,7 +47,7 @@ class TicketCreateView(LoginRequiredMixin, View):
         ticket = form.save(commit=False)
         ticket.owner = request.user
         ticket.save()
-        messages.success(request, "Kaydın alındı, teşekkürler. Yanıt gelirse burada görürsün.")
+        messages.success(request, _("Kaydın alındı, teşekkürler. Yanıt gelirse burada görürsün."))
         return redirect("support:detail", pk=ticket.pk)
 
 
@@ -90,7 +91,7 @@ class TicketDetailView(LoginRequiredMixin, View):
         if not from_admin and ticket.status == STATUS_DONE:
             ticket.status = STATUS_OPEN  # the author says it is not solved after all
         ticket.save(update_fields=["status", "updated_at"])
-        messages.success(request, "Yanıtın eklendi.")
+        messages.success(request, _("Yanıtın eklendi."))
         return redirect("support:detail", pk=ticket.pk)
 
     def _change_status(self, request, ticket, manager):
@@ -100,7 +101,7 @@ class TicketDetailView(LoginRequiredMixin, View):
         if form.is_valid():
             ticket.status = form.cleaned_data["status"]
             ticket.save(update_fields=["status", "updated_at"])
-            messages.success(request, "Durum güncellendi.")
+            messages.success(request, _("Durum güncellendi."))
         return redirect("support:detail", pk=ticket.pk)
 
 

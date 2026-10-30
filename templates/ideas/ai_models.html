@@ -1,19 +1,20 @@
 {% extends "base.html" %}
-{% block title %}AI modelleri · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "AI modelleri" %} · Idealar{% endblock %}
 {% block content %}
-<a class="crumb" href="{% url 'accounts:settings' %}"><svg class="icon"><use href="#i-back"/></svg>Ayarlar</a>
+<a class="crumb" href="{% url 'accounts:settings' %}"><svg class="icon"><use href="#i-back"/></svg>{% trans "Ayarlar" %}</a>
 <div class="page-head">
-  <h1>AI modelleri</h1>
-  <a class="btn primary" href="{% url 'ideas:ai-model-create' %}">Model ekle</a>
+  <h1>{% trans "AI modelleri" %}</h1>
+  <a class="btn primary" href="{% url 'ideas:ai-model-create' %}">{% trans "Model ekle" %}</a>
 </div>
-<p class="muted">Bu uygulama kendi yapay zekâ anahtarınla çalışır. Üstteki model önce denenir; hata verirse sıradakine geçilir. Anahtarın şifrelenerek saklanır ve bir daha ekranda gösterilmez.</p>
+<p class="muted">{% trans "Bu uygulama kendi yapay zekâ anahtarınla çalışır. Üstteki model önce denenir; hata verirse sıradakine geçilir. Anahtarın şifrelenerek saklanır ve bir daha ekranda gösterilmez." %}</p>
 
 {% if not models %}
 <div class="form" style="margin: 16px 0 24px">
-  <p>Henüz model eklemedin. Groq ve Gemini'nin ücretsiz katmanı var; Claude ve OpenRouter ücretlidir. Anahtarı ilgili sağlayıcının sitesinden alıp <strong>Model ekle</strong> ile buraya yapıştır.</p>
+  <p>{% blocktranslate trimmed %}Henüz model eklemedin. Groq ve Gemini'nin ücretsiz katmanı var; Claude ve OpenRouter ücretlidir. Anahtarı ilgili sağlayıcının sitesinden alıp <strong>Model ekle</strong> ile buraya yapıştır.{% endblocktranslate %}</p>
   {% if can_import_env %}
   <form method="post" action="{% url 'ideas:ai-model-import-env' %}">{% csrf_token %}
-    <button class="btn" type="submit">Sunucunun .env ayarlarını bana aktar</button>
+    <button class="btn" type="submit">{% trans "Sunucunun .env ayarlarını bana aktar" %}</button>
   </form>
   {% endif %}
 </div>
@@ -22,16 +23,16 @@
   {% for model in models %}
   <li class="has-tools wrap">
     <a href="{% url 'ideas:ai-model-update' model.pk %}">
-      <span class="title">{{ model.label }}{% if not model.enabled %} <span class="muted">(kapalı)</span>{% endif %}</span><br>
-      <span class="meta">{{ model.kind_label }}{% if model.model_name %} · {{ model.model_name }}{% endif %}{% if model.key_hint %} · anahtar …{{ model.key_hint }}{% endif %}{% if model.problem %}<br><span class="error-text">Kullanılamıyor: {{ model.problem }}</span>{% endif %}</span>
+      <span class="title">{{ model.label }}{% if not model.enabled %} <span class="muted">{% trans "(kapalı)" %}</span>{% endif %}</span><br>
+      <span class="meta">{{ model.kind_label }}{% if model.model_name %} · {{ model.model_name }}{% endif %}{% if model.key_hint %} · {% blocktranslate with hint=model.key_hint %}anahtar …{{ hint }}{% endblocktranslate %}{% endif %}{% if model.problem %}<br><span class="error-text">{% blocktranslate with problem=model.problem %}Kullanılamıyor: {{ problem }}{% endblocktranslate %}</span>{% endif %}</span>
     </a>
     <div class="row-tools">
-      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'up' %}">{% csrf_token %}<button class="btn quiet small" type="submit" aria-label="Yukarı taşı" {% if forloop.first %}disabled{% endif %}>↑</button></form>
-      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'down' %}">{% csrf_token %}<button class="btn quiet small" type="submit" aria-label="Aşağı taşı" {% if forloop.last %}disabled{% endif %}>↓</button></form>
-      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'test' %}">{% csrf_token %}<button class="btn quiet small" type="submit" data-pending="Deneniyor…">Dene</button></form>
-      <a class="btn quiet small" style="display:inline-block;padding:2px 10px" href="{% url 'ideas:ai-model-available' model.pk %}">Modeller</a>
-      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'toggle' %}">{% csrf_token %}<button class="btn quiet small" type="submit">{% if model.enabled %}Kapat{% else %}Aç{% endif %}</button></form>
-      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'delete' %}" data-confirm="“{{ model.label }}” silinsin mi?">{% csrf_token %}<button class="btn danger small" type="submit">Sil</button></form>
+      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'up' %}">{% csrf_token %}<button class="btn quiet small" type="submit" aria-label="{% trans "Yukarı taşı" %}" {% if forloop.first %}disabled{% endif %}>↑</button></form>
+      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'down' %}">{% csrf_token %}<button class="btn quiet small" type="submit" aria-label="{% trans "Aşağı taşı" %}" {% if forloop.last %}disabled{% endif %}>↓</button></form>
+      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'test' %}">{% csrf_token %}<button class="btn quiet small" type="submit" data-pending="{% trans "Deneniyor…" %}">{% trans "Dene" %}</button></form>
+      <a class="btn quiet small" style="display:inline-block;padding:2px 10px" href="{% url 'ideas:ai-model-available' model.pk %}">{% trans "Modeller" %}</a>
+      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'toggle' %}">{% csrf_token %}<button class="btn quiet small" type="submit">{% if model.enabled %}{% trans "Kapat" %}{% else %}{% trans "Aç" %}{% endif %}</button></form>
+      <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'delete' %}" data-confirm="{% blocktranslate with label=model.label %}“{{ label }}” silinsin mi?{% endblocktranslate %}">{% csrf_token %}<button class="btn danger small" type="submit">{% trans "Sil" %}</button></form>
     </div>
   </li>
   {% endfor %}

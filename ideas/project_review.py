@@ -1,5 +1,6 @@
 """AI review of a project's GitHub repository, stored on the project and applied only on confirmation."""
 import logging
+from django.utils.translation import gettext as _
 import os
 
 from django.utils import timezone
@@ -82,7 +83,7 @@ def review_project(project: Project, github_factory=None, reviewer_factory=None)
         return False
     except AIError as error:
         logger.warning("AI repo review failed for project %s: %s", project.pk, error)
-        _record_failure(project, "AI şu an yanıt veremedi, biraz sonra tekrar dene.")
+        _record_failure(project, _("AI şu an yanıt veremedi, biraz sonra tekrar dene."))
         return False
     run = reviewer.last_run
     project.repo_analysis = _stored_analysis(review, snapshot.files_read, checklist)

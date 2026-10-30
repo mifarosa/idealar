@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Çevrimdışı · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Çevrimdışı" %} · Idealar{% endblock %}
 {% block body %}
 <main class="auth">
-  <div class="brand"><span class="dot"></span>Idealar</div>
-  <h1>Çevrimdışısın</h1>
-  <p class="muted">Sunucuya ulaşılamıyor. Bilgisayarın açık ve Tailscale bağlı mı? Bağlantı gelince sayfayı yenile.</p>
+  <div class="brand">{% include "_logo.html" %}</div>
+  <h1>{% trans "Çevrimdışısın" %}</h1>
+  <p class="muted">{% trans "Sunucuya ulaşılamıyor. İnternet bağlantını kontrol et; bağlantı gelince sayfayı yenile." %}</p>
 </main>
 {% endblock %}

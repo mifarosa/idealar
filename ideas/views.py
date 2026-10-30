@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Case, F, FloatField, Value, When
 from django.shortcuts import get_object_or_404
@@ -18,7 +20,7 @@ PROGRESS_RATIO = Case(
     default=F("done_features") * 1.0 / F("total_features"),
     output_field=FloatField(),
 )
-SORT_CHOICES = [("yeni", "Yeni → eski"), ("eski", "Eski → yeni"), ("guncel", "Son güncellenen"), ("ilerleme", "İlerleme")]
+SORT_CHOICES = [("yeni", gettext_lazy("Yeni → eski")), ("eski", gettext_lazy("Eski → yeni")), ("guncel", gettext_lazy("Son güncellenen")), ("ilerleme", gettext_lazy("İlerleme"))]
 SORT_ORDERINGS = {
     "yeni": ("-created_at", "-id"),
     "eski": ("created_at", "id"),
@@ -121,7 +123,7 @@ class IdeaCreateView(UserFormKwargsMixin, OwnedIdeaMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        messages.success(self.request, "Fikir kaydedildi.")
+        messages.success(self.request, _("Fikir kaydedildi."))
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -134,7 +136,7 @@ class IdeaUpdateView(UserFormKwargsMixin, OwnedIdeaMixin, UpdateView):
     form_class = IdeaForm
 
     def form_valid(self, form):
-        messages.success(self.request, "Fikir güncellendi.")
+        messages.success(self.request, _("Fikir güncellendi."))
         return super().form_valid(form)
 
 
@@ -142,5 +144,5 @@ class IdeaDeleteView(OwnedIdeaMixin, DeleteView):
     template_name = "ideas/idea_confirm_delete.html"
 
     def form_valid(self, form):
-        messages.success(self.request, "Fikir silindi.")
+        messages.success(self.request, _("Fikir silindi."))
         return super().form_valid(form)

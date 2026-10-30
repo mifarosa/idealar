@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Öneri &amp; şikayet · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Öneri & şikayet" %} · Idealar{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Öneri &amp; şikayet</h1>
-  <a class="btn primary" href="{% url 'support:create' %}">Yeni kayıt</a>
+  <h1>{% trans "Öneri & şikayet" %}</h1>
+  <a class="btn primary" href="{% url 'support:create' %}">{% trans "Yeni kayıt" %}</a>
 </div>
-<p class="muted">Bir şey bozuksa, bir özellik eksikse ya da fikrin varsa yaz. Kayıtlarını yalnızca sen ve uygulamanın sahibi görür.</p>
+<p class="muted">{% trans "Bir şey bozuksa, bir özellik eksikse ya da fikrin varsa yaz. Kayıtlarını yalnızca sen ve uygulamanın sahibi görür." %}</p>
 <ul class="list">
   {% for ticket in tickets %}
   <li><a href="{% url 'support:detail' ticket.pk %}">
@@ -13,7 +14,7 @@
     <span class="meta"><span class="tag">{{ ticket.get_kind_display }}</span> <span class="tag status-{{ ticket.status }}">{{ ticket.get_status_display }}</span> · {{ ticket.updated_at|date:"d M Y H:i" }}</span>
   </a></li>
   {% empty %}
-  <li><p class="muted" style="padding:12px 4px">Henüz bir kaydın yok.</p></li>
+  <li><p class="muted" style="padding:12px 4px">{% trans "Henüz bir kaydın yok." %}</p></li>
   {% endfor %}
 </ul>
 {% endblock %}

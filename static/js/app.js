@@ -9,6 +9,11 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// Texts come from the page (translated on the server); the Turkish defaults only matter if that script is missing.
+function text(key, fallback) {
+  return (window.IDEALAR_TEXT && window.IDEALAR_TEXT[key]) || fallback;
+}
+
 function csrfToken() {
   return document.querySelector('meta[name="csrf-token"]').content;
 }
@@ -51,7 +56,7 @@ document.addEventListener("change", (event) => {
   saveFeatureState(checkbox).catch((error) => {
     checkbox.checked = !checkbox.checked;
     console.error(error);
-    alert("Kaydedilemedi, bağlantını kontrol et.");
+    alert(text("saveFailed", "Kaydedilemedi, bağlantını kontrol et."));
   });
 });
 
@@ -99,7 +104,7 @@ function editInPlace(label, save) {
 async function saveRename(url, field, text) {
   const response = await postForm(url, { [field]: text });
   const body = await response.json();
-  if (!response.ok) throw new Error(body.error || "Kaydedilemedi.");
+  if (!response.ok) throw new Error(body.error || text("notSaved", "Kaydedilemedi."));
   return body[field];
 }
 
@@ -274,7 +279,7 @@ document.querySelectorAll("[data-drop-zone]").forEach((list) => {
     const status = list.closest(".column").dataset.status;
     const response = await postForm(card.dataset.moveUrl, { status, index });
     if (response.ok) window.location.reload(); // counts and arrow buttons depend on the column
-    else alert("Kart taşınamadı.");
+    else alert(text("cardMoveFailed", "Kart taşınamadı."));
   });
 });
 document.addEventListener("dragstart", (event) => {
@@ -361,12 +366,12 @@ document.addEventListener("click", async (event) => {
   try {
     await copyText(field);
     button.textContent = button.dataset.copied;
-    if (status) status.textContent = "Panoya kopyalandı. Claude'a yapıştırabilirsin.";
-    setTimeout(() => { button.textContent = "Kopyala"; }, 2500);
+    if (status) status.textContent = text("copied", "Panoya kopyalandı. Claude'a yapıştırabilirsin.");
+    setTimeout(() => { button.textContent = text("copy", "Kopyala"); }, 2500);
   } catch (error) {
     field.focus();
     field.select();
-    if (status) status.textContent = "Otomatik kopyalanamadı; metin seçili, Ctrl+C ile kopyala.";
+    if (status) status.textContent = text("copyFailed", "Otomatik kopyalanamadı; metin seçili, Ctrl+C ile kopyala.");
   }
 });
 

@@ -1,4 +1,5 @@
 import json
+from django.utils.translation import get_language, gettext as _
 
 from django.http import JsonResponse
 from django.templatetags.static import static
@@ -12,15 +13,16 @@ BACKGROUND_COLOR = "#F5F4F0"
 
 
 def _icon(size: int, purpose: str = "any") -> dict:
-    return {"src": static(f"icons/icon-{size}.png"), "sizes": f"{size}x{size}", "type": "image/png", "purpose": purpose}
+    name = f"icon-{size}-maskable.png" if purpose == "maskable" else f"icon-{size}.png"
+    return {"src": static(f"icons/{name}"), "sizes": f"{size}x{size}", "type": "image/png", "purpose": purpose}
 
 
 def build_manifest() -> dict:
     return {
         "name": APP_NAME,
         "short_name": APP_NAME,
-        "description": "Uygulama fikirlerini hızlıca yakala.",
-        "lang": "tr",
+        "description": _("Uygulama fikirlerini hızlıca yakala."),
+        "lang": get_language() or "tr",
         "start_url": reverse("ideas:list"),
         "scope": "/",
         "display": "standalone",

@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Yeni kayıt · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Yeni kayıt" %} · Idealar{% endblock %}
 {% block content %}
-<a class="crumb" href="{% url 'support:list' %}"><svg class="icon"><use href="#i-back"/></svg>Öneri &amp; şikayet</a>
-<div class="page-head"><h1>Yeni kayıt</h1></div>
+<a class="crumb" href="{% url 'support:list' %}"><svg class="icon"><use href="#i-back"/></svg>{% trans "Öneri & şikayet" %}</a>
+<div class="page-head"><h1>{% trans "Yeni kayıt" %}</h1></div>
 <form method="post" class="form">
   {% csrf_token %}
   {{ form.non_field_errors }}
@@ -14,8 +15,8 @@
   </div>
   {% endfor %}
   <div class="actions">
-    <button class="btn primary" type="submit">Gönder</button>
-    <a class="btn quiet" href="{% url 'support:list' %}">Vazgeç</a>
+    <button class="btn primary" type="submit">{% trans "Gönder" %}</button>
+    <a class="btn quiet" href="{% url 'support:list' %}">{% trans "Vazgeç" %}</a>
   </div>
 </form>
 {% endblock %}

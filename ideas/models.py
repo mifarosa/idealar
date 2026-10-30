@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from django.utils.translation import gettext_lazy
 
 from django.conf import settings
 from django.db import models
@@ -13,7 +14,7 @@ SIMILARITY_DONE, SIMILARITY_WORDS_ONLY = "done", "words_only"
 SUGGESTION_PENDING, SUGGESTION_APPLIED, SUGGESTION_DISMISSED = "pending", "applied", "dismissed"
 
 AI_PENDING, AI_DONE, AI_FAILED = "pending", "done", "failed"
-AI_STATUS_CHOICES = [(AI_PENDING, "Bekliyor"), (AI_DONE, "Tamam"), (AI_FAILED, "Başarısız")]
+AI_STATUS_CHOICES = [(AI_PENDING, gettext_lazy("Bekliyor")), (AI_DONE, gettext_lazy("Tamam")), (AI_FAILED, gettext_lazy("Başarısız"))]
 
 
 @dataclass(frozen=True)
@@ -203,7 +204,7 @@ class ChatMessage(models.Model):
     """One message of a conversation."""
 
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
-    role = models.CharField(max_length=10, choices=[(ROLE_USER, "Kullanıcı"), (ROLE_ASSISTANT, "AI")])
+    role = models.CharField(max_length=10, choices=[(ROLE_USER, gettext_lazy("Kullanıcı")), (ROLE_ASSISTANT, "AI")])
     content = models.TextField()
     # Proposed changes: [{"type", "text", "idea_id", "status"}]; applied only after the user confirms.
     actions = models.JSONField(default=list, blank=True)

@@ -1,4 +1,5 @@
 import logging
+from django.utils.translation import gettext as _
 
 from authlib.integrations.base_client.errors import OAuthError
 from django.contrib import messages
@@ -35,7 +36,7 @@ class LoginView(View):
 class GoogleStartView(View):
     def get(self, request):
         if not google.is_configured():
-            messages.error(request, "Google girişi bu sunucuda ayarlanmamış.")
+            messages.error(request, _("Google girişi bu sunucuda ayarlanmamış."))
             return redirect("accounts:login")
         next_url = request.GET.get("next", "")
         if url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
@@ -53,7 +54,7 @@ class GoogleCallbackView(View):
             return redirect("accounts:login")
         except (OAuthError, KeyError) as error:
             logger.warning("Google sign-in failed: %s", error)
-            messages.error(request, "Google ile giriş tamamlanamadı. Tekrar dene.")
+            messages.error(request, _("Google ile giriş tamamlanamadı. Tekrar dene."))
             return redirect("accounts:login")
         next_url = request.session.pop(NEXT_SESSION_KEY, "")
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")

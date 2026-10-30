@@ -1,4 +1,5 @@
 import os
+from django.utils.translation import gettext as _, ngettext
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -46,7 +47,7 @@ class ProjectCreateView(UserFormKwargsMixin, OwnedProjectMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        messages.success(self.request, "Proje kaydedildi.")
+        messages.success(self.request, _("Proje kaydedildi."))
         return super().form_valid(form)
 
 
@@ -55,7 +56,7 @@ class ProjectUpdateView(UserFormKwargsMixin, OwnedProjectMixin, UpdateView):
     form_class = ProjectForm
 
     def form_valid(self, form):
-        messages.success(self.request, "Proje güncellendi.")
+        messages.success(self.request, _("Proje güncellendi."))
         return super().form_valid(form)
 
 
@@ -63,7 +64,7 @@ class ProjectDeleteView(OwnedProjectMixin, DeleteView):
     template_name = "ideas/project_confirm_delete.html"
 
     def form_valid(self, form):
-        messages.success(self.request, "Proje silindi (fikirler silinmedi).")
+        messages.success(self.request, _("Proje silindi (fikirler silinmedi)."))
         return super().form_valid(form)
 
 
@@ -80,9 +81,9 @@ class ProjectInspectView(ProjectActionView):
     def post(self, request, pk):
         project = self.get_project(pk)
         if not project.github_url:
-            messages.error(request, "Önce projeye bir GitHub adresi ekle (Düzenle).")
+            messages.error(request, _("Önce projeye bir GitHub adresi ekle (Düzenle)."))
         elif project_review.review_project(project):
-            messages.success(request, "Proje incelendi.")
+            messages.success(request, _("Proje incelendi."))
         else:
             messages.error(request, project.repo_analysis_error)
         return redirect("ideas:project-detail", pk=project.pk)
@@ -95,9 +96,9 @@ class ProjectMatchDecideView(ProjectActionView):
             apply = request.POST.get("decision") == "apply"
             try:
                 project_review.decide_match(project, index, apply)
-                messages.success(request, "Özellik yapıldı olarak işaretlendi." if apply else "Yoksayıldı.")
+                messages.success(request, _("Özellik yapıldı olarak işaretlendi.") if apply else _("Yoksayıldı."))
             except ActionNotApplicable:
-                messages.error(request, "Bu özellik artık projenin bir parçası değil.")
+                messages.error(request, _("Bu özellik artık projenin bir parçası değil."))
         return redirect("ideas:project-detail", pk=project.pk)
 
 
@@ -120,7 +121,7 @@ class ProjectImportView(LoginRequiredMixin, View):
         chosen = set(request.POST.getlist("repo"))
         # Only repositories the server just listed can be imported; anything else in the form is ignored.
         added = github_import.import_repos(request.user, [r for r in repos if r.full_name in chosen])
-        messages.success(request, f"{added} proje eklendi." if added else "Eklenecek yeni proje yoktu.")
+        messages.success(request, ngettext("{n} proje eklendi.", "{n} proje eklendi.", added).format(n=added) if added else _("Eklenecek yeni proje yoktu."))
         return redirect("ideas:project-list")
 
     @staticmethod

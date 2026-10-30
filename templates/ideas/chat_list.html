@@ -1,30 +1,31 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Sohbetler · {{ scope.title }}{% endblock %}
 {% block body %}
 <main class="page">
   <div class="page-inner">
-    <a class="crumb" href="{{ back_url }}"><svg class="icon"><use href="#i-back"/></svg>Geri</a>
-    <div class="page-head"><h1>Sohbet · {{ scope.title }}</h1></div>
+    <a class="crumb" href="{{ back_url }}"><svg class="icon"><use href="#i-back"/></svg>{% trans "Geri" %}</a>
+    <div class="page-head"><h1>{% blocktranslate with title=scope.title %}Sohbet · {{ title }}{% endblocktranslate %}</h1></div>
     {% if conversations %}
     <ul class="list">
       {% for conversation in conversations %}
       <li class="has-tools">
-        <a href="{% url 'ideas:conversation' conversation.pk %}"><div class="title" data-rename-text>{{ conversation.title }}</div><div class="meta">{{ conversation.message_count }} mesaj · {{ conversation.updated_at|date:"d M H:i" }}</div></a>
+        <a href="{% url 'ideas:conversation' conversation.pk %}"><div class="title" data-rename-text>{{ conversation.title }}</div><div class="meta">{% blocktranslate count counter=conversation.message_count %}{{ counter }} mesaj{% plural %}{{ counter }} mesaj{% endblocktranslate %} · {{ conversation.updated_at|date:"d M H:i" }}</div></a>
         <span class="row-tools">
-          <button class="icon-btn" type="button" data-rename-url="{% url 'ideas:conversation-rename' conversation.pk %}" title="Adı değiştir" aria-label="Sohbet adını değiştir"><svg class="icon"><use href="#i-edit"/></svg></button>
-          <form method="post" action="{% url 'ideas:conversation-delete' conversation.pk %}" data-confirm="“{{ conversation.title|escapejs }}” silinsin mi?">{% csrf_token %}<button class="icon-btn" type="submit" title="Sil" aria-label="Sohbeti sil"><svg class="icon"><use href="#i-close"/></svg></button></form>
+          <button class="icon-btn" type="button" data-rename-url="{% url 'ideas:conversation-rename' conversation.pk %}" title="{% trans "Adı değiştir" %}" aria-label="{% trans "Sohbet adını değiştir" %}"><svg class="icon"><use href="#i-edit"/></svg></button>
+          <form method="post" action="{% url 'ideas:conversation-delete' conversation.pk %}" data-confirm="{% blocktranslate with title=conversation.title|escapejs %}“{{ title }}” silinsin mi?{% endblocktranslate %}">{% csrf_token %}<button class="icon-btn" type="submit" title="{% trans "Sil" %}" aria-label="{% trans "Sohbeti sil" %}"><svg class="icon"><use href="#i-close"/></svg></button></form>
         </span>
       </li>
       {% endfor %}
     </ul>
     {% else %}
     <p class="muted">
-      {% if scope.kind == 'project' %}Projeyi, fikirlerini ve özelliklerini konuşalım. Ne eksik, neyi önce yapmalısın?
-      {% elif scope.kind == 'idea' %}Bu fikri konuşalım. Hangi özellikler olmalı, ne riskli?
-      {% else %}Fikirlerini konuşalım. Yeni fikir bulmak, öncelik belirlemek ya da birleştirmek için yaz.{% endif %}
+      {% if scope.kind == 'project' %}{% trans "Projeyi, fikirlerini ve özelliklerini konuşalım. Ne eksik, neyi önce yapmalısın?" %}
+      {% elif scope.kind == 'idea' %}{% trans "Bu fikri konuşalım. Hangi özellikler olmalı, ne riskli?" %}
+      {% else %}{% trans "Fikirlerini konuşalım. Yeni fikir bulmak, öncelik belirlemek ya da birleştirmek için yaz." %}{% endif %}
     </p>
     {% endif %}
-    <p class="muted typing" hidden role="status">AI yazıyor…</p>
+    <p class="muted typing" hidden role="status">{% trans "AI yazıyor…" %}</p>
   </div>
 </main>
 {% endblock %}
@@ -32,7 +33,7 @@
 <form method="post" action="{{ post_url }}" class="composer chat-form">
   {% csrf_token %}
   {% include "ideas/_provider_select.html" %}
-  <label class="field"><textarea name="text" rows="1" placeholder="Yeni sohbet başlat…" aria-label="Yeni sohbet" required></textarea></label>
-  <button class="send" type="submit" aria-label="Başlat"><svg class="icon"><use href="#i-send"/></svg></button>
+  <label class="field"><textarea name="text" rows="1" placeholder="{% trans "Yeni sohbet başlat…" %}" aria-label="{% trans "Yeni sohbet" %}" required></textarea></label>
+  <button class="send" type="submit" aria-label="{% trans "Başlat" %}"><svg class="icon"><use href="#i-send"/></svg></button>
 </form>
 {% endblock %}

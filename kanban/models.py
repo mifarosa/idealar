@@ -1,8 +1,9 @@
 from django.conf import settings
+from django.utils.translation import gettext_lazy
 from django.db import models
 
 STATUS_TODO, STATUS_DOING, STATUS_DONE = "todo", "doing", "done"
-STATUS_CHOICES = [(STATUS_TODO, "Yapılacak"), (STATUS_DOING, "Yapılıyor"), (STATUS_DONE, "Bitti")]
+STATUS_CHOICES = [(STATUS_TODO, gettext_lazy("Yapılacak")), (STATUS_DOING, gettext_lazy("Yapılıyor")), (STATUS_DONE, gettext_lazy("Bitti"))]
 STATUSES = [value for value, _ in STATUS_CHOICES]
 
 

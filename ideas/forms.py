@@ -1,4 +1,6 @@
 from django import forms
+from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext as _
 
 from .github_repo import GitHubError, parse_repo_url
 from .models import PLATFORM_CHOICES, Feature, Idea, Project
@@ -11,7 +13,7 @@ class QuickIdeaForm(forms.ModelForm):
         model = Idea
         fields = ["body"]
         widgets = {
-            "body": forms.Textarea(attrs={"rows": 1, "placeholder": "Yeni fikir…", "aria-label": "Yeni fikir"}),
+            "body": forms.Textarea(attrs={"rows": 1, "placeholder": gettext_lazy("Yeni fikir…"), "aria-label": gettext_lazy("Yeni fikir")}),
         }
 
     def __init__(self, *args, user=None, **kwargs):
@@ -21,13 +23,13 @@ class QuickIdeaForm(forms.ModelForm):
 
 class IdeaForm(forms.ModelForm):
     platforms = forms.MultipleChoiceField(
-        label="Platformlar", choices=PLATFORM_CHOICES, required=False, widget=forms.CheckboxSelectMultiple
+        label=gettext_lazy("Platformlar"), choices=PLATFORM_CHOICES, required=False, widget=forms.CheckboxSelectMultiple
     )
 
     class Meta:
         model = Idea
         fields = ["title", "body", "platforms", "projects"]
-        labels = {"title": "Başlık (isteğe bağlı)", "body": "Açıklama", "projects": "Projeler"}
+        labels = {"title": gettext_lazy("Başlık (isteğe bağlı)"), "body": gettext_lazy("Açıklama"), "projects": gettext_lazy("Projeler")}
         widgets = {"body": forms.Textarea(attrs={"rows": 8}), "projects": forms.CheckboxSelectMultiple}
 
     def __init__(self, *args, user, **kwargs):
@@ -41,24 +43,24 @@ class FeatureForm(forms.ModelForm):
         model = Feature
         fields = ["text", "platform"]
         widgets = {
-            "text": forms.TextInput(attrs={"placeholder": "Yeni özellik ekle…", "aria-label": "Yeni özellik"}),
-            "platform": forms.Select(attrs={"class": "select", "aria-label": "Platform"}),
+            "text": forms.TextInput(attrs={"placeholder": gettext_lazy("Yeni özellik ekle…"), "aria-label": gettext_lazy("Yeni özellik")}),
+            "platform": forms.Select(attrs={"class": "select", "aria-label": gettext_lazy("Platform")}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["platform"].choices = [("", "Tümü")] + list(PLATFORM_CHOICES)
+        self.fields["platform"].choices = [("", _("Tümü"))] + list(PLATFORM_CHOICES)
 
 
 class ProjectForm(forms.ModelForm):
     ideas = forms.ModelMultipleChoiceField(
-        label="Bağlı fikirler", queryset=Idea.objects.none(), required=False, widget=forms.CheckboxSelectMultiple
+        label=gettext_lazy("Bağlı fikirler"), queryset=Idea.objects.none(), required=False, widget=forms.CheckboxSelectMultiple
     )
 
     class Meta:
         model = Project
         fields = ["name", "description", "github_url"]
-        labels = {"name": "Proje adı", "description": "Açıklama", "github_url": "GitHub adresi (isteğe bağlı)"}
+        labels = {"name": gettext_lazy("Proje adı"), "description": gettext_lazy("Açıklama"), "github_url": gettext_lazy("GitHub adresi (isteğe bağlı)")}
         widgets = {
             "description": forms.Textarea(attrs={"rows": 5}),
             "github_url": forms.URLInput(attrs={"placeholder": "https://github.com/sahip/depo"}),
@@ -88,7 +90,7 @@ class ProjectForm(forms.ModelForm):
 
 class CopyFeatureForm(forms.Form):
     ideas = forms.ModelMultipleChoiceField(
-        label="Hangi fikirlere kopyalansın?", queryset=Idea.objects.none(), widget=forms.CheckboxSelectMultiple
+        label=gettext_lazy("Hangi fikirlere kopyalansın?"), queryset=Idea.objects.none(), widget=forms.CheckboxSelectMultiple
     )
 
     def __init__(self, *args, user, source_idea, **kwargs):

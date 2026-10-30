@@ -1,4 +1,5 @@
 import os
+from django.utils.translation import gettext as _, ngettext
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -46,7 +47,7 @@ class AIModelListView(LoginRequiredMixin, View):
     def get(self, request):
         models = list(own_models(request.user))
         for model in models:
-            model.kind_label = KINDS[model.kind].label if model.kind in KINDS else model.kind
+            model.kind_label = ai_registry.kind_label(model.kind)
             model.problem = ai_registry.problem(model, request.user) if model.enabled else ""
         return render(request, "ideas/ai_models.html", {"models": models, "can_import_env": request.user.is_staff and not models})
 
@@ -73,7 +74,7 @@ class AIModelFormView(LoginRequiredMixin, View):
         if instance is None:
             model.position = (own_models(request.user).aggregate(top=Max("position"))["top"] or 0) + 1
         model.save()
-        messages.success(request, f"“{model.label}” kaydedildi.")
+        messages.success(request, _("“{label}” kaydedildi.").format(label=model.label))
         return redirect(LIST_URL_NAME)
 
 
@@ -93,7 +94,7 @@ class AIModelImportEnvView(StaffRequiredMixin, View):
                 api_key_sealed=key_vault.seal(key, request.user.pk) if key else "", key_hint=key_vault.hint(key), position=position,
             )
             imported += 1
-        messages.success(request, f".env'den {imported} model aktarıldı. Artık buradan yönetebilirsin.")
+        messages.success(request, ngettext(".env'den {n} model aktarıldı. Artık buradan yönetebilirsin.", ".env'den {n} model aktarıldı. Artık buradan yönetebilirsin.", imported).format(n=imported))
         return redirect(LIST_URL_NAME)
 
 
@@ -119,26 +120,26 @@ class AIModelActionView(LoginRequiredMixin, View):
 
     def do_delete(self, request, model):
         model.delete()
-        messages.success(request, f"“{model.label}” silindi.")
+        messages.success(request, _("“{label}” silindi.").format(label=model.label))
 
     def do_use(self, request, model):
         name = request.POST.get("model_name", "").strip()[: AIModel._meta.get_field("model_name").max_length]
         if name:
             model.model_name = name
             model.save(update_fields=["model_name"])
-            messages.success(request, f"“{model.label}” artık {name} modelini kullanıyor.")
+            messages.success(request, _("“{label}” artık {name} modelini kullanıyor.").format(label=model.label, name=name))
 
     def do_test(self, request, model):
         if not model.model_name:
-            messages.error(request, f"“{model.label}” için önce bir model seç: “Modeller” tuşuna bas.")
+            messages.error(request, _("“{label}” için önce bir model seç: “Modeller” tuşuna bas.").format(label=model.label))
             return
         try:
             client = build_client(ai_registry.spec_for(model))
             client.chat_json('Reply only with the JSON object {"ok": true}.', [{"role": "user", "content": "ping"}])
         except AIError as error:
-            messages.error(request, f"“{model.label}” çalışmadı: {error}")
+            messages.error(request, _("“{label}” çalışmadı: {error}").format(label=model.label, error=error))
         else:
-            messages.success(request, f"“{model.label}” çalışıyor ({model.model_name}).")
+            messages.success(request, _("“{label}” çalışıyor ({name}).").format(label=model.label, name=model.model_name))
 
     def _swap_with_neighbour(self, model: AIModel, before: bool) -> None:
         ordered = list(own_models(model.owner))
@@ -165,5 +166,5 @@ class AIModelAvailableView(LoginRequiredMixin, View):
         except AIError as failure:
             error = str(failure)
         except AttributeError:
-            error = "Bu sağlayıcı model listesi vermiyor."
+            error = _("Bu sağlayıcı model listesi vermiyor.")
         return render(request, "ideas/ai_model_available.html", {"object": model, "names": names, "error": error})

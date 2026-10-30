@@ -1,5 +1,6 @@
 """Describes what the AI may see in a conversation, and which ideas it may touch."""
 from dataclasses import dataclass
+from django.utils.translation import gettext as _
 
 from .models import Conversation, Idea, Project
 
@@ -30,7 +31,7 @@ class ChatScope:
     def title(self) -> str:
         if self.idea:
             return self.idea.display_title
-        return self.project.name if self.project else "Genel sohbet"
+        return self.project.name if self.project else _("Genel sohbet")
 
     def conversations(self):
         return Conversation.objects.filter(owner=self.owner, idea=self.idea, project=self.project)

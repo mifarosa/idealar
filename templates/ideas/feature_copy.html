@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Özelliği kopyala · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Özelliği kopyala" %} · Idealar{% endblock %}
 {% block content %}
-<div class="page-head"><h1>Özelliği kopyala</h1></div>
+<div class="page-head"><h1>{% trans "Özelliği kopyala" %}</h1></div>
 <form method="post" class="form panel">
   {% csrf_token %}
-  <p>“{{ feature.text }}” seçtiğin fikirlere yeni, işaretsiz bir madde olarak eklenir.</p>
+  <p>{% blocktranslate with text=feature.text %}“{{ text }}” seçtiğin fikirlere yeni, işaretsiz bir madde olarak eklenir.{% endblocktranslate %}</p>
   {% include "ideas/_form_fields.html" %}
   <div class="actions">
-    <button class="btn primary" type="submit">Kopyala</button>
-    <a class="btn quiet" href="{% url 'ideas:detail' feature.idea_id %}">Vazgeç</a>
+    <button class="btn primary" type="submit">{% trans "Kopyala" %}</button>
+    <a class="btn quiet" href="{% url 'ideas:detail' feature.idea_id %}">{% trans "Vazgeç" %}</a>
   </div>
 </form>
 {% endblock %}

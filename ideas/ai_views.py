@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext as _, ngettext
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
@@ -22,9 +23,9 @@ class IdeaEnrichView(OwnedIdeaActionView):
     def post(self, request, pk):
         idea = self.get_idea(pk)
         if ai_enrichment.enrich_idea(idea, ai_enrichment.build_analyzer(idea.owner)):
-            messages.success(request, "AI başlık, özet, etiket ve özellik önerilerini hazırladı.")
+            messages.success(request, _("AI başlık, özet, etiket ve özellik önerilerini hazırladı."))
         else:
-            messages.error(request, "AI şu an yanıt veremedi. Fikir kaydedildi; sonra tekrar deneyebilirsin.")
+            messages.error(request, _("AI şu an yanıt veremedi. Fikir kaydedildi; sonra tekrar deneyebilirsin."))
         similarity.check_idea(idea)  # separate AI call; its failure never undoes the enrichment above
         if ai_registry.has_models(request.user):
             advice.advise_idea(idea)  # reads the whole notebook; likewise independent of the steps above
@@ -38,9 +39,9 @@ class AdviceView(OwnedIdeaActionView):
         idea = self.get_idea(pk)
         if advice.advise_idea(idea):
             count = len([entry for entry in idea.advice if entry["status"] == SUGGESTION_PENDING])
-            messages.success(request, f"Tüm notların okundu: {count} öneri hazır." if count else "Tüm notların okundu; şimdilik önerecek bir şey bulamadım.")
+            messages.success(request, ngettext("Tüm notların okundu: {n} öneri hazır.", "Tüm notların okundu: {n} öneri hazır.", count).format(n=count) if count else _("Tüm notların okundu; şimdilik önerecek bir şey bulamadım."))
         else:
-            messages.error(request, "AI şu an yanıt veremedi. Biraz sonra tekrar dene.")
+            messages.error(request, _("AI şu an yanıt veremedi. Biraz sonra tekrar dene."))
         return redirect(idea_panel_url(idea.pk))
 
 
@@ -51,9 +52,9 @@ class AdviceDecideView(OwnedIdeaActionView):
             apply = request.POST.get("decision") == "apply"
             try:
                 advice.decide_advice(idea, index, apply)
-                messages.success(request, "Uygulandı." if apply else "Tamam, öneri gizlendi.")
+                messages.success(request, _("Uygulandı.") if apply else _("Tamam, öneri gizlendi."))
             except ActionNotApplicable:
-                messages.error(request, "Bu kayıt artık yok (silinmiş olabilir).")
+                messages.error(request, _("Bu kayıt artık yok (silinmiş olabilir)."))
         return redirect(idea_panel_url(idea.pk))
 
 
@@ -70,11 +71,11 @@ class SimilarCheckView(OwnedIdeaActionView):
     def _report(request, idea):
         found = len([hint for hint in idea.similar if hint["status"] == SUGGESTION_PENDING])
         if idea.similarity_status == similarity.SIMILARITY_WORDS_ONLY:
-            messages.warning(request, "AI şu an yanıt veremedi; yalnızca kelime benzerliğine baktım.")
+            messages.warning(request, _("AI şu an yanıt veremedi; yalnızca kelime benzerliğine baktım."))
         elif found:
-            messages.success(request, f"Benzerlik kontrolü tamamlandı: {found} benzer kayıt bulundu.")
+            messages.success(request, ngettext("Benzerlik kontrolü tamamlandı: {n} benzer kayıt bulundu.", "Benzerlik kontrolü tamamlandı: {n} benzer kayıt bulundu.", found).format(n=found))
         else:
-            messages.success(request, "Benzerlik kontrolü tamamlandı: benzer kayıt bulunmadı.")
+            messages.success(request, _("Benzerlik kontrolü tamamlandı: benzer kayıt bulunmadı."))
 
 
 class SimilarDecideView(OwnedIdeaActionView):
@@ -84,9 +85,9 @@ class SimilarDecideView(OwnedIdeaActionView):
             apply = request.POST.get("decision") == "apply"
             try:
                 similarity.decide_similar(idea, index, apply)
-                messages.success(request, "Eklendi." if apply else "Tamam, farklı olarak işaretlendi.")
+                messages.success(request, _("Eklendi.") if apply else _("Tamam, farklı olarak işaretlendi."))
             except ActionNotApplicable:
-                messages.error(request, "Bu kayıt artık yok (silinmiş olabilir).")
+                messages.error(request, _("Bu kayıt artık yok (silinmiş olabilir)."))
         return redirect(idea_panel_url(idea.pk))
 
 
@@ -118,7 +119,7 @@ class IdeaPromptView(LoginRequiredMixin, View):
         mode = self._mode(request.POST.get("mod"), idea)
         brief = prompt_brief.draft_brief(idea, mode)
         if brief is None:
-            messages.error(request, "AI şu an yanıt veremedi; sade prompt gösteriliyor, biraz sonra tekrar deneyebilirsin.")
+            messages.error(request, _("AI şu an yanıt veremedi; sade prompt gösteriliyor, biraz sonra tekrar deneyebilirsin."))
         return self._render(request, idea, mode, brief)
 
     def _idea(self, pk: int) -> Idea:

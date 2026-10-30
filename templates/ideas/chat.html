@@ -1,16 +1,17 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}{{ conversation.title }} · Sohbet{% endblock %}
 {% block body %}
 <main class="page">
   <div class="page-inner">
-    <a class="crumb" href="{{ list_url }}"><svg class="icon"><use href="#i-back"/></svg>Sohbetler</a>
+    <a class="crumb" href="{{ list_url }}"><svg class="icon"><use href="#i-back"/></svg>{% trans "Sohbetler" %}</a>
     <div class="page-head">
       <h1 data-rename-text>{{ conversation.title }}</h1>
       <div class="actions">
-        <button class="btn quiet small" type="button" data-rename-url="{% url 'ideas:conversation-rename' conversation.pk %}"><svg class="icon"><use href="#i-edit"/></svg>Adı değiştir</button>
-        <form method="post" action="{% url 'ideas:conversation-delete' conversation.pk %}" data-confirm="Bu sohbet silinsin mi?">
+        <button class="btn quiet small" type="button" data-rename-url="{% url 'ideas:conversation-rename' conversation.pk %}"><svg class="icon"><use href="#i-edit"/></svg>{% trans "Adı değiştir" %}</button>
+        <form method="post" action="{% url 'ideas:conversation-delete' conversation.pk %}" data-confirm="{% trans "Bu sohbet silinsin mi?" %}">
           {% csrf_token %}
-          <button class="btn quiet danger small" type="submit">Sil</button>
+          <button class="btn quiet danger small" type="submit">{% trans "Sil" %}</button>
         </form>
       </div>
     </div>
@@ -20,23 +21,24 @@
       <div class="bubble bubble-{{ message.role }}">
         <p>{{ message.content|linebreaksbr }}</p>
         {% if message.provider_label %}
-        <p class="provider-badge">Yanıtlayan: {{ message.provider_label }}{% if message.failed_labels %} · {{ message.failed_labels|join:", " }} yanıt vermediği için{% endif %}</p>
+        <p class="provider-badge">{% blocktranslate with name=message.provider_label %}Yanıtlayan: {{ name }}{% endblocktranslate %}{% if message.failed_labels %} · {% blocktranslate with names=message.failed_labels|join:", " %}{{ names }} yanıt vermediği için{% endblocktranslate %}{% endif %}</p>
         {% endif %}
         {% for action in message.action_views %}
         <div class="action-card">
           <p>
-            {% if action.type == 'add_feature' %}<strong>{{ action.target_title|default:"Fikir" }}</strong> fikrine özellik: “{{ action.text }}”
-            {% elif action.type == 'link_project' %}<strong>{{ action.target_title|default:"Fikir" }}</strong> fikrini <strong>{{ action.project_name|default:"projeye" }}</strong> projesine bağla{% if action.text %}: {{ action.text }}{% endif %}
-            {% else %}Yeni fikir{% if action.project_name %} (<strong>{{ action.project_name }}</strong> projesine){% endif %}: “{{ action.text }}”{% endif %}
+            {% if action.type == 'add_feature' %}{% blocktranslate trimmed with title=action.target_title|default:_("Fikir") text=action.text %}<strong>{{ title }}</strong> fikrine özellik: “{{ text }}”{% endblocktranslate %}
+            {% elif action.type == 'link_project' %}{% blocktranslate trimmed with title=action.target_title|default:_("Fikir") project=action.project_name|default:_("projeye") %}<strong>{{ title }}</strong> fikrini <strong>{{ project }}</strong> projesine bağla{% endblocktranslate %}{% if action.text %}: {{ action.text }}{% endif %}
+            {% elif action.project_name %}{% blocktranslate trimmed with project=action.project_name text=action.text %}Yeni fikir (<strong>{{ project }}</strong> projesine): “{{ text }}”{% endblocktranslate %}
+            {% else %}{% blocktranslate trimmed with text=action.text %}Yeni fikir: “{{ text }}”{% endblocktranslate %}{% endif %}
           </p>
           {% if action.status == 'pending' %}
           <form method="post" action="{% url 'ideas:chat-action' message.pk action.index %}" class="actions">
             {% csrf_token %}
-            <button class="btn small primary" name="decision" value="apply" type="submit">{% if action.type == 'link_project' %}Bağla{% else %}Ekle{% endif %}</button>
-            <button class="btn small quiet" name="decision" value="dismiss" type="submit">Yoksay</button>
+            <button class="btn small primary" name="decision" value="apply" type="submit">{% if action.type == 'link_project' %}{% trans "Bağla" %}{% else %}{% trans "Ekle" %}{% endif %}</button>
+            <button class="btn small quiet" name="decision" value="dismiss" type="submit">{% trans "Yoksay" %}</button>
           </form>
-          {% elif action.status == 'applied' %}<span class="muted">Eklendi</span>
-          {% else %}<span class="muted">Yoksayıldı</span>{% endif %}
+          {% elif action.status == 'applied' %}<span class="muted">{% trans "Eklendi" %}</span>
+          {% else %}<span class="muted">{% trans "Yoksayıldı" %}</span>{% endif %}
         </div>
         {% endfor %}
       </div>
@@ -45,12 +47,12 @@
       {% if needs_reply %}
       <form method="post" action="{{ post_url }}" class="chat-retry">
         {% csrf_token %}
-        <span class="muted">Son mesajına yanıt gelmedi.</span>
+        <span class="muted">{% trans "Son mesajına yanıt gelmedi." %}</span>
         {% include "ideas/_provider_select.html" %}
-        <button class="btn" type="submit">Tekrar dene</button>
+        <button class="btn" type="submit">{% trans "Tekrar dene" %}</button>
       </form>
       {% endif %}
-      <p class="muted typing" hidden role="status">AI yazıyor…</p>
+      <p class="muted typing" hidden role="status">{% trans "AI yazıyor…" %}</p>
     </div>
   </div>
 </main>
@@ -59,7 +61,7 @@
 <form method="post" action="{{ post_url }}" class="composer chat-form">
   {% csrf_token %}
   {% include "ideas/_provider_select.html" %}
-  <label class="field"><textarea name="text" rows="1" placeholder="Mesaj yaz…" aria-label="Mesaj" required></textarea></label>
-  <button class="send" type="submit" aria-label="Gönder"><svg class="icon"><use href="#i-send"/></svg></button>
+  <label class="field"><textarea name="text" rows="1" placeholder="{% trans "Mesaj yaz…" %}" aria-label="{% trans "Mesaj" %}" required></textarea></label>
+  <button class="send" type="submit" aria-label="{% trans "Gönder" %}"><svg class="icon"><use href="#i-send"/></svg></button>
 </form>
 {% endblock %}

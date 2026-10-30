@@ -1,20 +1,20 @@
-
+{% load i18n %}
 <article class="detail" id="idea-{{ idea.pk }}" data-idea="{{ idea.pk }}"
   {% if view_mode == 'detail' and enrich and idea.ai_status != 'done' %}data-enrich-url="{% url 'ideas:idea-enrich' idea.pk %}" data-done-url="{% url 'ideas:detail' idea.pk %}"{% endif %}>
-  <a class="back" href="{% url 'ideas:list' %}{% if filter_query %}?{{ filter_query }}{% endif %}"><svg class="icon"><use href="#i-back"/></svg>Fikirler</a>
+  <a class="back" href="{% url 'ideas:list' %}{% if filter_query %}?{{ filter_query }}{% endif %}"><svg class="icon"><use href="#i-back"/></svg>{% trans "Fikirler" %}</a>
 
   <h2>{{ idea.display_title }}</h2>
   {% if idea.ai_summary %}<p class="lead">{{ idea.ai_summary }}</p>{% endif %}
-  {% if view_mode == 'detail' and enrich and idea.ai_status != 'done' %}<p class="ai-working" role="status">AI düşünüyor…</p>{% endif %}
+  {% if view_mode == 'detail' and enrich and idea.ai_status != 'done' %}<p class="ai-working" role="status">{% trans "AI düşünüyor…" %}</p>{% endif %}
 
   <dl class="spec">
-    <dt>Platformlar</dt>
+    <dt>{% trans "Platformlar" %}</dt>
     <dd>{% for label in idea.platform_labels %}<span class="tag">{{ label }}</span>{% empty %}<span class="muted">—</span>{% endfor %}</dd>
-    <dt>Proje</dt>
+    <dt>{% trans "Proje" %}</dt>
     <dd>{% for project in idea.projects.all %}<a class="link" href="{% url 'ideas:project-detail' project.pk %}">{{ project.name }}</a>{% empty %}<span class="muted">—</span>{% endfor %}</dd>
-    <dt>Etiketler</dt>
+    <dt>{% trans "Etiketler" %}</dt>
     <dd>{% for tag in idea.ai_tags %}<span class="tag">#{{ tag }}</span>{% empty %}<span class="muted">—</span>{% endfor %}</dd>
-    <dt>Kaydedildi</dt>
+    <dt>{% trans "Kaydedildi" %}</dt>
     <dd>{{ idea.created_at|date:"d M Y, H:i" }}</dd>
   </dl>
 
@@ -22,30 +22,30 @@
 
   {% for hint in idea.similar %}{% if hint.status != 'dismissed' %}
   <div class="callout">
-    <p class="callout-title">{% if hint.kind == 'project' %}Buna benzer bir projen var:{% else %}Buna benzer bir fikrin var:{% endif %}
+    <p class="callout-title">{% if hint.kind == 'project' %}{% trans "Buna benzer bir projen var:" %}{% else %}{% trans "Buna benzer bir fikrin var:" %}{% endif %}
       <span>{{ hint.title }}</span>
-      <span class="tag">{% if hint.verdict == 'same' %}aynısı{% elif hint.verdict == 'similar' %}benzer{% else %}ilgili{% endif %}</span>
-      {% if hint.source == 'words' %}<span class="tag">kelime benzerliği</span>{% endif %}
+      <span class="tag">{% if hint.verdict == 'same' %}{% trans "aynısı" %}{% elif hint.verdict == 'similar' %}{% trans "benzer" %}{% else %}{% trans "ilgili" %}{% endif %}</span>
+      {% if hint.source == 'words' %}<span class="tag">{% trans "kelime benzerliği" %}</span>{% endif %}
     </p>
     <p class="why">{{ hint.reason }}</p>
     {% if hint.status == 'pending' %}
     <form method="post" action="{% url 'ideas:idea-similar-decide' idea.pk forloop.counter0 %}" class="actions">
       {% csrf_token %}
-      <button class="btn primary" name="decision" value="apply" type="submit">{% if hint.kind == 'project' %}Bu projeye bağla{% else %}O fikre özellik olarak ekle{% endif %}</button>
-      <button class="btn quiet" name="decision" value="dismiss" type="submit">Farklı, yoksay</button>
+      <button class="btn primary" name="decision" value="apply" type="submit">{% if hint.kind == 'project' %}{% trans "Bu projeye bağla" %}{% else %}{% trans "O fikre özellik olarak ekle" %}{% endif %}</button>
+      <button class="btn quiet" name="decision" value="dismiss" type="submit">{% trans "Farklı, yoksay" %}</button>
     </form>
-    {% else %}<p class="muted">Eklendi.</p>{% endif %}
+    {% else %}<p class="muted">{% trans "Eklendi." %}</p>{% endif %}
   </div>
   {% endif %}{% endfor %}
-  {% if idea.similarity_status == 'words_only' %}<p class="callout-note">AI kontrolü yapılamadı; yalnızca kelime benzerliğine baktım.</p>
-  {% elif idea.similarity_status == 'done' and not idea.similar %}<p class="callout-note">Benzer bir kayıt bulunmadı.</p>{% endif %}
+  {% if idea.similarity_status == 'words_only' %}<p class="callout-note">{% trans "AI kontrolü yapılamadı; yalnızca kelime benzerliğine baktım." %}</p>
+  {% elif idea.similarity_status == 'done' and not idea.similar %}<p class="callout-note">{% trans "Benzer bir kayıt bulunmadı." %}</p>{% endif %}
 
   {% if idea.advice %}
-  <div class="sec"><h3>Tüm notlarına göre öneriler</h3></div>
+  <div class="sec"><h3>{% trans "Tüm notlarına göre öneriler" %}</h3></div>
   {% for item in idea.advice %}{% if item.status != 'dismissed' %}
   <div class="callout advice">
     <p class="callout-title">
-      <span class="tag">{% if item.kind == 'related' %}ilgili not{% elif item.kind == 'merge' %}birleştirilebilir{% elif item.kind == 'borrow_feature' %}özellik fikri{% elif item.kind == 'add_to_project' %}proje{% elif item.kind == 'tag' %}etiket{% else %}yeni fikir{% endif %}</span>
+      <span class="tag">{% if item.kind == 'related' %}{% trans "ilgili not" %}{% elif item.kind == 'merge' %}{% trans "birleştirilebilir" %}{% elif item.kind == 'borrow_feature' %}{% trans "özellik fikri" %}{% elif item.kind == 'add_to_project' %}{% trans "proje" %}{% elif item.kind == 'tag' %}{% trans "etiket" %}{% else %}{% trans "yeni fikir" %}{% endif %}</span>
       {% if item.kind == 'tag' %}<span>{{ item.text }}</span>{% elif item.target_title %}<span>{{ item.target_title }}</span>{% endif %}
     </p>
     {% if item.kind == 'borrow_feature' or item.kind == 'new_idea' %}<p>{{ item.text }}</p>{% endif %}
@@ -53,20 +53,20 @@
     {% if item.status == 'pending' %}
     <form method="post" action="{% url 'ideas:idea-advice-decide' idea.pk forloop.counter0 %}" class="actions">
       {% csrf_token %}
-      {% if item.kind == 'related' or item.kind == 'merge' %}<a class="btn" href="{% url 'ideas:detail' item.target %}">Notu aç</a>
-      {% elif item.kind == 'borrow_feature' %}<button class="btn primary" name="decision" value="apply" type="submit">Özellik olarak ekle</button>
-      {% elif item.kind == 'add_to_project' %}<button class="btn primary" name="decision" value="apply" type="submit">Bu projeye bağla</button>
-      {% elif item.kind == 'tag' %}<button class="btn primary" name="decision" value="apply" type="submit">Etiketi ekle</button>
-      {% else %}<button class="btn primary" name="decision" value="apply" type="submit">Yeni fikir olarak kaydet</button>{% endif %}
-      <button class="btn quiet" name="decision" value="dismiss" type="submit">Gizle</button>
+      {% if item.kind == 'related' or item.kind == 'merge' %}<a class="btn" href="{% url 'ideas:detail' item.target %}">{% trans "Notu aç" %}</a>
+      {% elif item.kind == 'borrow_feature' %}<button class="btn primary" name="decision" value="apply" type="submit">{% trans "Özellik olarak ekle" %}</button>
+      {% elif item.kind == 'add_to_project' %}<button class="btn primary" name="decision" value="apply" type="submit">{% trans "Bu projeye bağla" %}</button>
+      {% elif item.kind == 'tag' %}<button class="btn primary" name="decision" value="apply" type="submit">{% trans "Etiketi ekle" %}</button>
+      {% else %}<button class="btn primary" name="decision" value="apply" type="submit">{% trans "Yeni fikir olarak kaydet" %}</button>{% endif %}
+      <button class="btn quiet" name="decision" value="dismiss" type="submit">{% trans "Gizle" %}</button>
     </form>
-    {% else %}<p class="muted">Uygulandı.</p>{% endif %}
+    {% else %}<p class="muted">{% trans "Uygulandı." %}</p>{% endif %}
   </div>
   {% endif %}{% endfor %}
-  {% elif idea.advice_status == 'done' %}<p class="callout-note">Tüm notların okundu; şimdilik önerecek bir şey bulamadım.</p>
-  {% elif idea.advice_status == 'failed' %}<p class="callout-note">AI şu an yanıt veremedi; "Notlarıma göre öneri al" ile tekrar dene.</p>{% endif %}
+  {% elif idea.advice_status == 'done' %}<p class="callout-note">{% trans "Tüm notların okundu; şimdilik önerecek bir şey bulamadım." %}</p>
+  {% elif idea.advice_status == 'failed' %}<p class="callout-note">{% trans 'AI şu an yanıt veremedi; "Notlarıma göre öneri al" ile tekrar dene.' %}</p>{% endif %}
 
-  <div class="sec"><h3>Özellikler</h3><span class="feature-count">{{ idea.progress.done }} / {{ idea.progress.total }}</span></div>
+  <div class="sec"><h3>{% trans "Özellikler" %}</h3><span class="feature-count">{{ idea.progress.done }} / {{ idea.progress.total }}</span></div>
   <ul class="checks">
     {% for feature in idea.features.all %}
     <li class="feature" data-toggle-url="{% url 'ideas:feature-toggle' feature.pk %}" data-edit-url="{% url 'ideas:feature-edit' feature.pk %}">
@@ -76,24 +76,24 @@
       </label>
       {% if feature.platform %}<span class="tag">{{ feature.get_platform_display }}</span>{% endif %}
       <span class="feature-tools">
-        <button class="icon-btn" type="button" data-edit title="Adı değiştir" aria-label="Adı değiştir"><svg class="icon"><use href="#i-edit"/></svg></button>
-        <a class="icon-btn" href="{% url 'ideas:feature-copy' feature.pk %}" title="Başka fikre kopyala" aria-label="Başka fikre kopyala"><svg class="icon"><use href="#i-copy"/></svg></a>
-        <form method="post" action="{% url 'ideas:feature-delete' feature.pk %}">{% csrf_token %}<button class="icon-btn" type="submit" title="Sil" aria-label="Özelliği sil"><svg class="icon"><use href="#i-close"/></svg></button></form>
+        <button class="icon-btn" type="button" data-edit title="{% trans "Adı değiştir" %}" aria-label="{% trans "Adı değiştir" %}"><svg class="icon"><use href="#i-edit"/></svg></button>
+        <a class="icon-btn" href="{% url 'ideas:feature-copy' feature.pk %}" title="{% trans "Başka fikre kopyala" %}" aria-label="{% trans "Başka fikre kopyala" %}"><svg class="icon"><use href="#i-copy"/></svg></a>
+        <form method="post" action="{% url 'ideas:feature-delete' feature.pk %}">{% csrf_token %}<button class="icon-btn" type="submit" title="{% trans "Sil" %}" aria-label="{% trans "Özelliği sil" %}"><svg class="icon"><use href="#i-close"/></svg></button></form>
       </span>
     </li>
     {% empty %}
-    <li class="muted">Henüz özellik yok.</li>
+    <li class="muted">{% trans "Henüz özellik yok." %}</li>
     {% endfor %}
   </ul>
   <form method="post" action="{% url 'ideas:feature-add' idea.pk %}" class="add-feature">
     {% csrf_token %}
     <label class="field"><svg class="icon"><use href="#i-plus"/></svg>{{ feature_form.text }}</label>
     {{ feature_form.platform }}
-    <button class="btn small" type="submit">Ekle</button>
+    <button class="btn small" type="submit">{% trans "Ekle" %}</button>
   </form>
 
   {% if idea.suggested_features %}
-  <div class="sec"><h3>AI önerileri</h3><span>{{ idea.suggested_features|length }}</span></div>
+  <div class="sec"><h3>{% trans "AI önerileri" %}</h3><span>{{ idea.suggested_features|length }}</span></div>
   <ul class="checks suggest">
     {% for text in idea.suggested_features %}
     <li>
@@ -101,8 +101,8 @@
       <form method="post" action="{% url 'ideas:suggestion-resolve' idea.pk %}" class="actions">
         {% csrf_token %}
         <input type="hidden" name="text" value="{{ text }}">
-        <button class="btn small" name="action" value="accept" type="submit">Ekle</button>
-        <button class="icon-btn" name="action" value="dismiss" type="submit" aria-label="Öneriyi yoksay"><svg class="icon"><use href="#i-close"/></svg></button>
+        <button class="btn small" name="action" value="accept" type="submit">{% trans "Ekle" %}</button>
+        <button class="icon-btn" name="action" value="dismiss" type="submit" aria-label="{% trans "Öneriyi yoksay" %}"><svg class="icon"><use href="#i-close"/></svg></button>
       </form>
     </li>
     {% endfor %}
@@ -110,14 +110,14 @@
   {% endif %}
 
   <div class="actions detail-actions" style="margin-top: 32px">
-    <a class="btn" href="{% url 'ideas:idea-chat' idea.pk %}"><svg class="icon"><use href="#i-chat"/></svg>Sohbet</a>
-    <a class="btn quiet" href="{% url 'ideas:update' idea.pk %}">Düzenle</a>
-    <a class="btn quiet" href="{% url 'ideas:idea-prompt' idea.pk %}">Claude için prompt</a>
-    <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="{% if idea.ai_status == 'done' %}Yenileniyor…{% else %}Dolduruluyor…{% endif %}" data-busy-note="AI başlık, özet, etiket ve önerileri hazırlıyor, benzerlik kontrolü yapıyor ve tüm notlarını okuyup öneri çıkarıyor. Birkaç saniye sürebilir.">{% if idea.ai_status == 'done' %}AI ile yenile{% else %}AI ile doldur{% endif %}</button></form>
-    <form method="post" action="{% url 'ideas:idea-advice' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="Notların okunuyor…" data-busy-note="AI tüm notlarını okuyup bu fikre göre öneri hazırlıyor. Notların çoksa biraz sürebilir.">Notlarıma göre öneri al</button></form>
-    <form method="post" action="{% url 'ideas:idea-similar-check' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="Aranıyor…" data-busy-note="Tüm fikirlerin ve projelerinle karşılaştırılıyor. Birkaç saniye sürebilir.">Benzerleri ara</button></form>
-    <a class="btn quiet danger" href="{% url 'ideas:delete' idea.pk %}">Sil</a>
-    {% if idea.ai_status == 'failed' %}<span class="muted">AI daha önce yanıt veremedi.</span>{% endif %}
+    <a class="btn" href="{% url 'ideas:idea-chat' idea.pk %}"><svg class="icon"><use href="#i-chat"/></svg>{% trans "Sohbet" %}</a>
+    <a class="btn quiet" href="{% url 'ideas:update' idea.pk %}">{% trans "Düzenle" %}</a>
+    <a class="btn quiet" href="{% url 'ideas:idea-prompt' idea.pk %}">{% trans "Claude için prompt" %}</a>
+    <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="{% if idea.ai_status == 'done' %}{% trans "Yenileniyor…" %}{% else %}{% trans "Dolduruluyor…" %}{% endif %}" data-busy-note="{% trans "AI başlık, özet, etiket ve önerileri hazırlıyor, benzerlik kontrolü yapıyor ve tüm notlarını okuyup öneri çıkarıyor. Birkaç saniye sürebilir." %}">{% if idea.ai_status == 'done' %}{% trans "AI ile yenile" %}{% else %}{% trans "AI ile doldur" %}{% endif %}</button></form>
+    <form method="post" action="{% url 'ideas:idea-advice' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="{% trans "Notların okunuyor…" %}" data-busy-note="{% trans "AI tüm notlarını okuyup bu fikre göre öneri hazırlıyor. Notların çoksa biraz sürebilir." %}">{% trans "Notlarıma göre öneri al" %}</button></form>
+    <form method="post" action="{% url 'ideas:idea-similar-check' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="{% trans "Aranıyor…" %}" data-busy-note="{% trans "Tüm fikirlerin ve projelerinle karşılaştırılıyor. Birkaç saniye sürebilir." %}">{% trans "Benzerleri ara" %}</button></form>
+    <a class="btn quiet danger" href="{% url 'ideas:delete' idea.pk %}">{% trans "Sil" %}</a>
+    {% if idea.ai_status == 'failed' %}<span class="muted">{% trans "AI daha önce yanıt veremedi." %}</span>{% endif %}
   </div>
 </article>
 

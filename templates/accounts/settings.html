@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Ayarlar · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Ayarlar" %} · Idealar{% endblock %}
 {% block content %}
-<div class="page-head"><h1>Ayarlar</h1></div>
+<div class="page-head"><h1>{% trans "Ayarlar" %}</h1></div>
 <dl class="spec">
-  <dt>Kullanıcı</dt><dd>{{ user.get_username }}</dd>
-  <dt>Tema</dt><dd>{% include "_theme_switch.html" %}</dd>
-  <dt>Destek</dt><dd><a href="{% url 'support:list' %}">Öneri veya şikayet yaz</a>{% if can_manage_tickets %} · <a href="{% url 'support:inbox' %}">Gelen kutusu ({{ open_ticket_count }})</a>{% endif %}</dd>
-  <dt>AI</dt><dd><a href="{% url 'ideas:ai-models' %}">AI modellerimi yönet</a></dd>
+  <dt>{% trans "Kullanıcı" %}</dt><dd>{{ user.get_username }}</dd>
+  <dt>{% trans "Tema" %}</dt><dd>{% include "_theme_switch.html" %}</dd>
+  <dt>{% trans "Destek" %}</dt><dd><a href="{% url 'support:list' %}">{% trans "Öneri veya şikayet yaz" %}</a>{% if can_manage_tickets %} · <a href="{% url 'support:inbox' %}">{% blocktranslate with count=open_ticket_count %}Gelen kutusu ({{ count }}){% endblocktranslate %}</a>{% endif %}</dd>
+  <dt>AI</dt><dd><a href="{% url 'ideas:ai-models' %}">{% trans "AI modellerimi yönet" %}</a></dd>
 </dl>
-<form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn" type="submit">Çıkış yap</button></form>
+<form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn" type="submit">{% trans "Çıkış yap" %}</button></form>
 {% endblock %}

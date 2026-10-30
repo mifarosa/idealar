@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-{% block title %}{% if object %}Projeyi düzenle{% else %}Yeni proje{% endif %} · Idealar{% endblock %}
+{% load i18n %}
+{% block title %}{% if object %}{% trans "Projeyi düzenle" %}{% else %}{% trans "Yeni proje" %}{% endif %} · Idealar{% endblock %}
 {% block content %}
-<div class="page-head"><h1>{% if object %}Projeyi düzenle{% else %}Yeni proje{% endif %}</h1></div>
+<div class="page-head"><h1>{% if object %}{% trans "Projeyi düzenle" %}{% else %}{% trans "Yeni proje" %}{% endif %}</h1></div>
 <form method="post" class="form">
   {% csrf_token %}
   {% include "ideas/_form_fields.html" %}
   <div class="actions">
-    <button class="btn primary" type="submit">Kaydet</button>
-    <a class="btn quiet" href="{% if object %}{% url 'ideas:project-detail' object.pk %}{% else %}{% url 'ideas:project-list' %}{% endif %}">Vazgeç</a>
+    <button class="btn primary" type="submit">{% trans "Kaydet" %}</button>
+    <a class="btn quiet" href="{% if object %}{% url 'ideas:project-detail' object.pk %}{% else %}{% url 'ideas:project-list' %}{% endif %}">{% trans "Vazgeç" %}</a>
   </div>
 </form>
 {% endblock %}

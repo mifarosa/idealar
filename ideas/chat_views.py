@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.db.models import Count
@@ -12,12 +14,12 @@ from .models import ROLE_ASSISTANT, ChatMessage, Conversation, Idea, Project
 
 MAX_USER_MESSAGE_CHARS = 4000
 MAX_TITLE_CHARS = Conversation._meta.get_field("title").max_length
-NO_ANSWER_MESSAGE = "Hiçbir AI yanıt veremedi. Mesajın kaydedildi; başka bir AI seçip tekrar deneyebilirsin."
+NO_ANSWER_MESSAGE = gettext_lazy("Hiçbir AI yanıt veremedi. Mesajın kaydedildi; başka bir AI seçip tekrar deneyebilirsin.")
 
 
 def no_answer_message(conversation: Conversation) -> str:
     reason = getattr(conversation, "failure_reason", "")
-    return f"{NO_ANSWER_MESSAGE} Sebep: {reason}" if reason else NO_ANSWER_MESSAGE
+    return _("{message} Sebep: {reason}").format(message=NO_ANSWER_MESSAGE, reason=reason) if reason else str(NO_ANSWER_MESSAGE)
 
 
 def scope_chat_url(scope: ChatScope) -> str:
@@ -145,7 +147,7 @@ class ConversationDeleteView(LoginRequiredMixin, View):
         conversation = get_object_or_404(Conversation.objects.filter(owner=request.user), pk=pk)
         list_url = scope_chat_url(ChatScope.of(conversation))
         conversation.delete()
-        messages.success(request, "Sohbet silindi.")
+        messages.success(request, _("Sohbet silindi."))
         return redirect(list_url)
 
 
@@ -158,7 +160,7 @@ class ConversationRenameView(LoginRequiredMixin, View):
         conversation = get_object_or_404(Conversation.objects.filter(owner=request.user), pk=pk)
         title = " ".join(request.POST.get("title", "").split())[:MAX_TITLE_CHARS]
         if not title:
-            return JsonResponse({"error": "Sohbet adı boş olamaz."}, status=400)
+            return JsonResponse({"error": _("Sohbet adı boş olamaz.")}, status=400)
         conversation.title = title
         conversation.save(update_fields=["title"])
         return JsonResponse({"title": title})
@@ -177,7 +179,7 @@ class ChatActionView(LoginRequiredMixin, View):
         apply = request.POST.get("decision") == "apply"
         try:
             chat_service.decide_action(message, index, apply)
-            messages.success(request, "Eklendi." if apply else "Öneri yoksayıldı.")
+            messages.success(request, _("Eklendi.") if apply else _("Öneri yoksayıldı."))
         except chat_service.ActionNotApplicable:
-            messages.error(request, "Bu öneri artık uygulanamıyor (fikir silinmiş olabilir).")
+            messages.error(request, _("Bu öneri artık uygulanamıyor (fikir silinmiş olabilir)."))
         return redirect(destination)
