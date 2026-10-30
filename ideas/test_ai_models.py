@@ -72,8 +72,8 @@ class BuildClientTests(SimpleTestCase):
                          [("groq", "g-model", "", "GROQ_API_KEY"), ("ollama", "qwen2.5:3b", "http://h:11434", "")])
 
 
-def sealed(key="sk-test-key-123456"):
-    return {"api_key_sealed": key_vault.seal(key), "key_hint": key_vault.hint(key)}
+def sealed(owner, key="sk-test-key-123456"):
+    return {"api_key_sealed": key_vault.seal(key, owner.pk), "key_hint": key_vault.hint(key)}
 
 
 class SpecTests(SimpleTestCase):
@@ -90,20 +90,118 @@ class SpecTests(SimpleTestCase):
 
 class KeyVaultTests(SimpleTestCase):
     def test_round_trip_and_the_sealed_value_hides_the_key(self):
-        token = key_vault.seal("sk-test-key-123456")
+        token = key_vault.seal("sk-test-key-123456", 7)
 
         self.assertNotIn("sk-test", token)
-        self.assertEqual(key_vault.unseal(token), "sk-test-key-123456")
+        self.assertEqual(key_vault.unseal(token, 7), "sk-test-key-123456")
+
+    def test_a_sealed_key_is_useless_for_any_other_owner(self):
+        token = key_vault.seal("sk-test-key-123456", 7)
+
+        with self.assertRaises(key_vault.KeyUnreadable):
+            key_vault.unseal(token, 8)
+
+    def test_sealing_twice_gives_different_tokens(self):
+        self.assertNotEqual(key_vault.seal("sk-test-key-123456", 7), key_vault.seal("sk-test-key-123456", 7))
+
+    def test_tampered_value_is_unreadable(self):
+        token = key_vault.seal("sk-test-key-123456", 7)
+
+        with self.assertRaises(key_vault.KeyUnreadable):
+            key_vault.unseal(token[:-4] + "AAAA", 7)
 
     def test_changed_secret_makes_the_key_unreadable(self):
-        token = key_vault.seal("sk-test-key-123456")
+        token = key_vault.seal("sk-test-key-123456", 7)
 
-        with self.settings(KEYS_ENCRYPTION_KEY="another-secret"), self.assertRaises(key_vault.KeyUnreadable):
-            key_vault.unseal(token)
+        with self.settings(KEYS_ENCRYPTION_KEY="another-secret-another-secret-123"), self.assertRaises(key_vault.KeyUnreadable):
+            key_vault.unseal(token, 7)
+
+    def test_rotation_keeps_old_values_readable_until_they_are_resealed(self):
+        old = "old-secret-old-secret-old-secret-1"
+        with self.settings(KEYS_ENCRYPTION_KEY=old):
+            token = key_vault.seal("sk-test-key-123456", 7)
+
+        with self.settings(KEYS_ENCRYPTION_KEY="new-secret-new-secret-new-secret-1", KEYS_ENCRYPTION_KEY_PREVIOUS=[old]):
+            self.assertTrue(key_vault.needs_rotation(token))
+            self.assertEqual(key_vault.unseal(token, 7), "sk-test-key-123456")
+            fresh = key_vault.seal(key_vault.unseal(token, 7), 7)
+            self.assertFalse(key_vault.needs_rotation(fresh))
+
+        with self.settings(KEYS_ENCRYPTION_KEY="new-secret-new-secret-new-secret-1"):
+            self.assertEqual(key_vault.unseal(fresh, 7), "sk-test-key-123456")
+
+    def test_values_sealed_by_the_first_version_stay_readable(self):
+        import base64
+        import hashlib
+
+        from cryptography.fernet import Fernet
+        from django.conf import settings
+
+        legacy = Fernet(base64.urlsafe_b64encode(hashlib.sha256(f"idealar-ai-keys:{settings.SECRET_KEY}".encode()).digest()))
+        token = legacy.encrypt(b"sk-legacy-key-123456").decode()
+
+        self.assertEqual(key_vault.unseal(token, 7), "sk-legacy-key-123456")
+        self.assertTrue(key_vault.needs_rotation(token))
 
     def test_hint_shows_only_the_last_four_characters_of_long_keys(self):
         self.assertEqual(key_vault.hint("sk-test-key-123456"), "3456")
         self.assertEqual(key_vault.hint("short"), "")
+
+
+class RotateCommandTests(TestCase):
+    def test_reseals_with_the_current_secret_and_reports_unreadable_ones(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        user = make_user("owner", staff=False)
+        old = "old-secret-old-secret-old-secret-1"
+        with self.settings(KEYS_ENCRYPTION_KEY=old):
+            good = AIModel.objects.create(owner=user, kind="groq", label="Good", model_name="m", **sealed(user))
+        lost = AIModel.objects.create(owner=user, kind="groq", label="Lost", model_name="m", api_key_sealed="garbage")
+
+        out, err = StringIO(), StringIO()
+        with self.settings(KEYS_ENCRYPTION_KEY="new-secret-new-secret-new-secret-1", KEYS_ENCRYPTION_KEY_PREVIOUS=[old]):
+            call_command("rotate_ai_keys", stdout=out, stderr=err)
+            good.refresh_from_db()
+            self.assertFalse(key_vault.needs_rotation(good.api_key_sealed))
+            self.assertEqual(key_vault.unseal(good.api_key_sealed, user.pk), "sk-test-key-123456")
+
+        self.assertIn("Re-sealed 1", out.getvalue())
+        self.assertIn(f"Model {lost.pk}", err.getvalue())
+
+
+class SystemCheckTests(SimpleTestCase):
+    def test_short_secret_is_an_error_and_a_missing_one_a_warning_outside_debug(self):
+        from ideas.checks import key_encryption_secret
+
+        with self.settings(KEYS_ENCRYPTION_KEY="short", DEBUG=False):
+            self.assertEqual([m.id for m in key_encryption_secret(None)], ["ideas.E001"])
+        with self.settings(KEYS_ENCRYPTION_KEY="", DEBUG=False):
+            self.assertEqual([m.id for m in key_encryption_secret(None)], ["ideas.W001"])
+        with self.settings(KEYS_ENCRYPTION_KEY="x" * 40, DEBUG=False):
+            self.assertEqual(key_encryption_secret(None), [])
+
+
+class NewProviderTests(SimpleTestCase):
+    def test_every_cloud_kind_has_its_own_fixed_endpoint_and_needs_a_key(self):
+        for kind in ("openai", "mistral", "deepseek", "xai", "together", "cerebras", "fireworks"):
+            client = build_client(ModelSpec("m1", kind, kind, "some-model", api_key="k"), {})
+
+            self.assertIsInstance(client, OpenAICompatibleClient, kind)
+            with self.assertRaises(AINotConfiguredError):
+                build_client(ModelSpec("m1", kind, kind, "some-model"), {})
+
+    def test_openai_requests_leave_out_temperature_but_others_send_it(self):
+        server = FakeProviderServer(200, chat_reply('{"ok": true}'))
+        self.addCleanup(server.close)
+
+        for temperature, expected in ((None, False), (0.3, True)):
+            OpenAICompatibleClient("x", server.url, "m", api_key="k", temperature=temperature).complete_json("s", "u")
+            self.assertEqual("temperature" in server.requests[-1]["json"], expected)
+
+        self.assertIn("api.openai.com", build_client(ModelSpec("m1", "ChatGPT", "openai", "m", api_key="k"), {})._chat_url)
+        self.assertIsNone(build_client(ModelSpec("m1", "ChatGPT", "openai", "m", api_key="k"), {})._temperature)
 
 
 class RegistryTests(TestCase):
@@ -111,7 +209,7 @@ class RegistryTests(TestCase):
         self.user = make_user("owner", staff=False)
 
     def make(self, label, position, owner=None, **fields):
-        fields = {"kind": "groq", "model_name": "m", **sealed(), **fields}
+        fields = {"kind": "groq", "model_name": "m", **sealed(owner or self.user), **fields}
         return AIModel.objects.create(owner=owner or self.user, label=label, position=position, **fields)
 
     def test_chain_has_only_this_users_enabled_models_in_order(self):
@@ -123,7 +221,7 @@ class RegistryTests(TestCase):
         self.assertEqual(ai_registry.choices(self.user), [(first.chain_name, "First"), (second.chain_name, "Second")])
 
     def test_decrypted_key_reaches_the_client_and_models_without_a_key_are_skipped(self):
-        self.make("With key", 1, api_key_sealed=key_vault.seal("sk-live-abcdefgh"))
+        self.make("With key", 1, api_key_sealed=key_vault.seal("sk-live-abcdefgh", self.user.pk))
         self.make("No key", 2, api_key_sealed="", key_hint="", kind="gemini")
 
         with self.assertLogs("ai.providers", level="WARNING"):
@@ -227,7 +325,7 @@ class SettingsPageTests(TestCase):
 
         self.client.post(url, {**base, "api_key": "sk-another-key-9999"})
         model.refresh_from_db()
-        self.assertEqual(key_vault.unseal(model.api_key_sealed), "sk-another-key-9999")
+        self.assertEqual(key_vault.unseal(model.api_key_sealed, self.user.pk), "sk-another-key-9999")
 
     def test_changing_the_provider_requires_a_new_key_so_the_old_one_never_travels(self):
         self.create()
@@ -240,7 +338,7 @@ class SettingsPageTests(TestCase):
 
     def test_users_cannot_see_or_change_each_others_models(self):
         other = make_user("other")
-        theirs = AIModel.objects.create(owner=other, kind="groq", label="Theirs", model_name="m", **sealed())
+        theirs = AIModel.objects.create(owner=other, kind="groq", label="Theirs", model_name="m", **sealed(other))
 
         self.assertNotContains(self.client.get(reverse("ideas:ai-models")), "Theirs")
         self.assertEqual(self.client.get(reverse("ideas:ai-model-update", args=[theirs.pk])).status_code, 404)
@@ -259,11 +357,11 @@ class SettingsPageTests(TestCase):
 
         models = {m.kind: m for m in AIModel.objects.all()}
         self.assertEqual(set(models), {"groq", "ollama"})
-        self.assertEqual(key_vault.unseal(models["groq"].api_key_sealed), "sk-from-env-0001")
+        self.assertEqual(key_vault.unseal(models["groq"].api_key_sealed, models["groq"].owner_id), "sk-from-env-0001")
 
     def test_toggle_move_and_delete(self):
-        a = AIModel.objects.create(owner=self.user, kind="groq", label="A", model_name="a", position=1, **sealed())
-        b = AIModel.objects.create(owner=self.user, kind="groq", label="B", model_name="b", position=1, **sealed())  # tie on purpose
+        a = AIModel.objects.create(owner=self.user, kind="groq", label="A", model_name="a", position=1, **sealed(self.user))
+        b = AIModel.objects.create(owner=self.user, kind="groq", label="B", model_name="b", position=1, **sealed(self.user))  # tie on purpose
 
         self.client.post(reverse("ideas:ai-model-action", args=[b.pk, "up"]))
         self.assertEqual([m.label for m in AIModel.objects.all()], ["B", "A"])
@@ -276,7 +374,7 @@ class SettingsPageTests(TestCase):
         self.assertEqual([m.label for m in AIModel.objects.all()], ["B"])
 
     def test_unknown_action_is_a_404_and_actions_need_post(self):
-        model = AIModel.objects.create(owner=self.user, kind="groq", label="A", model_name="a", **sealed())
+        model = AIModel.objects.create(owner=self.user, kind="groq", label="A", model_name="a", **sealed(self.user))
 
         self.assertEqual(self.client.post(reverse("ideas:ai-model-action", args=[model.pk, "explode"])).status_code, 404)
         self.assertEqual(self.client.get(reverse("ideas:ai-model-action", args=[model.pk, "delete"])).status_code, 405)
@@ -296,7 +394,7 @@ class SettingsPageTests(TestCase):
         self.assertContains(failed, "çalışmadı")
 
     def test_test_button_never_leaks_the_key_into_the_page(self):
-        model = AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", **sealed("sk-secret-should-not-show"))
+        model = AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", **sealed(self.user, "sk-secret-should-not-show"))
 
         with patch("ideas.ai_settings_views.build_client", side_effect=AIProviderError("groq HTTP 401: invalid key")):
             page = self.client.post(reverse("ideas:ai-model-action", args=[model.pk, "test"]), follow=True)
@@ -335,12 +433,12 @@ class SettingsPageTests(TestCase):
     def test_notice_asks_users_without_models_to_add_one(self):
         self.assertContains(self.client.get(reverse("ideas:list")), "kendi AI anahtarını ekle")
 
-        AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", **sealed())
+        AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", **sealed(self.user))
 
         self.assertNotContains(self.client.get(reverse("ideas:list")), "kendi AI anahtarını ekle")
 
     def test_old_chat_messages_show_the_label_of_a_database_model(self):
-        model = AIModel.objects.create(owner=self.user, kind="groq", label="Home PC", model_name="a", **sealed())
+        model = AIModel.objects.create(owner=self.user, kind="groq", label="Home PC", model_name="a", **sealed(self.user))
         conversation = Conversation.objects.create(owner=self.user, title="t")
         ChatMessage.objects.create(conversation=conversation, role="assistant", content="hi", provider=model.chain_name)
 

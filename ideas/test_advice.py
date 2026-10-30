@@ -172,6 +172,6 @@ class AdviceViewTests(TestCase):
                 patch("ideas.ai_views.similarity.check_idea"):
             self.client.post(reverse("ideas:idea-enrich", args=[self.idea.pk]))
             run.assert_not_called()
-            AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", api_key_sealed=seal("k"))
+            AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", api_key_sealed=seal("k", self.user.pk))
             self.client.post(reverse("ideas:idea-enrich", args=[self.idea.pk]))
             run.assert_called_once()

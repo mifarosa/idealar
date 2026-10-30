@@ -87,6 +87,8 @@ GOOGLE_SIGNUP = env_bool("GOOGLE_SIGNUP", default=False)
 
 # Secret that seals users' AI API keys in the database. Falls back to SECRET_KEY; set it separately to rotate either one alone.
 KEYS_ENCRYPTION_KEY = os.environ.get("KEYS_ENCRYPTION_KEY", "").strip()
+# Old secrets that may still decrypt values during a rotation (comma-separated, newest first).
+KEYS_ENCRYPTION_KEY_PREVIOUS = env_list("KEYS_ENCRYPTION_KEY_PREVIOUS")
 
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "ideas:list"

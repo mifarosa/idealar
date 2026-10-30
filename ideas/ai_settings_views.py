@@ -7,7 +7,9 @@ from django.db.models import Max
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.cache import never_cache
 
 from ai.errors import AIError
 from ai.providers import KINDS, build_client, specs_from_environment
@@ -44,6 +46,7 @@ def key_is_set(model: AIModel) -> bool:
     return not info or not info.needs_key or bool(model.api_key_sealed)
 
 
+@method_decorator(never_cache, name="dispatch")
 class AIModelListView(LoginRequiredMixin, View):
     def get(self, request):
         models = list(own_models(request.user))
@@ -53,6 +56,7 @@ class AIModelListView(LoginRequiredMixin, View):
         return render(request, "ideas/ai_models.html", {"models": models, "can_import_env": request.user.is_staff and not models})
 
 
+@method_decorator(never_cache, name="dispatch")
 class AIModelFormView(LoginRequiredMixin, View):
     def get_instance(self, pk):
         return get_object_or_404(own_models(self.request.user), pk=pk) if pk else None
@@ -91,7 +95,7 @@ class AIModelImportEnvView(StaffRequiredMixin, View):
                 continue
             AIModel.objects.create(
                 owner=request.user, kind=spec.kind, label=spec.label, model_name=spec.model, base_url=spec.base_url,
-                api_key_sealed=key_vault.seal(key) if key else "", key_hint=key_vault.hint(key), position=position,
+                api_key_sealed=key_vault.seal(key, request.user.pk) if key else "", key_hint=key_vault.hint(key), position=position,
             )
             imported += 1
         messages.success(request, f".env'den {imported} model aktarıldı. Artık buradan yönetebilirsin.")

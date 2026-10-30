@@ -136,6 +136,7 @@ class KindInfo:
     key_env: str  # suggested env variable holding the key; empty means no key
     needs_key: bool
     local: bool = False  # slow hardware: longer timeout
+    send_temperature: bool = True  # OpenAI's newer models reject any value except their default
     staff_only: bool = False  # the user supplies the address, so only trusted users may use it (server-side request risk)
 
 
@@ -143,7 +144,14 @@ KINDS: dict[str, KindInfo] = {
     "groq": KindInfo("Groq", "https://api.groq.com/openai/v1", "GROQ_API_KEY", True),
     "gemini": KindInfo("Gemini", "https://generativelanguage.googleapis.com/v1beta/openai", "GEMINI_API_KEY", True),
     "anthropic": KindInfo("Claude", "", "ANTHROPIC_API_KEY", True),
+    "openai": KindInfo("ChatGPT (OpenAI)", "https://api.openai.com/v1", "OPENAI_API_KEY", True, send_temperature=False),
     "openrouter": KindInfo("OpenRouter", "https://openrouter.ai/api/v1", "OPENROUTER_API_KEY", True),
+    "mistral": KindInfo("Mistral", "https://api.mistral.ai/v1", "MISTRAL_API_KEY", True),
+    "deepseek": KindInfo("DeepSeek", "https://api.deepseek.com/v1", "DEEPSEEK_API_KEY", True),
+    "xai": KindInfo("Grok (xAI)", "https://api.x.ai/v1", "XAI_API_KEY", True),
+    "together": KindInfo("Together AI", "https://api.together.xyz/v1", "TOGETHER_API_KEY", True),
+    "cerebras": KindInfo("Cerebras", "https://api.cerebras.ai/v1", "CEREBRAS_API_KEY", True),
+    "fireworks": KindInfo("Fireworks AI", "https://api.fireworks.ai/inference/v1", "FIREWORKS_API_KEY", True),
     "ollama": KindInfo("Ollama", "", "", False, local=True, staff_only=True),
     "custom": KindInfo("Diğer (OpenAI uyumlu)", "", "", False, local=True, staff_only=True),
 }
@@ -178,7 +186,8 @@ def build_client(spec: ModelSpec, environ: Mapping[str, str] | None = None) -> L
         raise AINotConfiguredError(f"{spec.label} has no address")
     if spec.kind == "ollama":
         base_url += "/v1"
-    return OpenAICompatibleClient(spec.name, base_url, spec.model, api_key=api_key, timeout=timeout)
+    temperature = 0.3 if info.send_temperature else None
+    return OpenAICompatibleClient(spec.name, base_url, spec.model, api_key=api_key, timeout=timeout, temperature=temperature)
 
 
 def build_chain(specs: list[ModelSpec], environ: Mapping[str, str] | None = None, preferred: str | None = None) -> FallbackClient:

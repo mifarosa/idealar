@@ -278,9 +278,10 @@ class ChatViewTests(TestCase):
         self.assertContains(response, "Sleep tracker")
 
     def test_picker_lists_only_usable_models_of_this_user_and_posts_the_choice(self):
-        mine = AIModel.objects.create(owner=self.user, kind="groq", label="My Groq", model_name="m", api_key_sealed=seal("k"))
+        mine = AIModel.objects.create(owner=self.user, kind="groq", label="My Groq", model_name="m", api_key_sealed=seal("k", self.user.pk))
         AIModel.objects.create(owner=self.user, kind="gemini", label="No key", model_name="m")
-        AIModel.objects.create(owner=make_user("other"), kind="groq", label="Not mine", model_name="m", api_key_sealed=seal("k"))
+        stranger = make_user("other")
+        AIModel.objects.create(owner=stranger, kind="groq", label="Not mine", model_name="m", api_key_sealed=seal("k", stranger.pk))
 
         page = self.client.get(reverse("ideas:chat"))
         self.assertContains(page, f'<option value="{mine.chain_name}">My Groq</option>')

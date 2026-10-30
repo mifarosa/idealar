@@ -20,7 +20,7 @@ def usable_models(user) -> list[AIModel]:
 
 def spec_for(model: AIModel) -> ModelSpec:
     try:
-        key = unseal(model.api_key_sealed) if model.api_key_sealed else ""
+        key = unseal(model.api_key_sealed, model.owner_id) if model.api_key_sealed else ""
     except KeyUnreadable:
         logger.warning("Stored key of AI model %s cannot be decrypted; the owner must enter it again", model.pk)
         key = ""

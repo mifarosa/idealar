@@ -128,8 +128,8 @@ class ReviewProjectTests(TestCase):
             self.assertFalse(project_review.review_project(self.project, lambda: self.github(), broken_factory))
 
     def test_gemini_is_the_preferred_reviewer(self):
-        AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", api_key_sealed=seal("k"))
-        gemini = AIModel.objects.create(owner=self.user, kind="gemini", label="Gem", model_name="m", api_key_sealed=seal("k"))
+        AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", api_key_sealed=seal("k", self.user.pk))
+        gemini = AIModel.objects.create(owner=self.user, kind="gemini", label="Gem", model_name="m", api_key_sealed=seal("k", self.user.pk))
 
         reviewer = project_review.build_reviewer(self.user)
 

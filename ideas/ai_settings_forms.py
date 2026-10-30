@@ -25,6 +25,7 @@ class AIModelForm(forms.ModelForm):
         labels = {"label": "Görünen ad", "model_name": "Model adı", "base_url": "Adres", "enabled": "Kullanımda"}
         help_texts = {
             "label": "Boş bırakırsan sağlayıcı adı kullanılır.",
+            "model_name": "Adı sağlayıcının sitesinden al. Kaydettikten sonra listedeki \"Modeller\" tuşu anahtarının kullanabildiği adları gösterir.",
             "base_url": "Yalnızca Ollama ve \"Diğer\" için. Ollama: http://host.docker.internal:11434 · LM Studio: http://host.docker.internal:1234/v1",
         }
 
@@ -79,7 +80,7 @@ class AIModelForm(forms.ModelForm):
         model.owner = self.user
         key = self.cleaned_data.get("api_key")
         if key:
-            model.api_key_sealed, model.key_hint = key_vault.seal(key), key_vault.hint(key)
+            model.api_key_sealed, model.key_hint = key_vault.seal(key, self.user.pk), key_vault.hint(key)
         elif kind_changed:
             # A key saved for one provider must never be sent to another one.
             model.api_key_sealed = model.key_hint = ""

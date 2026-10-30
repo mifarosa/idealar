@@ -42,21 +42,25 @@ def parse_json_object(text: str) -> dict:
 
 
 class OpenAICompatibleClient(LLMClient):
-    def __init__(self, name: str, base_url: str, model: str, api_key: str = "", timeout: float = 20):
+    def __init__(
+        self, name: str, base_url: str, model: str, api_key: str = "", timeout: float = 20, temperature: float | None = 0.3
+    ):
         self.name = name
         self._chat_url = base_url.rstrip("/") + "/chat/completions"
         self._models_url = base_url.rstrip("/") + "/models"
         self._model = model
         self._api_key = api_key
         self._timeout = timeout
+        self._temperature = temperature  # None omits it: some providers' newer models only accept their default
 
     def chat_json(self, system: str, messages: list[dict]) -> dict:
         payload = {
             "model": self._model,
             "messages": [{"role": "system", "content": system}, *messages],
-            "temperature": 0.3,
             "response_format": {"type": "json_object"},
         }
+        if self._temperature is not None:
+            payload["temperature"] = self._temperature
         return parse_json_object(self._extract_content(self._post(payload)))
 
     def list_models(self) -> list[str]:
