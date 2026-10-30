@@ -10,8 +10,8 @@ from .models import AI_DONE, AI_FAILED, Idea
 logger = logging.getLogger(__name__)
 
 
-def build_analyzer() -> IdeaAnalyzer:
-    return IdeaAnalyzer(ai_registry.build_client())
+def build_analyzer(owner) -> IdeaAnalyzer:
+    return IdeaAnalyzer(ai_registry.build_client(owner))
 
 
 def _idea_text(idea: Idea) -> str:

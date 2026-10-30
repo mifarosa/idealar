@@ -1,40 +1,48 @@
-"""Which AI models the app uses: the ones managed in the settings page, or the .env chain until any exist."""
+"""Which AI models a user has brought: their own list, with keys unsealed only for the moment of a call."""
+import logging
 import re
 
 from ai.fallback import FallbackClient
-from ai.providers import KINDS, PROVIDER_LABELS, ModelSpec, build_chain, build_default_client, configured_provider_names
+from ai.providers import KINDS, PROVIDER_LABELS, ModelSpec, build_chain
 
+from .key_vault import KeyUnreadable, unseal
 from .models import AIModel
 
+logger = logging.getLogger(__name__)
 CHAIN_NAME = re.compile(r"m(\d+)")
 
 
+def usable_models(user) -> list[AIModel]:
+    """Enabled models of this user. A model of a staff-only kind is ignored once its owner is no longer staff."""
+    models = AIModel.objects.filter(owner=user, enabled=True)
+    return [m for m in models if user.is_staff or not KINDS.get(m.kind, KINDS["custom"]).staff_only]
+
+
 def spec_for(model: AIModel) -> ModelSpec:
-    return ModelSpec(model.chain_name, model.label, model.kind, model.model_name, model.base_url, model.key_env)
+    try:
+        key = unseal(model.api_key_sealed) if model.api_key_sealed else ""
+    except KeyUnreadable:
+        logger.warning("Stored key of AI model %s cannot be decrypted; the owner must enter it again", model.pk)
+        key = ""
+    return ModelSpec(model.chain_name, model.label, model.kind, model.model_name, model.base_url, api_key=key)
 
 
-def enabled_specs() -> list[ModelSpec]:
-    return [spec_for(model) for model in AIModel.objects.filter(enabled=True)]
+def has_models(user) -> bool:
+    return bool(usable_models(user))
 
 
-def uses_database() -> bool:
-    """Once a model is added in the settings page, the .env chain is no longer consulted."""
-    return AIModel.objects.exists()
+def build_client(user, preferred: str | None = None) -> FallbackClient:
+    """The user's fallback chain. `preferred` is a chain name (m12) or a provider kind (gemini) to try first."""
+    models = usable_models(user)
+    if preferred in KINDS:
+        preferred = next((m.chain_name for m in models if m.kind == preferred), None)
+    return build_chain([spec_for(model) for model in models], preferred=preferred)
 
 
-def build_client(preferred: str | None = None) -> FallbackClient:
-    if uses_database():
-        return build_chain(enabled_specs(), preferred=preferred)
-    return build_default_client(preferred=preferred)
-
-
-def choices() -> list[tuple[str, str]]:
-    """(chain name, label) pairs for the picker, in priority order."""
-    if uses_database():
-        usable = build_chain(enabled_specs())._clients
-        labels = dict(AIModel.objects.values_list("id", "label"))
-        return [(client.name, labels[int(CHAIN_NAME.fullmatch(client.name).group(1))]) for client in usable]
-    return [(name, PROVIDER_LABELS.get(name, name)) for name in configured_provider_names()]
+def choices(user) -> list[tuple[str, str]]:
+    """(chain name, label) pairs for the picker, in priority order; models without a key are left out."""
+    labels = {model.chain_name: model.label for model in usable_models(user)}
+    return [(client.name, labels[client.name]) for client in build_client(user)._clients]
 
 
 def label_for(name: str) -> str:
@@ -44,7 +52,3 @@ def label_for(name: str) -> str:
         label = AIModel.objects.filter(pk=int(match.group(1))).values_list("label", flat=True).first()
         return label or "silinmiş model"
     return PROVIDER_LABELS.get(name, name)
-
-
-def kind_choices() -> list[tuple[str, str]]:
-    return [(kind, info.label) for kind, info in KINDS.items()]

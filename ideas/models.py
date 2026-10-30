@@ -217,13 +217,15 @@ class ChatMessage(models.Model):
 
 
 class AIModel(models.Model):
-    """An AI model the app may call. Instance-wide (managed by staff); keys stay in .env, only their variable name is stored."""
+    """An AI model one user brought. The API key is stored sealed (see key_vault) and never shown again."""
 
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ai_models")
     kind = models.CharField(max_length=20)
     label = models.CharField(max_length=60)
     model_name = models.CharField(max_length=120)
-    base_url = models.CharField(max_length=200, blank=True)
-    key_env = models.CharField(max_length=60, blank=True)
+    base_url = models.CharField(max_length=200, blank=True)  # staff-only kinds (Ollama, other servers)
+    api_key_sealed = models.TextField(blank=True)
+    key_hint = models.CharField(max_length=4, blank=True)
     enabled = models.BooleanField(default=True)
     position = models.PositiveIntegerField(default=0)
 

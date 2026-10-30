@@ -1,3 +1,4 @@
+from . import ai_registry
 from .models import Idea, Project
 
 IDEA_VIEWS = {"list", "detail", "create", "update", "delete", "feature-copy"}
@@ -13,6 +14,7 @@ def navigation(request):
         "nav_section": _section(name),
         "nav_idea_count": Idea.objects.owned_by(request.user).count(),
         "nav_project_count": Project.objects.filter(owner=request.user).count(),
+        "ai_missing": not name.startswith("ai-model") and name != "settings" and not ai_registry.has_models(request.user),
     }
 
 

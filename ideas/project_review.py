@@ -29,8 +29,8 @@ def build_github_client() -> GitHubClient:
     return GitHubClient(api_url=os.environ.get("GITHUB_API_URL", DEFAULT_API_URL), token=os.environ.get("GITHUB_TOKEN", ""))
 
 
-def build_reviewer() -> RepoReviewer:
-    return RepoReviewer(ai_registry.build_client(preferred=REVIEW_PROVIDER))
+def build_reviewer(owner) -> RepoReviewer:
+    return RepoReviewer(ai_registry.build_client(owner, preferred=REVIEW_PROVIDER))
 
 
 def _max_chars() -> int:
@@ -74,7 +74,7 @@ def review_project(project: Project, github_factory=None, reviewer_factory=None)
     try:
         ref = parse_repo_url(project.github_url)
         snapshot = build_snapshot((github_factory or build_github_client)(), ref, _max_chars())
-        reviewer = (reviewer_factory or build_reviewer)()
+        reviewer = reviewer_factory() if reviewer_factory else build_reviewer(project.owner)
         checklist = _checklist(project)
         review = reviewer.review(snapshot.text, [(f.pk, f.text) for f in checklist])
     except GitHubError as error:

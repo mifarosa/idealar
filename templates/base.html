@@ -45,6 +45,7 @@
     {% endif %}
 
     <div class="content">
+      {% if ai_missing %}<a class="ai-notice" href="{% url 'ideas:ai-models' %}">Yapay zekâ özellikleri için kendi AI anahtarını ekle →</a>{% endif %}
       {% block body %}
       <main class="page"><div class="page-inner {% block inner_class %}{% endblock %}">{% block content %}{% endblock %}</div></main>
       {% endblock %}

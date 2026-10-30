@@ -181,6 +181,8 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .list li.has-tools { display: flex; align-items: center; }
 .list li.has-tools > a { flex: 1; min-width: 0; }
 .list li.has-tools.wrap { flex-wrap: wrap; }
+.list li.has-tools.wrap > a { flex: 1 1 100%; }  /* buttons drop under the text instead of squeezing it */
+.list li.has-tools.wrap .row-tools { padding: 0 4px 10px; flex-wrap: wrap; gap: 4px; }
 .row-tools { display: flex; align-items: center; gap: 2px; padding-right: 4px; flex: none; }
 .row-tools form { display: inline; }
 [data-rename-text][contenteditable="true"] { outline: 2px solid var(--signal); outline-offset: 2px; background: var(--panel); cursor: text; }
@@ -211,6 +213,8 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .capture .cancel { flex: none; height: 38px; padding: 0 12px; }
 
 /* ---------- Toasts (flash messages) ---------- */
+.ai-notice { display: block; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); border-left: 3px solid var(--signal); font-size: 14px; text-decoration: none; flex: none; }
+.ai-notice:hover { background: var(--hover); }
 .toasts { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 20; width: min(32rem, calc(100% - 24px)); }
 .toast { background: var(--ink); color: var(--ground); border-radius: 3px; padding: 10px 14px; font-size: 14px; cursor: pointer; border-left: 3px solid var(--signal); }
 .toast-error { border-left-color: var(--danger); }

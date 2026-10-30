@@ -6,14 +6,16 @@
   <h1>AI modelleri</h1>
   <a class="btn primary" href="{% url 'ideas:ai-model-create' %}">Model ekle</a>
 </div>
-<p class="muted">Üstteki model önce denenir; hata verirse sıradakine geçilir. Anahtarlar burada saklanmaz, <code>.env</code> dosyasında durur.</p>
+<p class="muted">Bu uygulama kendi yapay zekâ anahtarınla çalışır. Üstteki model önce denenir; hata verirse sıradakine geçilir. Anahtarın şifrelenerek saklanır ve bir daha ekranda gösterilmez.</p>
 
-{% if env_chain %}
+{% if not models %}
 <div class="form" style="margin: 16px 0 24px">
-  <p>Henüz model eklemedin; şu an <code>.env</code> içindeki <code>AI_PROVIDERS</code> sırası kullanılıyor. İlk modeli eklediğinde bu liste devreye girer.</p>
+  <p>Henüz model eklemedin. Groq ve Gemini'nin ücretsiz katmanı var; Claude ve OpenRouter ücretlidir. Anahtarı ilgili sağlayıcının sitesinden alıp <strong>Model ekle</strong> ile buraya yapıştır.</p>
+  {% if can_import_env %}
   <form method="post" action="{% url 'ideas:ai-model-import-env' %}">{% csrf_token %}
-    <button class="btn" type="submit">.env ayarlarımı listeye aktar</button>
+    <button class="btn" type="submit">Sunucunun .env ayarlarını bana aktar</button>
   </form>
+  {% endif %}
 </div>
 {% else %}
 <ul class="list">
@@ -21,7 +23,7 @@
   <li class="has-tools wrap">
     <a href="{% url 'ideas:ai-model-update' model.pk %}">
       <span class="title">{{ model.label }}{% if not model.enabled %} <span class="muted">(kapalı)</span>{% endif %}</span><br>
-      <span class="meta">{{ model.kind_label }} · {{ model.model_name }}{% if model.key_missing %} · <span class="error-text">{{ model.key_env }} .env'de yok</span>{% endif %}</span>
+      <span class="meta">{{ model.kind_label }} · {{ model.model_name }}{% if model.key_missing %} · <span class="error-text">anahtar yok</span>{% elif model.key_hint %} · anahtar …{{ model.key_hint }}{% endif %}</span>
     </a>
     <div class="row-tools">
       <form method="post" action="{% url 'ideas:ai-model-action' model.pk 'up' %}">{% csrf_token %}<button class="btn quiet small" type="submit" aria-label="Yukarı taşı" {% if forloop.first %}disabled{% endif %}>↑</button></form>

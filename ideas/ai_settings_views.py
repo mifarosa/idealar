@@ -12,7 +12,7 @@ from django.views import View
 from ai.errors import AIError
 from ai.providers import KINDS, build_client, specs_from_environment
 
-from . import ai_registry
+from . import ai_registry, key_vault
 from .ai_settings_forms import AIModelForm
 from .models import AIModel
 
@@ -21,31 +21,41 @@ MAX_LISTED_MODELS = 200
 
 
 class StaffRequiredMixin(LoginRequiredMixin):
-    """The model list is instance-wide, so only staff may change it."""
-
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and not request.user.is_staff:
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
 
 
+def own_models(user):
+    """Every lookup goes through here, so one user can never see or touch another user's models."""
+    return AIModel.objects.filter(owner=user)
+
+
+def get_own(user, pk) -> AIModel:
+    model = get_object_or_404(own_models(user), pk=pk)
+    if KINDS.get(model.kind, KINDS["custom"]).staff_only and not user.is_staff:
+        raise Http404  # a model that points at an arbitrary address is only usable by staff
+    return model
+
+
 def key_is_set(model: AIModel) -> bool:
     info = KINDS.get(model.kind)
-    return not info or not info.needs_key or bool(os.environ.get(model.key_env, "").strip())
+    return not info or not info.needs_key or bool(model.api_key_sealed)
 
 
-class AIModelListView(StaffRequiredMixin, View):
+class AIModelListView(LoginRequiredMixin, View):
     def get(self, request):
-        models = list(AIModel.objects.all())
+        models = list(own_models(request.user))
         for model in models:
             model.kind_label = KINDS[model.kind].label if model.kind in KINDS else model.kind
             model.key_missing = not key_is_set(model)
-        return render(request, "ideas/ai_models.html", {"models": models, "env_chain": not models})
+        return render(request, "ideas/ai_models.html", {"models": models, "can_import_env": request.user.is_staff and not models})
 
 
-class AIModelFormView(StaffRequiredMixin, View):
+class AIModelFormView(LoginRequiredMixin, View):
     def get_instance(self, pk):
-        return get_object_or_404(AIModel, pk=pk) if pk else None
+        return get_object_or_404(own_models(self.request.user), pk=pk) if pk else None
 
     def render_form(self, request, form, instance):
         return render(request, "ideas/ai_model_form.html", {"form": form, "object": instance})
@@ -53,41 +63,46 @@ class AIModelFormView(StaffRequiredMixin, View):
     def get(self, request, pk=None):
         instance = self.get_instance(pk)
         initial = {} if instance else {"kind": request.GET.get("kind", "groq")}
-        return self.render_form(request, AIModelForm(instance=instance, initial=initial), instance)
+        return self.render_form(request, AIModelForm(instance=instance, initial=initial, user=request.user), instance)
 
     def post(self, request, pk=None):
         instance = self.get_instance(pk)
-        form = AIModelForm(request.POST, instance=instance)
+        form = AIModelForm(request.POST, instance=instance, user=request.user)
         if not form.is_valid():
             return self.render_form(request, form, instance)
         model = form.save(commit=False)
         if instance is None:
-            model.position = (AIModel.objects.aggregate(top=Max("position"))["top"] or 0) + 1
+            model.position = (own_models(request.user).aggregate(top=Max("position"))["top"] or 0) + 1
         model.save()
         messages.success(request, f"“{model.label}” kaydedildi.")
         return redirect(LIST_URL_NAME)
 
 
 class AIModelImportEnvView(StaffRequiredMixin, View):
-    """Copies the .env chain into the list so it can be edited; only offered while the list is empty."""
+    """Staff only: copies the server's .env AI chain (with its keys, sealed) into the staff user's own list."""
 
     def post(self, request):
-        if AIModel.objects.exists():
+        if own_models(request.user).exists():
             return redirect(LIST_URL_NAME)
+        imported = 0
         for position, spec in enumerate(specs_from_environment(), start=1):
+            key = os.environ.get(spec.key_env, "").strip() if spec.key_env else ""
+            if KINDS[spec.kind].needs_key and not key:
+                continue
             AIModel.objects.create(
-                kind=spec.kind, label=spec.label, model_name=spec.model, base_url=spec.base_url,
-                key_env=spec.key_env, position=position,
+                owner=request.user, kind=spec.kind, label=spec.label, model_name=spec.model, base_url=spec.base_url,
+                api_key_sealed=key_vault.seal(key) if key else "", key_hint=key_vault.hint(key), position=position,
             )
-        messages.success(request, ".env ayarların listeye aktarıldı. Artık buradan yönetebilirsin.")
+            imported += 1
+        messages.success(request, f".env'den {imported} model aktarıldı. Artık buradan yönetebilirsin.")
         return redirect(LIST_URL_NAME)
 
 
-class AIModelActionView(StaffRequiredMixin, View):
+class AIModelActionView(LoginRequiredMixin, View):
     """Small one-click changes on a single model."""
 
     def post(self, request, pk, action):
-        model = get_object_or_404(AIModel, pk=pk)
+        model = get_own(request.user, pk)
         handler = getattr(self, f"do_{action}", None)
         if handler is None:
             raise Http404
@@ -124,7 +139,7 @@ class AIModelActionView(StaffRequiredMixin, View):
             messages.success(request, f"“{model.label}” çalışıyor ({model.model_name}).")
 
     def _swap_with_neighbour(self, model: AIModel, before: bool) -> None:
-        ordered = list(AIModel.objects.all())
+        ordered = list(own_models(model.owner))
         index = ordered.index(model)
         other = index - 1 if before else index + 1
         if not 0 <= other < len(ordered):
@@ -136,11 +151,11 @@ class AIModelActionView(StaffRequiredMixin, View):
                 AIModel.objects.filter(pk=item.pk).update(position=position)
 
 
-class AIModelAvailableView(StaffRequiredMixin, View):
+class AIModelAvailableView(LoginRequiredMixin, View):
     """Asks the provider which model names the key can use; handy when a model has been retired."""
 
     def get(self, request, pk):
-        model = get_object_or_404(AIModel, pk=pk)
+        model = get_own(request.user, pk)
         names, error = [], ""
         try:
             client = build_client(ai_registry.spec_for(model))

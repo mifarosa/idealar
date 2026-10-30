@@ -7,8 +7,10 @@ from django.urls import reverse
 from ai.chat import ChatAction, ChatAssistant, ChatReply, ChatTurn
 from ai.errors import AIProviderError, AllProvidersFailed
 from ideas import chat_service
+from ideas.key_vault import seal
 from ideas.chat_context import MAX_CONTEXT_CHARS, ChatScope, build_context
 from ideas.models import (
+    AIModel,
     ACTION_APPLIED,
     ACTION_DISMISSED,
     ACTION_PENDING,
@@ -130,7 +132,7 @@ class ChatServiceTests(TestCase):
         with patch("ideas.chat_service.build_assistant", return_value=StubAssistant()) as build:
             chat_service.ask_assistant(self.conversation, provider="gemini")
 
-        build.assert_called_once_with("gemini")
+        build.assert_called_once_with(self.conversation.owner, "gemini")
 
     def test_history_is_sent_oldest_first_and_only_from_this_conversation(self):
         other = chat_service.start_conversation(self.scope, "other session")
@@ -275,20 +277,23 @@ class ChatViewTests(TestCase):
         self.assertContains(response, "Fikir güzel.")
         self.assertContains(response, "Sleep tracker")
 
-    def test_picker_lists_only_configured_providers_and_posts_the_choice(self):
-        environ = {"AI_PROVIDERS": "groq,gemini", "GROQ_API_KEY": "k"}  # gemini lacks a key
-        with patch.dict("os.environ", environ, clear=True):
-            page = self.client.get(reverse("ideas:chat"))
-            self.assertContains(page, '<option value="groq">Groq</option>')
-            self.assertNotContains(page, 'value="gemini"')
+    def test_picker_lists_only_usable_models_of_this_user_and_posts_the_choice(self):
+        mine = AIModel.objects.create(owner=self.user, kind="groq", label="My Groq", model_name="m", api_key_sealed=seal("k"))
+        AIModel.objects.create(owner=self.user, kind="gemini", label="No key", model_name="m")
+        AIModel.objects.create(owner=make_user("other"), kind="groq", label="Not mine", model_name="m", api_key_sealed=seal("k"))
 
-            self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": "groq"})
-            self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": "gemini"})
-            self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": "skynet"})
+        page = self.client.get(reverse("ideas:chat"))
+        self.assertContains(page, f'<option value="{mine.chain_name}">My Groq</option>')
+        self.assertNotContains(page, "No key")
+        self.assertNotContains(page, "Not mine")
 
-        self.assertEqual(self.build.call_args_list[0].args, ("groq",))
-        # Not configured or unknown means "automatic".
-        self.assertEqual([call.args for call in self.build.call_args_list[1:]], [(None,), (None,)])
+        self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": mine.chain_name})
+        self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": "m99999"})
+        self.client.post(reverse("ideas:chat"), {"text": "hi", "provider": "skynet"})
+
+        self.assertEqual(self.build.call_args_list[0].args[1:], (mine.chain_name,))
+        # Not usable or unknown means "automatic".
+        self.assertEqual([call.args[1:] for call in self.build.call_args_list[1:]], [(None,), (None,)])
 
     def test_answer_shows_provider_badge_with_fallback_note(self):
         self.assistant._reply = ChatReply("cevap", [], provider="ollama", failed_providers=("groq", "gemini"))

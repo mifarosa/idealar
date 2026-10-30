@@ -21,7 +21,7 @@ class IdeaEnrichView(OwnedIdeaActionView):
 
     def post(self, request, pk):
         idea = self.get_idea(pk)
-        if ai_enrichment.enrich_idea(idea, ai_enrichment.build_analyzer()):
+        if ai_enrichment.enrich_idea(idea, ai_enrichment.build_analyzer(idea.owner)):
             messages.success(request, "AI başlık, özet, etiket ve özellik önerilerini hazırladı.")
         else:
             messages.error(request, "AI şu an yanıt veremedi. Fikir kaydedildi; sonra tekrar deneyebilirsin.")

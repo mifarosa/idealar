@@ -87,8 +87,8 @@ def _pick_for_ai(idea: Idea, candidates: list[tuple[Candidate, set[str]]]) -> li
     return list(picked.values())
 
 
-def build_judge() -> SimilarityJudge:
-    return SimilarityJudge(ai_registry.build_client())
+def build_judge(owner) -> SimilarityJudge:
+    return SimilarityJudge(ai_registry.build_client(owner))
 
 
 def _idea_text(idea: Idea) -> str:
@@ -123,7 +123,7 @@ def check_idea(idea: Idea, judge_factory=None) -> None:
     candidates = gather_candidates(idea)
     titles = {(c.kind, c.id): c.title for c, _ in candidates}
     try:
-        judge = (judge_factory or build_judge)()
+        judge = judge_factory() if judge_factory else build_judge(idea.owner)
         matches = judge.judge(_idea_text(idea), _pick_for_ai(idea, candidates))
         entries, status = [_entry(m, titles[(m.kind, m.id)], "ai") for m in matches], SIMILARITY_DONE
     except AIError as error:

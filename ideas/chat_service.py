@@ -25,8 +25,8 @@ HISTORY_MESSAGE_CHARS = 1500
 TITLE_CHARS = 50
 
 
-def build_assistant(preferred_provider: str | None = None) -> ChatAssistant:
-    return ChatAssistant(ai_registry.build_client(preferred=preferred_provider))
+def build_assistant(owner, preferred_provider: str | None = None) -> ChatAssistant:
+    return ChatAssistant(ai_registry.build_client(owner, preferred=preferred_provider))
 
 
 def _title_from(first_message: str) -> str:
@@ -63,7 +63,7 @@ def ask_assistant(conversation: Conversation, assistant_factory=None, provider: 
     recent = list(conversation.messages.order_by("-id")[:HISTORY_LIMIT])[::-1]
     history = [ChatTurn(m.role, m.content[:HISTORY_MESSAGE_CHARS]) for m in recent]
     try:
-        assistant = assistant_factory() if assistant_factory else build_assistant(provider)
+        assistant = assistant_factory() if assistant_factory else build_assistant(conversation.owner, provider)
         reply = assistant.respond(build_context(scope), history)
     except AIError as error:
         logger.warning("AI chat failed (%s scope): %s", scope.kind, error)

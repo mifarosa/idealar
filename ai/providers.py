@@ -6,7 +6,7 @@ fallbacks. A provider whose required key is missing is skipped with a warning.
 import logging
 import os
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .anthropic_client import AnthropicClient
 from .client import LLMClient, OpenAICompatibleClient
@@ -136,6 +136,7 @@ class KindInfo:
     key_env: str  # suggested env variable holding the key; empty means no key
     needs_key: bool
     local: bool = False  # slow hardware: longer timeout
+    staff_only: bool = False  # the user supplies the address, so only trusted users may use it (server-side request risk)
 
 
 KINDS: dict[str, KindInfo] = {
@@ -143,21 +144,22 @@ KINDS: dict[str, KindInfo] = {
     "gemini": KindInfo("Gemini", "https://generativelanguage.googleapis.com/v1beta/openai", "GEMINI_API_KEY", True),
     "anthropic": KindInfo("Claude", "", "ANTHROPIC_API_KEY", True),
     "openrouter": KindInfo("OpenRouter", "https://openrouter.ai/api/v1", "OPENROUTER_API_KEY", True),
-    "ollama": KindInfo("Ollama", "", "", False, local=True),
-    "custom": KindInfo("Diğer (OpenAI uyumlu)", "", "", False, local=True),
+    "ollama": KindInfo("Ollama", "", "", False, local=True, staff_only=True),
+    "custom": KindInfo("Diğer (OpenAI uyumlu)", "", "", False, local=True, staff_only=True),
 }
 
 
 @dataclass(frozen=True)
 class ModelSpec:
-    """One configured model. The key itself never lives here, only the name of the env variable holding it."""
+    """One configured model. `api_key` is kept out of repr so it cannot leak into logs or tracebacks."""
 
     name: str
     label: str
     kind: str
     model: str
     base_url: str = ""
-    key_env: str = ""
+    key_env: str = ""  # name of an env variable holding the key, used by the .env chain
+    api_key: str = field(default="", repr=False)
 
 
 def build_client(spec: ModelSpec, environ: Mapping[str, str] | None = None) -> LLMClient:
@@ -165,9 +167,9 @@ def build_client(spec: ModelSpec, environ: Mapping[str, str] | None = None) -> L
     info = KINDS.get(spec.kind)
     if info is None:
         raise AINotConfiguredError(f"Unknown AI kind '{spec.kind}'")
-    api_key = environ.get(spec.key_env, "").strip() if spec.key_env else ""
+    api_key = spec.api_key or (environ.get(spec.key_env, "").strip() if spec.key_env else "")
     if info.needs_key and not api_key:
-        raise AINotConfiguredError(f"{spec.key_env or 'API key variable'} is not set")
+        raise AINotConfiguredError(f"{spec.label} has no API key")
     timeout = LOCAL_TIMEOUT_SECONDS if info.local else CLOUD_TIMEOUT_SECONDS
     if spec.kind == "anthropic":
         return AnthropicClient(spec.name, spec.model, api_key, timeout=timeout)

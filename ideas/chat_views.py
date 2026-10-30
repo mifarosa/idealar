@@ -40,14 +40,14 @@ def provider_label(name: str) -> str:
     return ai_registry.label_for(name)
 
 
-def provider_choices() -> list[tuple[str, str]]:
-    return ai_registry.choices()
+def provider_choices(user) -> list[tuple[str, str]]:
+    return ai_registry.choices(user)
 
 
 def chosen_provider(request) -> str | None:
     """The picker value from the form; anything not currently configured means "automatic"."""
     name = request.POST.get("provider", "")
-    return name if name in dict(ai_registry.choices()) else None
+    return name if name in dict(ai_registry.choices(request.user)) else None
 
 
 class ConversationListView(LoginRequiredMixin, View):
@@ -67,7 +67,7 @@ class ConversationListView(LoginRequiredMixin, View):
             "conversations": conversations,
             "post_url": scope_chat_url(scope),
             "back_url": back_url(scope),
-            "providers": provider_choices(),
+            "providers": provider_choices(request.user),
         }
         return render(request, "ideas/chat_list.html", context)
 
@@ -96,7 +96,7 @@ class ConversationView(LoginRequiredMixin, View):
             "needs_reply": chat_service.needs_reply(conversation),
             "post_url": conversation_url(conversation),
             "list_url": scope_chat_url(scope),
-            "providers": provider_choices(),
+            "providers": provider_choices(request.user),
         }
         return render(request, "ideas/chat.html", context)
 

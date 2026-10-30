@@ -85,6 +85,9 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
 # Whether an unknown Google account may create a new user. Existing users are always matched by e-mail.
 GOOGLE_SIGNUP = env_bool("GOOGLE_SIGNUP", default=False)
 
+# Secret that seals users' AI API keys in the database. Falls back to SECRET_KEY; set it separately to rotate either one alone.
+KEYS_ENCRYPTION_KEY = os.environ.get("KEYS_ENCRYPTION_KEY", "").strip()
+
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "ideas:list"
 LOGOUT_REDIRECT_URL = "accounts:login"

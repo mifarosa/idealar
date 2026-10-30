@@ -10,7 +10,8 @@ from ideas import project_review
 from ideas.errors import ActionNotApplicable
 from ideas.forms import ProjectForm
 from ideas.github_repo import GitHubClient
-from ideas.models import SUGGESTION_APPLIED, SUGGESTION_DISMISSED, SUGGESTION_PENDING, Feature, Idea, Project
+from ideas.key_vault import seal
+from ideas.models import AIModel, SUGGESTION_APPLIED, SUGGESTION_DISMISSED, SUGGESTION_PENDING, Feature, Idea, Project
 from ideas.test_github_repo import FakeGitHub, repo_routes
 
 REPO_URL = "https://github.com/octo/habits"
@@ -127,10 +128,12 @@ class ReviewProjectTests(TestCase):
             self.assertFalse(project_review.review_project(self.project, lambda: self.github(), broken_factory))
 
     def test_gemini_is_the_preferred_reviewer(self):
-        with patch("ideas.ai_registry.build_default_client") as build:
-            project_review.build_reviewer()
+        AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", api_key_sealed=seal("k"))
+        gemini = AIModel.objects.create(owner=self.user, kind="gemini", label="Gem", model_name="m", api_key_sealed=seal("k"))
 
-        build.assert_called_once_with(preferred="gemini")
+        reviewer = project_review.build_reviewer(self.user)
+
+        self.assertEqual(reviewer._client._clients[0].name, gemini.chain_name)
 
 
 class DecideMatchTests(TestCase):
