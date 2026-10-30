@@ -445,3 +445,13 @@ class SettingsPageTests(TestCase):
         page = self.client.get(reverse("ideas:conversation", args=[conversation.pk]))
 
         self.assertContains(page, "Yanıtlayan: Home PC")
+
+
+class NavigationTests(TestCase):
+    def test_settings_is_reachable_from_the_desktop_sidebar_and_the_phone_tab_bar(self):
+        user = make_user("owner", staff=False)
+        self.client.force_login(user)
+
+        page = self.client.get(reverse("ideas:list")).content.decode()
+
+        self.assertEqual(page.count(f'href="{reverse("accounts:settings")}"'), 2)  # sidebar + tab bar
