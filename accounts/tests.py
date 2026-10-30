@@ -281,3 +281,120 @@ class LinkPreviewTests(TestCase):
         self.client.force_login(get_user_model().objects.create_user("faruk"))
 
         self.assertContains(self.client.get(reverse("ideas:list")), '<meta name="robots" content="noindex">')
+
+
+class DataControlTests(TestCase):
+    def setUp(self):
+        from ideas.key_vault import seal
+        from ideas.models import AIModel, Conversation, ChatMessage, Feature, Idea, Project
+        from kanban import services as kanban
+        from support.models import Ticket
+
+        self.user = get_user_model().objects.create_user("ayse", email="ayse@example.com", first_name="Ayşe")
+        self.other = get_user_model().objects.create_user("deniz", email="deniz@example.com")
+        project = Project.objects.create(owner=self.user, name="Apple Store", description="ship it")
+        idea = Idea.objects.create(owner=self.user, title="Water app", body="remind me to drink", ai_tags=["health"])
+        idea.projects.add(project)
+        Feature.objects.create(idea=idea, text="Streaks", is_done=True)
+        chat = Conversation.objects.create(owner=self.user, idea=idea, title="Water talk")
+        ChatMessage.objects.create(conversation=chat, role="user", content="hello")
+        kanban.add_task(self.user, None, "Buy milk", "todo")
+        Ticket.objects.create(owner=self.user, title="It breaks", body="always")
+        AIModel.objects.create(owner=self.user, kind="groq", label="My Groq", model_name="m", api_key_sealed=seal("sk-super-secret-key-1", self.user.pk), key_hint="y-1")
+        Idea.objects.create(owner=self.other, title="Not yours", body="secret")
+        self.client.force_login(self.user)
+
+    def test_the_export_contains_the_users_data_and_nothing_else(self):
+        response = self.client.get(reverse("accounts:export"))
+        data = response.json()
+
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertEqual(data["account"]["email"], "ayse@example.com")
+        self.assertEqual([i["title"] for i in data["ideas"]], ["Water app"])
+        self.assertEqual(data["ideas"][0]["features"], [{"text": "Streaks", "platform": "", "done": True}])
+        self.assertEqual(data["ideas"][0]["projects"], ["Apple Store"])
+        self.assertEqual(data["conversations"][0]["messages"][0]["text"], "hello")
+        self.assertEqual(data["kanban"][0]["title"], "Buy milk")
+        self.assertEqual(data["tickets"][0]["title"], "It breaks")
+        self.assertNotIn("Not yours", response.content.decode())
+
+    def test_the_export_never_contains_api_keys(self):
+        body = self.client.get(reverse("accounts:export")).content.decode()
+
+        self.assertIn("My Groq", body)
+        self.assertNotIn("sk-super-secret-key-1", body)
+        self.assertNotIn("api_key", body)
+        self.assertNotIn("gAAAA", body)  # not even the sealed form
+
+    def test_the_export_needs_a_login(self):
+        self.client.logout()
+
+        self.assertEqual(self.client.get(reverse("accounts:export")).status_code, 302)
+
+    def test_deleting_the_account_removes_everything_of_the_user_and_only_theirs(self):
+        from ideas.models import AIModel, ChatMessage, Idea, Project
+        from kanban.models import Task
+        from support.models import Ticket
+
+        response = self.client.post(reverse("accounts:delete-account"), follow=True)
+
+        self.assertRedirects(response, reverse("accounts:login"))
+        self.assertContains(response, "Hesabın ve tüm verilerin silindi.")
+        self.assertFalse(get_user_model().objects.filter(username="ayse").exists())
+        for model in (Project, Task, Ticket, AIModel, ChatMessage):
+            self.assertFalse(model.objects.exists(), model.__name__)
+        self.assertEqual(list(Idea.objects.values_list("title", flat=True)), ["Not yours"])
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_administrators_cannot_delete_themselves_here(self):
+        admin = get_user_model().objects.create_superuser("root", "root@example.com", "x")
+        self.client.force_login(admin)
+
+        self.client.post(reverse("accounts:delete-account"))
+
+        self.assertTrue(get_user_model().objects.filter(username="root").exists())
+
+    def test_deleting_needs_post_and_login(self):
+        self.assertEqual(self.client.get(reverse("accounts:delete-account")).status_code, 405)
+        self.client.logout()
+        self.assertEqual(self.client.post(reverse("accounts:delete-account")).status_code, 302)
+        self.assertTrue(get_user_model().objects.filter(username="ayse").exists())
+
+    def test_settings_offers_export_privacy_and_a_confirmed_delete(self):
+        page = self.client.get(reverse("accounts:settings"))
+
+        self.assertContains(page, reverse("accounts:export"))
+        self.assertContains(page, reverse("accounts:privacy"))
+        self.assertContains(page, "kalıcı olarak silinecek")  # the question the confirm dialog shows
+
+
+class PrivacyAndErrorPageTests(TestCase):
+    def test_the_privacy_page_is_public_and_linked_from_the_login_page(self):
+        self.client.logout()
+
+        self.assertContains(self.client.get(reverse("accounts:privacy")), "Neler saklanır")
+        self.assertContains(self.client.get(reverse("accounts:login")), reverse("accounts:privacy"))
+
+    def test_the_privacy_page_has_an_english_version(self):
+        self.client.post(reverse("set_language"), {"language": "en"})
+
+        page = self.client.get(reverse("accounts:privacy"))
+
+        self.assertContains(page, "What is stored")
+        self.assertNotContains(page, "Neler saklanır")
+
+    def test_unknown_addresses_show_the_branded_not_found_page(self):
+        response = self.client.get("/there/is/nothing/here/")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Sayfa bulunamadı", status_code=404)
+        self.assertContains(response, "logo.svg", status_code=404)
+
+    def test_the_server_error_page_is_standalone_and_bilingual(self):
+        from django.template.loader import render_to_string
+
+        html = render_to_string("500.html")
+
+        self.assertIn("Bir şeyler ters gitti", html)
+        self.assertIn("Something went wrong", html)
+        self.assertNotIn("{%", html)

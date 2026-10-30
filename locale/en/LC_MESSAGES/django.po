@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 01:49+0300\n"
+"POT-Creation-Date: 2026-10-31 01:55+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,10 +37,23 @@ msgid "Bu hesap kapatılmış."
 msgstr "This account has been disabled."
 
 #: accounts/timeline.py:22
+#| msgid "Verilerim"
+msgid "Verilerin sende"
+msgstr "Your data is yours"
+
+#: accounts/timeline.py:22
+msgid ""
+"Tüm verilerini JSON olarak indir, istediğin an hesabını ve her şeyini sil. "
+"Neyin saklandığı gizlilik sayfasında açıkça yazıyor."
+msgstr ""
+"Download all your data as JSON and delete your account and everything in it "
+"whenever you like. What is stored is stated plainly on the privacy page."
+
+#: accounts/timeline.py:23
 msgid "Türkçe ve İngilizce"
 msgstr "Turkish and English"
 
-#: accounts/timeline.py:22
+#: accounts/timeline.py:23
 msgid ""
 "Arayüz iki dilde: logonun yanındaki TR/EN düğmesiyle istediğin dili seç. "
 "Yeni bir logo da geldi."
@@ -48,11 +61,11 @@ msgstr ""
 "The interface comes in two languages: pick yours with the TR/EN button next "
 "to the logo. There is a new logo too."
 
-#: accounts/timeline.py:23
+#: accounts/timeline.py:24
 msgid "Kanban: kişisel ve proje panoları"
 msgstr "Kanban: personal and project boards"
 
-#: accounts/timeline.py:23
+#: accounts/timeline.py:24
 msgid ""
 "Yapılacak, yapılıyor, bitti. Projeye bağlı fikirler panoda kendiliğinden "
 "kart olur; kartları sürükleyip bırak. Kişisel pano evdeki küçük işler için "
@@ -62,11 +75,11 @@ msgstr ""
 "automatically; drag the cards around. The personal board is free-form for "
 "small everyday tasks, and you can add ideas to it too."
 
-#: accounts/timeline.py:24
+#: accounts/timeline.py:25
 msgid "Öneri ve şikayet kutusu"
 msgstr "Suggestions and complaints box"
 
-#: accounts/timeline.py:24
+#: accounts/timeline.py:25
 msgid ""
 "Bir şey bozuksa ya da bir fikrin varsa yaz; yanıtı ve durumu (açık, "
 "inceleniyor, çözüldü) aynı yerden takip et."
@@ -74,11 +87,11 @@ msgstr ""
 "If something is broken or you have an idea, write it down; follow the reply "
 "and the status (open, in progress, solved) in the same place."
 
-#: accounts/timeline.py:25
+#: accounts/timeline.py:26
 msgid "Sohbetten projeye ekle"
 msgstr "Add to a project from the chat"
 
-#: accounts/timeline.py:25
+#: accounts/timeline.py:26
 msgid ""
 "AI ile konuşurken “bu fikri şu projeye bağla” de; öneriyi tek tıkla "
 "onaylarsın."
@@ -86,11 +99,11 @@ msgstr ""
 "While talking to the AI say “link this idea to that project”; you confirm "
 "the suggestion with one click."
 
-#: accounts/timeline.py:26
+#: accounts/timeline.py:27
 msgid "Tüm notlarını okuyan öneriler"
 msgstr "Suggestions that read all your notes"
 
-#: accounts/timeline.py:26
+#: accounts/timeline.py:27
 msgid ""
 "Yeni bir fikir yazınca AI diğer bütün notlarına bakar: ilgili notlar, "
 "birleştirilebilecekler, ödünç alınabilecek özellikler, yeni fikirler."
@@ -98,11 +111,11 @@ msgstr ""
 "When you write a new idea the AI looks at all your other notes: related "
 "notes, notes that could be merged, features worth borrowing, new ideas."
 
-#: accounts/timeline.py:27
+#: accounts/timeline.py:28
 msgid "Kendi yapay zekânı getir"
 msgstr "Bring your own AI"
 
-#: accounts/timeline.py:27
+#: accounts/timeline.py:28
 msgid ""
 "Claude, ChatGPT, Gemini, Groq ve daha fazlası. Anahtarın şifrelenerek "
 "saklanır, kimse görmez."
@@ -110,19 +123,19 @@ msgstr ""
 "Claude, ChatGPT, Gemini, Groq and more. Your key is stored encrypted and "
 "nobody can see it."
 
-#: accounts/timeline.py:28
+#: accounts/timeline.py:29
 msgid "Google ile giriş"
 msgstr "Sign in with Google"
 
-#: accounts/timeline.py:28
+#: accounts/timeline.py:29
 msgid "Şifre yok: tek tıkla gir."
 msgstr "No password: sign in with one click."
 
-#: accounts/timeline.py:29
+#: accounts/timeline.py:30
 msgid "GitHub projelerini içe aktar"
 msgstr "Import your GitHub projects"
 
-#: accounts/timeline.py:29
+#: accounts/timeline.py:30
 msgid ""
 "Depolarını seç, proje olarak eklensin; AI depoyu inceleyip neyin yapıldığını"
 " söylesin."
@@ -130,61 +143,61 @@ msgstr ""
 "Pick your repositories and they become projects; the AI reviews a repository"
 " and tells you what is already done."
 
-#: accounts/timeline.py:30
+#: accounts/timeline.py:31
 msgid "Claude için hazır prompt"
 msgstr "Ready-made prompt for Claude"
 
-#: accounts/timeline.py:30
+#: accounts/timeline.py:31
 msgid ""
 "Bir fikri tek tıkla, yapay zekâya yapıştırılacak hazır bir plana çevir."
 msgstr "Turn an idea into a ready plan to paste into an AI with one click."
 
-#: accounts/timeline.py:31
+#: accounts/timeline.py:32
 msgid "Yeni arayüz"
 msgstr "New interface"
 
-#: accounts/timeline.py:31
+#: accounts/timeline.py:32
 msgid ""
 "Açık, gri ve koyu tema; klavye kısayolları; bilgisayarda ve telefonda rahat."
 msgstr ""
 "Light, gray and dark themes; keyboard shortcuts; comfortable on a computer "
 "and on a phone."
 
-#: accounts/timeline.py:32
+#: accounts/timeline.py:33
 msgid "Benzer fikir uyarısı"
 msgstr "Similar idea warning"
 
-#: accounts/timeline.py:32
+#: accounts/timeline.py:33
 msgid ""
 "Zaten bir şeyin varsa söyler, yeni proje açmak yerine ona eklemeni önerir."
 msgstr ""
 "If you already have something similar it tells you and suggests adding to it"
 " instead of starting a new project."
 
-#: accounts/timeline.py:33
+#: accounts/timeline.py:34
 msgid "AI ile sohbet"
 msgstr "Chat with the AI"
 
-#: accounts/timeline.py:33
+#: accounts/timeline.py:34
 msgid ""
 "Fikirlerinle yazışır gibi konuş; öneriler kartlarla gelir, sen onaylarsın."
 msgstr ""
 "Talk about your ideas like in a messaging app; suggestions come as cards and"
 " you confirm them."
 
-#: accounts/timeline.py:34
+#: accounts/timeline.py:35
 msgid "Otomatik başlık, özet ve etiket"
 msgstr "Automatic title, summary and tags"
 
-#: accounts/timeline.py:34
+#: accounts/timeline.py:35
 msgid "Aklına geleni yaz; gerisini AI toparlasın."
 msgstr "Write whatever comes to mind; let the AI tidy up the rest."
 
-#: accounts/timeline.py:35
+#: accounts/timeline.py:36
 msgid "Fikirler, projeler, özellik listeleri"
 msgstr "Ideas, projects, feature lists"
 
-#: accounts/timeline.py:35
+#: accounts/timeline.py:36
 msgid ""
 "Yapılan ve yapılmayanı işaretle, fikirleri projelere bağla. Telefona "
 "uygulama gibi kurulur."
@@ -192,15 +205,23 @@ msgstr ""
 "Mark what is done and what is not, and link ideas to projects. Installs on "
 "your phone like an app."
 
-#: accounts/views.py:39
+#: accounts/views.py:47
+msgid "Yönetici hesabı buradan silinemez."
+msgstr "An administrator account cannot be deleted from here."
+
+#: accounts/views.py:51
+msgid "Hesabın ve tüm verilerin silindi."
+msgstr "Your account and all your data were deleted."
+
+#: accounts/views.py:71
 msgid "Google girişi bu sunucuda ayarlanmamış."
 msgstr "Google sign-in is not set up on this server."
 
-#: accounts/views.py:57
+#: accounts/views.py:89
 msgid "Google ile giriş tamamlanamadı. Tekrar dene."
 msgstr "Google sign-in could not be completed. Please try again."
 
-#: ideas/ai_failure.py:10
+#: ideas/ai_failure.py:9
 msgid ""
 "Çalışan bir AI modelin yok. Ayarlar → AI modellerimi yönet sayfasından bir "
 "model ve anahtarı ekle."
@@ -208,23 +229,23 @@ msgstr ""
 "You have no working AI model. Add a model and its key under Settings → "
 "Manage my AI models."
 
-#: ideas/ai_failure.py:13
+#: ideas/ai_failure.py:12
 msgid "isteği reddetti (400); model adı yanlış olabilir"
 msgstr "rejected the request (400); the model name may be wrong"
 
-#: ideas/ai_failure.py:14
+#: ideas/ai_failure.py:13
 msgid "anahtarı reddetti (401); anahtar yanlış ya da iptal edilmiş olabilir"
 msgstr "rejected the key (401); the key may be wrong or revoked"
 
-#: ideas/ai_failure.py:15
+#: ideas/ai_failure.py:14
 msgid "ödeme gerekli (402); hesabında bakiye yok gibi görünüyor"
 msgstr "payment required (402); your account seems to be out of balance"
 
-#: ideas/ai_failure.py:16
+#: ideas/ai_failure.py:15
 msgid "erişimi reddetti (403); anahtarın bu modele yetkisi olmayabilir"
 msgstr "denied access (403); the key may not be allowed to use this model"
 
-#: ideas/ai_failure.py:17
+#: ideas/ai_failure.py:16
 msgid ""
 "modeli bulamadı (404); model adını kontrol et, \"Modeller\" tuşu geçerli "
 "adları listeler"
@@ -232,37 +253,37 @@ msgstr ""
 "could not find the model (404); check the model name, the \"Models\" button "
 "lists the valid names"
 
-#: ideas/ai_failure.py:23
+#: ideas/ai_failure.py:22
 msgid "kullanım limiti doldu, biraz sonra tekrar dene"
 msgstr "usage limit reached, try again in a while"
 
-#: ideas/ai_failure.py:25
+#: ideas/ai_failure.py:24
 msgid "anahtar eksik"
 msgstr "key missing"
 
-#: ideas/ai_failure.py:27
+#: ideas/ai_failure.py:26
 msgid "geçerli bir cevap vermedi"
 msgstr "did not return a valid answer"
 
-#: ideas/ai_failure.py:35
+#: ideas/ai_failure.py:34
 #, python-brace-format
 msgid "şu an çalışmıyor ({code})"
 msgstr "is not working right now ({code})"
 
-#: ideas/ai_failure.py:35
+#: ideas/ai_failure.py:34
 #, python-brace-format
 msgid "hata verdi ({code})"
 msgstr "returned an error ({code})"
 
-#: ideas/ai_failure.py:36
+#: ideas/ai_failure.py:35
 msgid "ulaşılamadı"
 msgstr "could not be reached"
 
-#: ideas/ai_failure.py:37
+#: ideas/ai_failure.py:36
 msgid "hata verdi"
 msgstr "returned an error"
 
-#: ideas/ai_failure.py:47
+#: ideas/ai_failure.py:46
 msgid "Modellerin var ama hiçbiri kullanılamıyor."
 msgstr "You have models but none of them can be used."
 
@@ -298,35 +319,35 @@ msgstr "Other (OpenAI compatible)"
 msgid "silinmiş model"
 msgstr "deleted model"
 
-#: ideas/ai_settings_forms.py:16
+#: ideas/ai_settings_forms.py:15
 msgid "Sağlayıcı"
 msgstr "Provider"
 
-#: ideas/ai_settings_forms.py:18
+#: ideas/ai_settings_forms.py:17
 msgid "API anahtarı"
 msgstr "API key"
 
-#: ideas/ai_settings_forms.py:27
+#: ideas/ai_settings_forms.py:26
 msgid "Görünen ad"
 msgstr "Display name"
 
-#: ideas/ai_settings_forms.py:27
+#: ideas/ai_settings_forms.py:26
 msgid "Model adı"
 msgstr "Model name"
 
-#: ideas/ai_settings_forms.py:27
+#: ideas/ai_settings_forms.py:26
 msgid "Adres"
 msgstr "Address"
 
-#: ideas/ai_settings_forms.py:27
+#: ideas/ai_settings_forms.py:26
 msgid "Kullanımda"
 msgstr "In use"
 
-#: ideas/ai_settings_forms.py:29
+#: ideas/ai_settings_forms.py:28
 msgid "Boş bırakırsan sağlayıcı adı kullanılır."
 msgstr "If left empty the provider's name is used."
 
-#: ideas/ai_settings_forms.py:30
+#: ideas/ai_settings_forms.py:29
 msgid ""
 "Boş bırakabilirsin: Groq, Gemini ve Claude için hazır bir model seçilir. "
 "Diğerlerinde kaydettikten sonra listedeki \"Modeller\" tuşundan seçersin."
@@ -335,7 +356,7 @@ msgstr ""
 "Claude. For the others, pick one with the \"Models\" button in the list "
 "after saving."
 
-#: ideas/ai_settings_forms.py:31
+#: ideas/ai_settings_forms.py:30
 msgid ""
 "Yalnızca Ollama ve \"Diğer\" için. Ollama: http://host.docker.internal:11434"
 " · LM Studio: http://host.docker.internal:1234/v1"
@@ -343,26 +364,26 @@ msgstr ""
 "Only for Ollama and \"Other\". Ollama: http://host.docker.internal:11434 · "
 "LM Studio: http://host.docker.internal:1234/v1"
 
-#: ideas/ai_settings_forms.py:42
+#: ideas/ai_settings_forms.py:41
 #, python-brace-format
 msgid "Kayıtlı anahtar: …{saved}. Değiştirmek istemiyorsan boş bırak."
 msgstr "Saved key: …{saved}. Leave empty if you do not want to change it."
 
-#: ideas/ai_settings_forms.py:44
+#: ideas/ai_settings_forms.py:43
 msgid "Anahtar şifrelenip saklanır ve bir daha gösterilmez."
 msgstr "The key is stored encrypted and is never shown again."
 
-#: ideas/ai_settings_forms.py:55
+#: ideas/ai_settings_forms.py:54
 msgid "Anahtar boşluk içeremez; kopyalarken fazladan bir şey gelmiş olabilir."
 msgstr ""
 "The key cannot contain spaces; something extra may have been copied along "
 "with it."
 
-#: ideas/ai_settings_forms.py:73
+#: ideas/ai_settings_forms.py:72
 msgid "Bu sağlayıcı için API anahtarı gerekli."
 msgstr "An API key is required for this provider."
 
-#: ideas/ai_settings_forms.py:77
+#: ideas/ai_settings_forms.py:76
 msgid "http:// veya https:// ile başlayan bir adres yaz."
 msgstr "Enter an address that starts with http:// or https://."
 
@@ -460,7 +481,7 @@ msgstr[1] "Similarity check finished: {n} similar items found."
 msgid "Benzerlik kontrolü tamamlandı: benzer kayıt bulunmadı."
 msgstr "Similarity check finished: no similar items found."
 
-#: ideas/ai_views.py:88 ideas/chat_views.py:182
+#: ideas/ai_views.py:88 ideas/chat_views.py:181
 #: templates/ideas/_idea_detail.html:37
 msgid "Eklendi."
 msgstr "Added."
@@ -477,14 +498,14 @@ msgstr ""
 "The AI could not answer right now; showing the plain prompt, you can try "
 "again in a moment."
 
-#: ideas/build_prompt.py:12
+#: ideas/build_prompt.py:11
 msgid ""
 "Bana Türkçe cevap ver; kod yorumları ve commit mesajları İngilizce olsun."
 msgstr ""
 "Answer me in English; code comments and commit messages should be in "
 "English."
 
-#: ideas/build_prompt.py:13
+#: ideas/build_prompt.py:12
 msgid ""
 "Önemli bir mimari karar gerekirse yapmadan önce bana sor. Küçük kararları "
 "kendin ver ve söyle."
@@ -492,12 +513,12 @@ msgstr ""
 "If an important architecture decision is needed, ask me before making it. "
 "Make small decisions yourself and tell me."
 
-#: ideas/build_prompt.py:14
+#: ideas/build_prompt.py:13
 msgid "İşi aşamalara böl; her aşamanın sonunda dur ve bana göster."
 msgstr ""
 "Split the work into stages; stop at the end of each stage and show me."
 
-#: ideas/build_prompt.py:15
+#: ideas/build_prompt.py:14
 msgid ""
 "Temiz kod yaz: küçük fonksiyonlar, anlamlı isimler, tek sorumluluk, hataları"
 " yutma."
@@ -505,11 +526,11 @@ msgstr ""
 "Write clean code: small functions, meaningful names, single responsibility, "
 "no swallowed errors."
 
-#: ideas/build_prompt.py:16
+#: ideas/build_prompt.py:15
 msgid "Önemli kısımlar için test yaz, çalıştır ve sonucu söyle."
 msgstr "Write tests for the important parts, run them and report the result."
 
-#: ideas/build_prompt.py:17
+#: ideas/build_prompt.py:16
 msgid ""
 "README'ye kurulum ve çalıştırma adımlarını yaz. Gizli bilgiler (anahtarlar, "
 "secret key) .env dosyasında dursun, git'e girmesin."
@@ -517,22 +538,22 @@ msgstr ""
 "Write the setup and run steps in the README. Keep secrets (keys, secret key)"
 " in the .env file and out of git."
 
-#: ideas/build_prompt.py:46
+#: ideas/build_prompt.py:45
 msgid "Yapılacak:"
 msgstr "To do:"
 
-#: ideas/build_prompt.py:47
+#: ideas/build_prompt.py:46
 msgid "Yapılmış:"
 msgstr "Done:"
 
-#: ideas/build_prompt.py:61
+#: ideas/build_prompt.py:60
 #, python-brace-format
 msgid "Bu fikir mevcut bir projeye ekleniyor. Proje: {names}. Depo: {repo}"
 msgstr ""
 "This idea is being added to an existing project. Project: {names}. "
 "Repository: {repo}"
 
-#: ideas/build_prompt.py:62
+#: ideas/build_prompt.py:61
 msgid ""
 "Önce depoyu incele (yapı, kullanılan teknolojiler, mevcut özellikler, kod "
 "stili), sonra bunu mevcut yapıya uygun biçimde ekle; kodu gereksiz yere "
@@ -542,69 +563,69 @@ msgstr ""
 " code style), then add this in a way that fits the existing structure; do "
 "not rewrite code unnecessarily."
 
-#: ideas/build_prompt.py:64
+#: ideas/build_prompt.py:63
 msgid "Sıfırdan başlıyoruz. Depo boşsa git init ile başla."
 msgstr ""
 "We are starting from scratch. If the repository is empty, begin with git "
 "init."
 
-#: ideas/build_prompt.py:66
+#: ideas/build_prompt.py:65
 #, python-brace-format
 msgid "İlgili proje: {names}"
 msgstr "Related project: {names}"
 
-#: ideas/build_prompt.py:78
+#: ideas/build_prompt.py:77
 #, python-brace-format
 msgid "Teknoloji: {stack}"
 msgstr "Technology: {stack}"
 
-#: ideas/build_prompt.py:79
+#: ideas/build_prompt.py:78
 msgid "MVP kapsamı"
 msgstr "MVP scope"
 
-#: ideas/build_prompt.py:79
+#: ideas/build_prompt.py:78
 msgid "Önerilen aşamalar"
 msgstr "Suggested stages"
 
-#: ideas/build_prompt.py:79
+#: ideas/build_prompt.py:78
 msgid "Riskler"
 msgstr "Risks"
 
-#: ideas/build_prompt.py:87
+#: ideas/build_prompt.py:86
 #, python-brace-format
 msgid "Platformlar: {names}"
 msgstr "Platforms: {names}"
 
-#: ideas/build_prompt.py:89
+#: ideas/build_prompt.py:88
 #, python-brace-format
 msgid "Etiketler: {names}"
 msgstr "Tags: {names}"
 
-#: ideas/build_prompt.py:91
+#: ideas/build_prompt.py:90
 msgid "Bir uygulama geliştireceğiz."
 msgstr "We are going to build an app."
 
-#: ideas/build_prompt.py:92
+#: ideas/build_prompt.py:91
 msgid "AMAÇ"
 msgstr "GOAL"
 
-#: ideas/build_prompt.py:93
+#: ideas/build_prompt.py:92
 msgid "ÖZELLİKLER"
 msgstr "FEATURES"
 
-#: ideas/build_prompt.py:94
+#: ideas/build_prompt.py:93
 msgid "PROJE"
 msgstr "PROJECT"
 
-#: ideas/build_prompt.py:95
+#: ideas/build_prompt.py:94
 msgid "BENZER KAYITLAR (aynı işi iki kez yapmamak için bak)"
 msgstr "SIMILAR ITEMS (check them so the same work is not done twice)"
 
-#: ideas/build_prompt.py:96
+#: ideas/build_prompt.py:95
 msgid "ÖNERİLEN YAKLAŞIM (AI taslağı, tartışmaya açık)"
 msgstr "SUGGESTED APPROACH (AI draft, open to discussion)"
 
-#: ideas/build_prompt.py:97
+#: ideas/build_prompt.py:96
 msgid "ÇALIŞMA ŞEKLİ"
 msgstr "WAY OF WORKING"
 
@@ -612,7 +633,7 @@ msgstr "WAY OF WORKING"
 msgid "Genel sohbet"
 msgstr "General chat"
 
-#: ideas/chat_views.py:17
+#: ideas/chat_views.py:16
 msgid ""
 "Hiçbir AI yanıt veremedi. Mesajın kaydedildi; başka bir AI seçip tekrar "
 "deneyebilirsin."
@@ -620,24 +641,24 @@ msgstr ""
 "No AI could answer. Your message was saved; you can pick another AI and try "
 "again."
 
-#: ideas/chat_views.py:22
+#: ideas/chat_views.py:21
 #, python-brace-format
 msgid "{message} Sebep: {reason}"
 msgstr "{message} Reason: {reason}"
 
-#: ideas/chat_views.py:150
+#: ideas/chat_views.py:149
 msgid "Sohbet silindi."
 msgstr "Chat deleted."
 
-#: ideas/chat_views.py:163
+#: ideas/chat_views.py:162
 msgid "Sohbet adı boş olamaz."
 msgstr "The chat name cannot be empty."
 
-#: ideas/chat_views.py:182
+#: ideas/chat_views.py:181
 msgid "Öneri yoksayıldı."
 msgstr "Suggestion dismissed."
 
-#: ideas/chat_views.py:184
+#: ideas/chat_views.py:183
 msgid "Bu öneri artık uygulanamıyor (fikir silinmiş olabilir)."
 msgstr ""
 "This suggestion can no longer be applied (the idea may have been deleted)."
@@ -653,62 +674,62 @@ msgid_plural "{n} fikre kopyalandı."
 msgstr[0] "Copied to {n} idea."
 msgstr[1] "Copied to {n} ideas."
 
-#: ideas/forms.py:16
+#: ideas/forms.py:15
 msgid "Yeni fikir…"
 msgstr "New idea…"
 
-#: ideas/forms.py:16 templates/ideas/idea_form.html:3
+#: ideas/forms.py:15 templates/ideas/idea_form.html:3
 #: templates/ideas/idea_form.html:6
 msgid "Yeni fikir"
 msgstr "New idea"
 
-#: ideas/forms.py:26 templates/ideas/_idea_detail.html:11
+#: ideas/forms.py:25 templates/ideas/_idea_detail.html:11
 msgid "Platformlar"
 msgstr "Platforms"
 
-#: ideas/forms.py:32
+#: ideas/forms.py:31
 msgid "Başlık (isteğe bağlı)"
 msgstr "Title (optional)"
 
-#: ideas/forms.py:32 ideas/forms.py:63
+#: ideas/forms.py:31 ideas/forms.py:62
 msgid "Açıklama"
 msgstr "Description"
 
-#: ideas/forms.py:32 templates/base.html:57 templates/base.html:86
+#: ideas/forms.py:31 templates/base.html:57 templates/base.html:86
 #: templates/ideas/project_detail.html:6 templates/ideas/project_import.html:6
 #: templates/ideas/project_list.html:3 templates/ideas/project_list.html:6
 msgid "Projeler"
 msgstr "Projects"
 
-#: ideas/forms.py:46
+#: ideas/forms.py:45
 msgid "Yeni özellik ekle…"
 msgstr "Add a new feature…"
 
-#: ideas/forms.py:46
+#: ideas/forms.py:45
 msgid "Yeni özellik"
 msgstr "New feature"
 
-#: ideas/forms.py:47
+#: ideas/forms.py:46
 msgid "Platform"
 msgstr "Platform"
 
-#: ideas/forms.py:52
+#: ideas/forms.py:51
 msgid "Tümü"
 msgstr "All"
 
-#: ideas/forms.py:57
+#: ideas/forms.py:56
 msgid "Bağlı fikirler"
 msgstr "Linked ideas"
 
-#: ideas/forms.py:63
+#: ideas/forms.py:62
 msgid "Proje adı"
 msgstr "Project name"
 
-#: ideas/forms.py:63
+#: ideas/forms.py:62
 msgid "GitHub adresi (isteğe bağlı)"
 msgstr "GitHub address (optional)"
 
-#: ideas/forms.py:93
+#: ideas/forms.py:92
 msgid "Hangi fikirlere kopyalansın?"
 msgstr "Which ideas should it be copied to?"
 
@@ -819,31 +840,31 @@ msgstr "There were no new projects to add."
 msgid "Ortak kelimeler: {words}"
 msgstr "Shared words: {words}"
 
-#: ideas/views.py:23
+#: ideas/views.py:22
 msgid "Yeni → eski"
 msgstr "Newest first"
 
-#: ideas/views.py:23
+#: ideas/views.py:22
 msgid "Eski → yeni"
 msgstr "Oldest first"
 
-#: ideas/views.py:23
+#: ideas/views.py:22
 msgid "Son güncellenen"
 msgstr "Recently updated"
 
-#: ideas/views.py:23
+#: ideas/views.py:22
 msgid "İlerleme"
 msgstr "Progress"
 
-#: ideas/views.py:126
+#: ideas/views.py:125
 msgid "Fikir kaydedildi."
 msgstr "Idea saved."
 
-#: ideas/views.py:139
+#: ideas/views.py:138
 msgid "Fikir güncellendi."
 msgstr "Idea updated."
 
-#: ideas/views.py:147
+#: ideas/views.py:146
 msgid "Fikir silindi."
 msgstr "Idea deleted."
 
@@ -955,6 +976,30 @@ msgstr "Status updated."
 msgid "Kayıt silindi."
 msgstr "Ticket deleted."
 
+#: templates/403.html:3
+msgid "Erişim yok"
+msgstr "No access"
+
+#: templates/403.html:7
+msgid "Bu sayfaya erişimin yok"
+msgstr "You do not have access to this page"
+
+#: templates/403.html:8
+msgid "Bu sayfayı görmek için gerekli yetkin yok."
+msgstr "You do not have the permission needed to see this page."
+
+#: templates/403.html:9 templates/404.html:9
+msgid "Ana sayfaya dön"
+msgstr "Back to the home page"
+
+#: templates/404.html:3 templates/404.html:7
+msgid "Sayfa bulunamadı"
+msgstr "Page not found"
+
+#: templates/404.html:8
+msgid "Aradığın sayfa yok ya da silinmiş olabilir."
+msgstr "The page you are looking for does not exist or may have been deleted."
+
 #: templates/_language_switch.html:5
 msgid "Dil"
 msgstr "Language"
@@ -1013,15 +1058,20 @@ msgstr ""
 "Your account is created automatically the first time you sign in. For the AI"
 " features you add your own API key."
 
-#: templates/accounts/login.html:24
+#: templates/accounts/login.html:21 templates/accounts/privacy.html:3
+#: templates/accounts/privacy.html:8 templates/accounts/settings.html:11
+msgid "Gizlilik"
+msgstr "Privacy"
+
+#: templates/accounts/login.html:25
 msgid "Fikirlerini yaz."
 msgstr "Write your ideas."
 
-#: templates/accounts/login.html:24
+#: templates/accounts/login.html:25
 msgid "Yapay zekân hepsini bilsin."
 msgstr "Let your AI know them all."
 
-#: templates/accounts/login.html:25
+#: templates/accounts/login.html:26
 msgid ""
 "Idealar, yapay zekâlı bir fikir defteri. Aklına geleni yazarsın; notlarının "
 "hepsini okuyan bir yardımcı bağlantıları, tekrarları ve eksikleri sana "
@@ -1031,23 +1081,23 @@ msgstr ""
 "an assistant that reads all your notes shows you the connections, the "
 "duplicates and the gaps."
 
-#: templates/accounts/login.html:30
+#: templates/accounts/login.html:31
 msgid "Alışkanlık sayacı"
 msgstr "Habit tracker"
 
-#: templates/accounts/login.html:31
+#: templates/accounts/login.html:32
 msgid "Uyku günlüğü"
 msgstr "Sleep log"
 
-#: templates/accounts/login.html:32
+#: templates/accounts/login.html:33
 msgid "Yeni fikir: günlük su takibi…"
 msgstr "New idea: daily water tracking…"
 
-#: templates/accounts/login.html:34
+#: templates/accounts/login.html:35
 msgid "tüm notlarına göre"
 msgstr "based on all your notes"
 
-#: templates/accounts/login.html:35
+#: templates/accounts/login.html:36
 msgid ""
 "<b>Alışkanlık sayacı</b> ile bağlantılı: ikisi de günlük kayıt tutuyor. "
 "Hatırlatıcı özelliğini oradan alabilirsin."
@@ -1055,29 +1105,131 @@ msgstr ""
 "Linked to <b>Habit tracker</b>: both keep a daily log. You can borrow its "
 "reminder feature."
 
-#: templates/accounts/login.html:36 templates/ideas/_idea_detail.html:57
+#: templates/accounts/login.html:37 templates/ideas/_idea_detail.html:57
 msgid "Özellik olarak ekle"
 msgstr "Add as a feature"
 
-#: templates/accounts/login.html:36 templates/ideas/_idea_detail.html:61
+#: templates/accounts/login.html:37 templates/ideas/_idea_detail.html:61
 msgid "Gizle"
 msgstr "Hide"
 
-#: templates/accounts/login.html:41 templates/accounts/login.html:50
+#: templates/accounts/login.html:42 templates/accounts/login.html:51
 msgid "Neler var, neler geliyor"
 msgstr "What's here, what's coming"
 
-#: templates/accounts/login.html:44
+#: templates/accounts/login.html:45
 #, python-format
 msgid "Tümünü gör (+%(counter)s)"
 msgid_plural "Tümünü gör (+%(counter)s)"
 msgstr[0] "See all (+%(counter)s)"
 msgstr[1] "See all (+%(counter)s)"
 
-#: templates/accounts/login.html:51
+#: templates/accounts/login.html:52
 msgctxt "dialog"
 msgid "Kapat"
 msgstr "Close"
+
+#: templates/accounts/privacy.html:7 templates/ideas/chat_list.html:7
+#: templates/ideas/idea_form.html:5
+msgid "Geri"
+msgstr "Back"
+
+#: templates/accounts/privacy.html:9
+msgid ""
+"Idealar, fikirlerini saklayan bir not defteridir. Bu sayfa neyin "
+"saklandığını, kimlerin görebildiğini ve verilerini nasıl silebileceğini "
+"açıkça anlatır."
+msgstr ""
+"Idealar is a notebook that keeps your ideas. This page explains plainly what"
+" is stored, who can see it and how you can delete your data."
+
+#: templates/accounts/privacy.html:11
+msgid "Neler saklanır"
+msgstr "What is stored"
+
+#: templates/accounts/privacy.html:12
+msgid ""
+"Google hesabından e-posta adresin ve adın; yazdığın fikirler, projeler, "
+"sohbetler, kanban kartları, öneri ve şikayet kayıtların; eklediğin AI "
+"modellerinin adları. API anahtarların şifrelenerek saklanır; hiçbir yerde "
+"gösterilmez ve dışa aktarılan dosyaya girmez."
+msgstr ""
+"Your e-mail address and name from your Google account; the ideas, projects, "
+"chats, kanban cards and suggestion and complaint tickets you write; the "
+"names of the AI models you add. Your API keys are stored encrypted; they are"
+" never shown anywhere and never included in the exported file."
+
+#: templates/accounts/privacy.html:14
+msgid "Yapay zekâ sağlayıcıları"
+msgstr "AI providers"
+
+#: templates/accounts/privacy.html:15
+msgid ""
+"AI özelliklerini kullandığında ilgili metinler (fikirlerin, projelerin, "
+"sohbet mesajların) senin eklediğin anahtarın sahibi sağlayıcıya (örneğin "
+"Groq, Google, Anthropic, OpenAI) gönderilir ve o sağlayıcının kendi "
+"şartlarına tabidir. Bu metinler bizim tarafımızdan başka bir amaçla ya da "
+"bir yapay zekâyı eğitmek için kullanılmaz. AI özelliklerini kullanmak "
+"istemiyorsan anahtar eklemen gerekmez."
+msgstr ""
+"When you use the AI features, the relevant texts (your ideas, projects and "
+"chat messages) are sent to the provider that owns the key you added (for "
+"example Groq, Google, Anthropic, OpenAI) and are subject to that provider's "
+"own terms. We do not use these texts for any other purpose or to train an "
+"AI. If you do not want to use the AI features you do not need to add a key."
+
+#: templates/accounts/privacy.html:17
+msgid "Kimler görebilir"
+msgstr "Who can see it"
+
+#: templates/accounts/privacy.html:18
+msgid ""
+"Fikirlerini, projelerini, sohbetlerini ve panolarını yalnızca sen görürsün. "
+"Öneri ve şikayet kayıtlarını sen ve uygulamanın sahibi görür. Uygulamanın "
+"sahibi sunucuyu ve veritabanını yönettiği için teknik olarak verilere "
+"erişebilir; bunu yalnızca bakım ve destek için kullanır."
+msgstr ""
+"Only you can see your ideas, projects, chats and boards. Your suggestion and"
+" complaint tickets are visible to you and to the owner of the app. Because "
+"the owner runs the server and the database they can technically access the "
+"data; they use this only for maintenance and support."
+
+#: templates/accounts/privacy.html:20
+msgid "Çerezler"
+msgstr "Cookies"
+
+#: templates/accounts/privacy.html:21
+msgid ""
+"Yalnızca oturum, güvenlik ve dil tercihi çerezleri kullanılır; tema gibi "
+"tercihler tarayıcında saklanır. Reklam ya da izleme çerezi yoktur."
+msgstr ""
+"Only session, security and language-preference cookies are used; preferences"
+" such as the theme are kept in your browser. There are no advertising or "
+"tracking cookies."
+
+#: templates/accounts/privacy.html:23
+msgid "Verilerin üzerindeki kontrol"
+msgstr "Control over your data"
+
+#: templates/accounts/privacy.html:24
+msgid ""
+"Ayarlar sayfasından tüm verilerini JSON olarak indirebilir, hesabını ve "
+"bütün verilerini kalıcı olarak silebilirsin. Silme geri alınamaz; yedeklerde"
+" kalan kopyalar en geç 30 gün içinde silinir."
+msgstr ""
+"On the Settings page you can download all your data as JSON and permanently "
+"delete your account and all your data. Deletion cannot be undone; copies "
+"left in backups are deleted within 30 days at the latest."
+
+#: templates/accounts/privacy.html:26
+msgid "İletişim"
+msgstr "Contact"
+
+#: templates/accounts/privacy.html:27
+msgid "Sorularını uygulamadaki Öneri &amp; şikayet sayfasından yazabilirsin."
+msgstr ""
+"You can write your questions on the Suggestions &amp; complaints page of the"
+" app."
 
 #: templates/accounts/settings.html:3 templates/accounts/settings.html:5
 #: templates/base.html:60 templates/base.html:89
@@ -1102,19 +1254,35 @@ msgstr "Inbox (%(count)s)"
 msgid "AI modellerimi yönet"
 msgstr "Manage my AI models"
 
-#: templates/accounts/settings.html:12
+#: templates/accounts/settings.html:11
+msgid "Verilerim"
+msgstr "My data"
+
+#: templates/accounts/settings.html:11
+msgid "Verilerimi indir (JSON)"
+msgstr "Download my data (JSON)"
+
+#: templates/accounts/settings.html:13
 msgid "Çıkış yap"
 msgstr "Sign out"
+
+#: templates/accounts/settings.html:15
+msgid ""
+"Hesabın ve tüm fikirlerin, projelerin, sohbetlerin, panoların ve kayıtların "
+"kalıcı olarak silinecek. Bu geri alınamaz. Emin misin?"
+msgstr ""
+"Your account and all your ideas, projects, chats, boards and tickets will be"
+" deleted permanently. This cannot be undone. Are you sure?"
+
+#: templates/accounts/settings.html:17
+msgid "Hesabımı ve tüm verilerimi sil"
+msgstr "Delete my account and all my data"
 
 #: templates/base.html:8
 msgid "Idealar"
 msgstr "Idealar"
 
 #: templates/base.html:17 templates/base.html:22 templates/base.html:30
-#| msgid ""
-#| "Idealar, yapay zekâlı bir fikir defteri. Aklına geleni yazarsın; notlarının "
-#| "hepsini okuyan bir yardımcı bağlantıları, tekrarları ve eksikleri sana "
-#| "gösterir."
 msgid ""
 "Fikirlerini yaz; notlarının hepsini okuyan yapay zekâ bağlantıları, "
 "tekrarları ve eksikleri sana göstersin."
@@ -1123,7 +1291,6 @@ msgstr ""
 " the duplicates and the gaps."
 
 #: templates/base.html:26
-#| msgid "Idealar · fikirlerini yapay zekâyla düşün"
 msgid "Idealar: fikirlerini yaz, yapay zekân hepsini bilsin."
 msgstr "Idealar: write your ideas, let your AI know them all."
 
@@ -1643,10 +1810,6 @@ msgstr "Message"
 #: templates/support/ticket_form.html:18
 msgid "Gönder"
 msgstr "Send"
-
-#: templates/ideas/chat_list.html:7 templates/ideas/idea_form.html:5
-msgid "Geri"
-msgstr "Back"
 
 #: templates/ideas/chat_list.html:8
 #, python-format

@@ -1,17 +1,19 @@
 import logging
-from django.utils.translation import gettext as _
 
 from authlib.integrations.base_client.errors import OAuthError
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 from django.views.generic import TemplateView
+from django.utils.translation import gettext as _
 
 from . import google
+from .export import export_user_data
 from .timeline import TIMELINE, TIMELINE_PREVIEW
 
 logger = logging.getLogger(__name__)
@@ -22,6 +24,36 @@ class SettingsView(LoginRequiredMixin, TemplateView):
     """Theme and sign-out; the only way to reach them on phones, where the sidebar is hidden."""
 
     template_name = "accounts/settings.html"
+
+
+class ExportView(LoginRequiredMixin, View):
+    """Downloads everything stored about the signed-in user as a JSON file."""
+
+    def get(self, request):
+        response = JsonResponse(export_user_data(request.user), json_dumps_params={"ensure_ascii": False, "indent": 2})
+        response["Content-Disposition"] = 'attachment; filename="idealar-export.json"'
+        response["Cache-Control"] = "no-store"
+        return response
+
+
+class DeleteAccountView(LoginRequiredMixin, View):
+    """Deletes the account and, through cascading deletes, every idea, project, chat, board, ticket and model of the user."""
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        user = request.user
+        if user.is_superuser:
+            messages.error(request, _("Yönetici hesabı buradan silinemez."))
+            return redirect("accounts:settings")
+        logout(request)
+        user.delete()
+        messages.success(request, _("Hesabın ve tüm verilerin silindi."))
+        return redirect("accounts:login")
+
+
+class PrivacyView(TemplateView):
+    template_name = "accounts/privacy.html"
 
 
 class LoginView(View):

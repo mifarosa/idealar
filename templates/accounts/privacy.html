@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Gizlilik" %} · Idealar{% endblock %}
+{% block body %}
+<main class="page">
+  <div class="page-inner prose">
+    <a class="crumb" href="{% if user.is_authenticated %}{% url 'accounts:settings' %}{% else %}{% url 'accounts:login' %}{% endif %}"><svg class="icon"><use href="#i-back"/></svg>{% trans "Geri" %}</a>
+    <div class="page-head"><h1>{% trans "Gizlilik" %}</h1></div>
+    <p>{% trans "Idealar, fikirlerini saklayan bir not defteridir. Bu sayfa neyin saklandığını, kimlerin görebildiğini ve verilerini nasıl silebileceğini açıkça anlatır." %}</p>
+
+    <h2>{% trans "Neler saklanır" %}</h2>
+    <p>{% trans "Google hesabından e-posta adresin ve adın; yazdığın fikirler, projeler, sohbetler, kanban kartları, öneri ve şikayet kayıtların; eklediğin AI modellerinin adları. API anahtarların şifrelenerek saklanır; hiçbir yerde gösterilmez ve dışa aktarılan dosyaya girmez." %}</p>
+
+    <h2>{% trans "Yapay zekâ sağlayıcıları" %}</h2>
+    <p>{% trans "AI özelliklerini kullandığında ilgili metinler (fikirlerin, projelerin, sohbet mesajların) senin eklediğin anahtarın sahibi sağlayıcıya (örneğin Groq, Google, Anthropic, OpenAI) gönderilir ve o sağlayıcının kendi şartlarına tabidir. Bu metinler bizim tarafımızdan başka bir amaçla ya da bir yapay zekâyı eğitmek için kullanılmaz. AI özelliklerini kullanmak istemiyorsan anahtar eklemen gerekmez." %}</p>
+
+    <h2>{% trans "Kimler görebilir" %}</h2>
+    <p>{% trans "Fikirlerini, projelerini, sohbetlerini ve panolarını yalnızca sen görürsün. Öneri ve şikayet kayıtlarını sen ve uygulamanın sahibi görür. Uygulamanın sahibi sunucuyu ve veritabanını yönettiği için teknik olarak verilere erişebilir; bunu yalnızca bakım ve destek için kullanır." %}</p>
+
+    <h2>{% trans "Çerezler" %}</h2>
+    <p>{% trans "Yalnızca oturum, güvenlik ve dil tercihi çerezleri kullanılır; tema gibi tercihler tarayıcında saklanır. Reklam ya da izleme çerezi yoktur." %}</p>
+
+    <h2>{% trans "Verilerin üzerindeki kontrol" %}</h2>
+    <p>{% trans "Ayarlar sayfasından tüm verilerini JSON olarak indirebilir, hesabını ve bütün verilerini kalıcı olarak silebilirsin. Silme geri alınamaz; yedeklerde kalan kopyalar en geç 30 gün içinde silinir." %}</p>
+
+    <h2>{% trans "İletişim" %}</h2>
+    <p>{% blocktranslate trimmed %}Sorularını uygulamadaki Öneri &amp; şikayet sayfasından yazabilirsin.{% endblocktranslate %}</p>
+  </div>
+</main>
+{% endblock %}

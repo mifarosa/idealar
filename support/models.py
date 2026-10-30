@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.utils.translation import gettext_lazy
 from django.db import models
+from django.utils.translation import gettext_lazy
 
 KIND_SUGGESTION, KIND_COMPLAINT, KIND_BUG = "suggestion", "complaint", "bug"
 KIND_CHOICES = [(KIND_SUGGESTION, gettext_lazy("Öneri")), (KIND_COMPLAINT, gettext_lazy("Şikayet")), (KIND_BUG, gettext_lazy("Hata bildirimi"))]

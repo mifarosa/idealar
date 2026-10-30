@@ -1,11 +1,11 @@
 import json
-from django.utils.translation import get_language, gettext as _
 
 from django.http import JsonResponse
 from django.templatetags.static import static
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
+from django.utils.translation import get_language, gettext as _
 
 APP_NAME = "Idealar"
 THEME_COLOR = "#E96A26"

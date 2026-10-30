@@ -1,8 +1,8 @@
 from django.contrib import messages
-from django.utils.translation import gettext as _, ngettext
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
+from django.utils.translation import gettext as _, ngettext
 
 from . import advice, ai_enrichment, ai_registry, build_prompt, prompt_brief, similarity
 from .errors import ActionNotApplicable

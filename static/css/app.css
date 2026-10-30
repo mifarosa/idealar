@@ -354,3 +354,8 @@ a.card-title:hover { text-decoration: underline; }
 .card-add { display: flex; flex-direction: column; gap: 6px; }
 .card-add .select { font-size: 13px; min-height: 32px; }
 @media (max-width: 899px) { .board { grid-template-columns: minmax(0, 1fr); } .card { cursor: default; } }
+
+/* Long-form text pages (privacy) */
+.prose h2 { font-size: 17px; margin: 28px 0 6px; }
+.prose p { max-width: 42rem; color: var(--ink); margin-bottom: 8px; }
+.prose p + p { margin-top: 8px; }

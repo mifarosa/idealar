@@ -1,9 +1,9 @@
 """AI review of a project's GitHub repository, stored on the project and applied only on confirmation."""
 import logging
-from django.utils.translation import gettext as _
 import os
 
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from ai.errors import AIError
 from ai.repo_review import RepoReview, RepoReviewer

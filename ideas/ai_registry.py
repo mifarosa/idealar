@@ -1,10 +1,10 @@
 """Which AI models a user has brought: their own list, with keys unsealed only for the moment of a call."""
 import logging
-from django.utils.translation import gettext as _
 import re
 
 from ai.fallback import FallbackClient
 from ai.providers import KINDS, PROVIDER_LABELS, ModelSpec, build_chain
+from django.utils.translation import gettext as _
 
 from .key_vault import KeyUnreadable, unseal
 from .models import AIModel

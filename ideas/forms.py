@@ -1,6 +1,5 @@
 from django import forms
-from django.utils.translation import gettext_lazy
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy, gettext as _
 
 from .github_repo import GitHubError, parse_repo_url
 from .models import PLATFORM_CHOICES, Feature, Idea, Project

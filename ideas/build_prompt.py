@@ -1,7 +1,6 @@
 """Turns an idea into a ready-to-paste prompt that starts (or continues) the build in a coding assistant."""
 from ai.brief import Brief
-from django.utils.translation import gettext_lazy
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy, gettext as _
 
 from .models import SUGGESTION_PENDING, Idea
 

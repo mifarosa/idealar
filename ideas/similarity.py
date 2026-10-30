@@ -5,7 +5,6 @@ Two stages: a cheap word-overlap pass picks which existing ideas/projects the AI
 unavailable, strong word overlap alone is reported and clearly marked as such.
 """
 import logging
-from django.utils.translation import gettext as _
 import re
 
 from ai.errors import AIError
@@ -17,6 +16,7 @@ from ai.similarity import (
     SimilarityJudge,
     SimilarMatch,
 )
+from django.utils.translation import gettext as _
 
 from . import ai_registry
 from .errors import ActionNotApplicable

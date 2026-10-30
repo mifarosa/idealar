@@ -4,13 +4,13 @@ Only github.com/<owner>/<repo> addresses are accepted and only the configured AP
 so a project URL can never make the server fetch arbitrary addresses.
 """
 import base64
-from django.utils.translation import gettext as _
 import json
 import re
 import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
+from django.utils.translation import gettext as _
 
 DEFAULT_API_URL = "https://api.github.com"
 DEFAULT_MAX_CHARS = 24000

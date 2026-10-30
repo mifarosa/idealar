@@ -1,7 +1,7 @@
 """Lists a GitHub account's repositories so they can be imported as projects (nothing is imported automatically)."""
 import re
-from django.utils.translation import gettext as _
 from dataclasses import dataclass
+from django.utils.translation import gettext as _
 
 from .github_repo import GitHubClient, GitHubError
 from .models import Project

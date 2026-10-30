@@ -1,10 +1,10 @@
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
+from django.utils.translation import gettext as _
 
 from ideas.models import Idea, Project
 

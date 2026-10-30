@@ -1,9 +1,8 @@
 """Turns an AI failure into a short Turkish sentence the user can act on (never includes a key)."""
 import re
-from django.utils.translation import gettext_lazy
-from django.utils.translation import gettext as _
 
 from ai.errors import AIError, AINotConfiguredError, AIProviderError, AIRateLimitError, AIResponseError, AllProvidersFailed
+from django.utils.translation import gettext_lazy, gettext as _
 
 from . import ai_registry
 

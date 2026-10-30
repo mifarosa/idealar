@@ -1,7 +1,7 @@
 """What the landing page shows as "what's new". Add one entry at the top whenever a user-visible feature ships."""
 from dataclasses import dataclass
-from django.utils.translation import gettext_lazy
 from datetime import date, timedelta
+from django.utils.translation import gettext_lazy
 
 TIMELINE_PREVIEW = 4  # entries shown on the landing page; the rest opens in a dialog
 NEW_FOR_DAYS = 10  # entries newer than this get a "Yeni" badge
@@ -19,6 +19,7 @@ class Feature:
 
 
 TIMELINE = (
+    Feature(date(2026, 10, 30), gettext_lazy("Verilerin sende"), gettext_lazy("Tüm verilerini JSON olarak indir, istediğin an hesabını ve her şeyini sil. Neyin saklandığı gizlilik sayfasında açıkça yazıyor.")),
     Feature(date(2026, 10, 30), gettext_lazy("Türkçe ve İngilizce"), gettext_lazy("Arayüz iki dilde: logonun yanındaki TR/EN düğmesiyle istediğin dili seç. Yeni bir logo da geldi.")),
     Feature(date(2026, 10, 30), gettext_lazy("Kanban: kişisel ve proje panoları"), gettext_lazy("Yapılacak, yapılıyor, bitti. Projeye bağlı fikirler panoda kendiliğinden kart olur; kartları sürükleyip bırak. Kişisel pano evdeki küçük işler için serbest, istersen oraya fikir de ekleyebilirsin.")),
     Feature(date(2026, 10, 30), gettext_lazy("Öneri ve şikayet kutusu"), gettext_lazy("Bir şey bozuksa ya da bir fikrin varsa yaz; yanıtı ve durumu (açık, inceleniyor, çözüldü) aynı yerden takip et.")),

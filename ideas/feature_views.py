@@ -1,10 +1,10 @@
 from django.contrib import messages
-from django.utils.translation import gettext as _, ngettext
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from django.views.generic import FormView
+from django.utils.translation import gettext as _, ngettext
 
 from .forms import CopyFeatureForm, FeatureForm
 from .mixins import idea_panel_url

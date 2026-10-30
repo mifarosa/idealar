@@ -1,5 +1,4 @@
 from datetime import timedelta
-from django.utils.translation import gettext as _
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,6 +8,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import View
+from django.utils.translation import gettext as _
 
 from .access import can_manage
 from .forms import ReplyForm, StatusForm, TicketForm

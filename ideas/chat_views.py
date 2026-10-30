@@ -1,12 +1,11 @@
 from django.contrib import messages
-from django.utils.translation import gettext_lazy
-from django.utils.translation import gettext as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
+from django.utils.translation import gettext_lazy, gettext as _
 
 from . import ai_registry, chat_service
 from .chat_context import ChatScope

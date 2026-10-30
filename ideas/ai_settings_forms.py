@@ -1,8 +1,7 @@
 import re
-from django.utils.translation import gettext_lazy
-from django.utils.translation import gettext as _
 
 from django import forms
+from django.utils.translation import gettext_lazy, gettext as _
 
 from ai.providers import KINDS
 

@@ -1,12 +1,11 @@
 from django.contrib import messages
-from django.utils.translation import gettext_lazy
-from django.utils.translation import gettext as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Case, F, FloatField, Value, When
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.http import urlencode
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.utils.translation import gettext_lazy, gettext as _
 
 from .forms import FeatureForm, IdeaForm, QuickIdeaForm
 from .mixins import UserFormKwargsMixin

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Sayfa bulunamadı" %} · Idealar{% endblock %}
+{% block body %}
+<main class="auth">
+  <div class="brand">{% include "_logo.html" %}</div>
+  <h1>{% trans "Sayfa bulunamadı" %}</h1>
+  <p class="muted">{% trans "Aradığın sayfa yok ya da silinmiş olabilir." %}</p>
+  <a class="btn primary" href="{% url 'ideas:list' %}">{% trans "Ana sayfaya dön" %}</a>
+</main>
+{% endblock %}

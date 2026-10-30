@@ -8,6 +8,13 @@
   <dt>{% trans "Tema" %}</dt><dd>{% include "_theme_switch.html" %}</dd>
   <dt>{% trans "Destek" %}</dt><dd><a href="{% url 'support:list' %}">{% trans "Öneri veya şikayet yaz" %}</a>{% if can_manage_tickets %} · <a href="{% url 'support:inbox' %}">{% blocktranslate with count=open_ticket_count %}Gelen kutusu ({{ count }}){% endblocktranslate %}</a>{% endif %}</dd>
   <dt>AI</dt><dd><a href="{% url 'ideas:ai-models' %}">{% trans "AI modellerimi yönet" %}</a></dd>
+  <dt>{% trans "Verilerim" %}</dt><dd><a href="{% url 'accounts:export' %}">{% trans "Verilerimi indir (JSON)" %}</a> · <a href="{% url 'accounts:privacy' %}">{% trans "Gizlilik" %}</a></dd>
 </dl>
 <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn" type="submit">{% trans "Çıkış yap" %}</button></form>
+{% if not user.is_superuser %}
+<form method="post" action="{% url 'accounts:delete-account' %}" style="margin-top: 32px" data-confirm="{% trans 'Hesabın ve tüm fikirlerin, projelerin, sohbetlerin, panoların ve kayıtların kalıcı olarak silinecek. Bu geri alınamaz. Emin misin?' %}">
+  {% csrf_token %}
+  <button class="btn quiet danger" type="submit">{% trans "Hesabımı ve tüm verilerimi sil" %}</button>
+</form>
+{% endif %}
 {% endblock %}

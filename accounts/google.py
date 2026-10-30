@@ -4,12 +4,12 @@ Authlib handles state, nonce and ID-token signature checks; this module only dec
 verified Google identity belongs to.
 """
 from functools import lru_cache
-from django.utils.translation import gettext as _
 
 from authlib.integrations.django_client import OAuth
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 from .models import GoogleAccount
 

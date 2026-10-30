@@ -1,5 +1,4 @@
 import os
-from django.utils.translation import gettext as _, ngettext
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,6 +10,7 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import never_cache
+from django.utils.translation import gettext as _, ngettext
 
 from ai.errors import AIError
 from ai.providers import KINDS, build_client, specs_from_environment

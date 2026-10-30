@@ -10,6 +10,9 @@ urlpatterns = [
     path("google/", views.GoogleStartView.as_view(), name="google-start"),
     path("google/callback/", views.GoogleCallbackView.as_view(), name="google-callback"),
     path("settings/", views.SettingsView.as_view(), name="settings"),
+    path("export/", views.ExportView.as_view(), name="export"),
+    path("delete/", views.DeleteAccountView.as_view(), name="delete-account"),
+    path("privacy/", views.PrivacyView.as_view(), name="privacy"),
     # Django 5 only accepts POST for logout, which also prevents logout via prefetch/CSRF links.
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]
