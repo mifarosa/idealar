@@ -1,0 +1,9 @@
+{% load i18n %}<ol class="timeline">
+  {% for item in items %}
+  <li>
+    <time datetime="{{ item.day|date:'Y-m-d' }}">{{ item.day|date:"j F Y" }}</time>
+    <h3>{{ item.title }}{% if item.is_new %} <span class="badge-new">{% trans "Yeni" %}</span>{% endif %}</h3>
+    <p>{{ item.text }}</p>
+  </li>
+  {% endfor %}
+</ol>

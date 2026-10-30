@@ -294,6 +294,20 @@ document.addEventListener("dragend", (event) => {
   if (event.target.classList) event.target.classList.remove("dragging");
 });
 
+// ---------- Dialogs (e.g. the full "what's new" list): open/close buttons, click outside to close ----------
+document.addEventListener("click", (event) => {
+  const opener = event.target.closest("[data-open-dialog]");
+  if (opener) {
+    document.getElementById(opener.dataset.openDialog).showModal();
+    return;
+  }
+  if (event.target.closest("[data-close-dialog]")) {
+    event.target.closest("dialog").close();
+    return;
+  }
+  if (event.target instanceof HTMLDialogElement) event.target.close(); // the backdrop counts as the dialog itself
+});
+
 // ---------- Small conveniences ----------
 document.addEventListener("input", (event) => {
   if (!event.target.matches(MESSAGE_BOX)) return;

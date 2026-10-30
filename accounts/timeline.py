@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from django.utils.translation import gettext_lazy
 from datetime import date, timedelta
 
+TIMELINE_PREVIEW = 4  # entries shown on the landing page; the rest opens in a dialog
 NEW_FOR_DAYS = 10  # entries newer than this get a "Yeni" badge
 
 

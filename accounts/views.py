@@ -12,7 +12,7 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from . import google
-from .timeline import TIMELINE
+from .timeline import TIMELINE, TIMELINE_PREVIEW
 
 logger = logging.getLogger(__name__)
 NEXT_SESSION_KEY = "login_next"
@@ -30,7 +30,7 @@ class LoginView(View):
     def get(self, request):
         if request.user.is_authenticated:
             return redirect("ideas:list")
-        return render(request, "accounts/login.html", {"google_ready": google.is_configured(), "next": request.GET.get("next", ""), "timeline": TIMELINE})
+        return render(request, "accounts/login.html", {"google_ready": google.is_configured(), "next": request.GET.get("next", ""), "timeline": TIMELINE, "timeline_preview": TIMELINE[:TIMELINE_PREVIEW], "timeline_more": max(len(TIMELINE) - TIMELINE_PREVIEW, 0)})
 
 
 class GoogleStartView(View):

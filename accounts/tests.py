@@ -212,3 +212,27 @@ class LandingTests(TestCase):
 
         self.assertContains(page, "Google ile giriş yap")
         self.assertContains(page, "Neler var, neler geliyor")
+
+
+@override_settings(**GOOGLE)
+class LandingPreviewTests(TestCase):
+    def test_the_page_shows_only_the_newest_entries_and_the_rest_wait_in_a_dialog(self):
+        from accounts.timeline import TIMELINE, TIMELINE_PREVIEW
+
+        page = self.client.get(reverse("accounts:login"))
+        html = page.content.decode()
+        before_dialog, _, dialog = html.partition('<dialog class="dialog"')
+
+        for item in TIMELINE[:TIMELINE_PREVIEW]:
+            self.assertIn(f"<h3>{item.title}", before_dialog)
+        for item in TIMELINE[TIMELINE_PREVIEW:]:
+            self.assertNotIn(f"<h3>{item.title}", before_dialog)
+            self.assertIn(f"<h3>{item.title}", dialog)  # but the full list is one click away
+        self.assertContains(page, f"Tümünü gör (+{len(TIMELINE) - TIMELINE_PREVIEW})")
+        self.assertContains(page, 'data-open-dialog="timeline-dialog"')
+
+    def test_no_button_when_everything_already_fits(self):
+        with patch("accounts.views.TIMELINE_PREVIEW", 999):
+            page = self.client.get(reverse("accounts:login"))
+
+        self.assertNotContains(page, "data-open-dialog")

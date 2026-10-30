@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 01:34+0300\n"
+"POT-Creation-Date: 2026-10-31 01:38+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,11 +36,11 @@ msgstr "Sign-ups are closed right now."
 msgid "Bu hesap kapatılmış."
 msgstr "This account has been disabled."
 
-#: accounts/timeline.py:21
+#: accounts/timeline.py:22
 msgid "Türkçe ve İngilizce"
 msgstr "Turkish and English"
 
-#: accounts/timeline.py:21
+#: accounts/timeline.py:22
 msgid ""
 "Arayüz iki dilde: logonun yanındaki TR/EN düğmesiyle istediğin dili seç. "
 "Yeni bir logo da geldi."
@@ -48,11 +48,11 @@ msgstr ""
 "The interface comes in two languages: pick yours with the TR/EN button next "
 "to the logo. There is a new logo too."
 
-#: accounts/timeline.py:22
+#: accounts/timeline.py:23
 msgid "Kanban: kişisel ve proje panoları"
 msgstr "Kanban: personal and project boards"
 
-#: accounts/timeline.py:22
+#: accounts/timeline.py:23
 msgid ""
 "Yapılacak, yapılıyor, bitti. Projeye bağlı fikirler panoda kendiliğinden "
 "kart olur; kartları sürükleyip bırak. Kişisel pano evdeki küçük işler için "
@@ -62,11 +62,11 @@ msgstr ""
 "automatically; drag the cards around. The personal board is free-form for "
 "small everyday tasks, and you can add ideas to it too."
 
-#: accounts/timeline.py:23
+#: accounts/timeline.py:24
 msgid "Öneri ve şikayet kutusu"
 msgstr "Suggestions and complaints box"
 
-#: accounts/timeline.py:23
+#: accounts/timeline.py:24
 msgid ""
 "Bir şey bozuksa ya da bir fikrin varsa yaz; yanıtı ve durumu (açık, "
 "inceleniyor, çözüldü) aynı yerden takip et."
@@ -74,11 +74,11 @@ msgstr ""
 "If something is broken or you have an idea, write it down; follow the reply "
 "and the status (open, in progress, solved) in the same place."
 
-#: accounts/timeline.py:24
+#: accounts/timeline.py:25
 msgid "Sohbetten projeye ekle"
 msgstr "Add to a project from the chat"
 
-#: accounts/timeline.py:24
+#: accounts/timeline.py:25
 msgid ""
 "AI ile konuşurken “bu fikri şu projeye bağla” de; öneriyi tek tıkla "
 "onaylarsın."
@@ -86,11 +86,11 @@ msgstr ""
 "While talking to the AI say “link this idea to that project”; you confirm "
 "the suggestion with one click."
 
-#: accounts/timeline.py:25
+#: accounts/timeline.py:26
 msgid "Tüm notlarını okuyan öneriler"
 msgstr "Suggestions that read all your notes"
 
-#: accounts/timeline.py:25
+#: accounts/timeline.py:26
 msgid ""
 "Yeni bir fikir yazınca AI diğer bütün notlarına bakar: ilgili notlar, "
 "birleştirilebilecekler, ödünç alınabilecek özellikler, yeni fikirler."
@@ -98,11 +98,11 @@ msgstr ""
 "When you write a new idea the AI looks at all your other notes: related "
 "notes, notes that could be merged, features worth borrowing, new ideas."
 
-#: accounts/timeline.py:26
+#: accounts/timeline.py:27
 msgid "Kendi yapay zekânı getir"
 msgstr "Bring your own AI"
 
-#: accounts/timeline.py:26
+#: accounts/timeline.py:27
 msgid ""
 "Claude, ChatGPT, Gemini, Groq ve daha fazlası. Anahtarın şifrelenerek "
 "saklanır, kimse görmez."
@@ -110,19 +110,19 @@ msgstr ""
 "Claude, ChatGPT, Gemini, Groq and more. Your key is stored encrypted and "
 "nobody can see it."
 
-#: accounts/timeline.py:27
+#: accounts/timeline.py:28
 msgid "Google ile giriş"
 msgstr "Sign in with Google"
 
-#: accounts/timeline.py:27
+#: accounts/timeline.py:28
 msgid "Şifre yok: tek tıkla gir."
 msgstr "No password: sign in with one click."
 
-#: accounts/timeline.py:28
+#: accounts/timeline.py:29
 msgid "GitHub projelerini içe aktar"
 msgstr "Import your GitHub projects"
 
-#: accounts/timeline.py:28
+#: accounts/timeline.py:29
 msgid ""
 "Depolarını seç, proje olarak eklensin; AI depoyu inceleyip neyin yapıldığını"
 " söylesin."
@@ -130,61 +130,61 @@ msgstr ""
 "Pick your repositories and they become projects; the AI reviews a repository"
 " and tells you what is already done."
 
-#: accounts/timeline.py:29
+#: accounts/timeline.py:30
 msgid "Claude için hazır prompt"
 msgstr "Ready-made prompt for Claude"
 
-#: accounts/timeline.py:29
+#: accounts/timeline.py:30
 msgid ""
 "Bir fikri tek tıkla, yapay zekâya yapıştırılacak hazır bir plana çevir."
 msgstr "Turn an idea into a ready plan to paste into an AI with one click."
 
-#: accounts/timeline.py:30
+#: accounts/timeline.py:31
 msgid "Yeni arayüz"
 msgstr "New interface"
 
-#: accounts/timeline.py:30
+#: accounts/timeline.py:31
 msgid ""
 "Açık, gri ve koyu tema; klavye kısayolları; bilgisayarda ve telefonda rahat."
 msgstr ""
 "Light, gray and dark themes; keyboard shortcuts; comfortable on a computer "
 "and on a phone."
 
-#: accounts/timeline.py:31
+#: accounts/timeline.py:32
 msgid "Benzer fikir uyarısı"
 msgstr "Similar idea warning"
 
-#: accounts/timeline.py:31
+#: accounts/timeline.py:32
 msgid ""
 "Zaten bir şeyin varsa söyler, yeni proje açmak yerine ona eklemeni önerir."
 msgstr ""
 "If you already have something similar it tells you and suggests adding to it"
 " instead of starting a new project."
 
-#: accounts/timeline.py:32
+#: accounts/timeline.py:33
 msgid "AI ile sohbet"
 msgstr "Chat with the AI"
 
-#: accounts/timeline.py:32
+#: accounts/timeline.py:33
 msgid ""
 "Fikirlerinle yazışır gibi konuş; öneriler kartlarla gelir, sen onaylarsın."
 msgstr ""
 "Talk about your ideas like in a messaging app; suggestions come as cards and"
 " you confirm them."
 
-#: accounts/timeline.py:33
+#: accounts/timeline.py:34
 msgid "Otomatik başlık, özet ve etiket"
 msgstr "Automatic title, summary and tags"
 
-#: accounts/timeline.py:33
+#: accounts/timeline.py:34
 msgid "Aklına geleni yaz; gerisini AI toparlasın."
 msgstr "Write whatever comes to mind; let the AI tidy up the rest."
 
-#: accounts/timeline.py:34
+#: accounts/timeline.py:35
 msgid "Fikirler, projeler, özellik listeleri"
 msgstr "Ideas, projects, feature lists"
 
-#: accounts/timeline.py:34
+#: accounts/timeline.py:35
 msgid ""
 "Yapılan ve yapılmayanı işaretle, fikirleri projelere bağla. Telefona "
 "uygulama gibi kurulur."
@@ -972,6 +972,10 @@ msgstr "Gray"
 msgid "Koyu"
 msgstr "Dark"
 
+#: templates/accounts/_timeline_items.html:5
+msgid "Yeni"
+msgstr "New"
+
 #: templates/accounts/login.html:3
 msgid "Idealar · fikirlerini yapay zekâyla düşün"
 msgstr "Idealar · think through your ideas with AI"
@@ -1054,13 +1058,22 @@ msgstr "Add as a feature"
 msgid "Gizle"
 msgstr "Hide"
 
-#: templates/accounts/login.html:41
+#: templates/accounts/login.html:41 templates/accounts/login.html:50
 msgid "Neler var, neler geliyor"
 msgstr "What's here, what's coming"
 
-#: templates/accounts/login.html:46
-msgid "Yeni"
-msgstr "New"
+#: templates/accounts/login.html:44
+#, python-format
+msgid "Tümünü gör (+%(counter)s)"
+msgid_plural "Tümünü gör (+%(counter)s)"
+msgstr[0] "See all (+%(counter)s)"
+msgstr[1] "See all (+%(counter)s)"
+
+#: templates/accounts/login.html:51
+#| msgid "Kapat"
+msgctxt "dialog"
+msgid "Kapat"
+msgstr "Close"
 
 #: templates/accounts/settings.html:3 templates/accounts/settings.html:5
 #: templates/base.html:41 templates/base.html:70

@@ -39,16 +39,18 @@
       </div>
 
       <h2 class="timeline-title">{% trans "Neler var, neler geliyor" %}</h2>
-      <ol class="timeline">
-        {% for item in timeline %}
-        <li>
-          <time datetime="{{ item.day|date:'Y-m-d' }}">{{ item.day|date:"j F Y" }}</time>
-          <h3>{{ item.title }}{% if item.is_new %} <span class="badge-new">{% trans "Yeni" %}</span>{% endif %}</h3>
-          <p>{{ item.text }}</p>
-        </li>
-        {% endfor %}
-      </ol>
+      {% include "accounts/_timeline_items.html" with items=timeline_preview %}
+      {% if timeline_more %}
+      <button class="btn quiet timeline-more" type="button" data-open-dialog="timeline-dialog">{% blocktranslate trimmed count counter=timeline_more %}Tümünü gör (+{{ counter }}){% plural %}Tümünü gör (+{{ counter }}){% endblocktranslate %}</button>
+      {% endif %}
     </section>
   </div>
+  <dialog class="dialog" id="timeline-dialog" aria-labelledby="timeline-dialog-title">
+    <div class="dialog-head">
+      <h2 id="timeline-dialog-title">{% trans "Neler var, neler geliyor" %}</h2>
+      <button class="btn quiet small" type="button" data-close-dialog>{% trans "Kapat" context "dialog" %}</button>
+    </div>
+    {% include "accounts/_timeline_items.html" with items=timeline %}
+  </dialog>
 </main>
 {% endblock %}
