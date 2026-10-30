@@ -122,11 +122,41 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// Forms that destroy something ask first.
+// Forms that destroy something ask first, in a dialog of our own (the browser's confirm() looks foreign and blocks scripts).
+let pendingConfirm = null;
+
+function resubmitConfirmed(form, submitter) {
+  form.dataset.confirmed = "1"; // lets the second submit event through
+  form.requestSubmit(submitter || undefined);
+  delete form.dataset.confirmed;
+}
+
 document.addEventListener("submit", (event) => {
-  const question = event.target.dataset.confirm;
-  if (question && !window.confirm(question)) event.preventDefault();
+  const form = event.target;
+  const question = form.dataset.confirm;
+  if (!question || form.dataset.confirmed === "1") return;
+  event.preventDefault();
+  const dialog = document.getElementById("confirm-dialog");
+  if (!dialog || typeof dialog.showModal !== "function") {
+    if (window.confirm(question)) resubmitConfirmed(form, event.submitter);
+    return;
+  }
+  document.getElementById("confirm-text").textContent = question;
+  pendingConfirm = { form, submitter: event.submitter };
+  dialog.showModal();
+  dialog.querySelector("[data-close-dialog]").focus(); // the safe answer is the default one
 });
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest("[data-confirm-yes]")) return;
+  const answer = pendingConfirm;
+  pendingConfirm = null;
+  document.getElementById("confirm-dialog").close();
+  if (answer) resubmitConfirmed(answer.form, answer.submitter);
+});
+
+const confirmDialog = document.getElementById("confirm-dialog");
+if (confirmDialog) confirmDialog.addEventListener("close", () => { pendingConfirm = null; });
 
 // ---------- AI fills a freshly captured idea; saving itself stays instant ----------
 async function enrichPendingIdea() {

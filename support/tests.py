@@ -209,3 +209,50 @@ class OwnerSideTests(TestCase):
         self.author.delete()
 
         self.assertFalse(Ticket.objects.exists())
+
+
+@override_settings(TICKET_ADMIN_EMAILS=[OWNER_EMAIL])
+class DeleteTests(TestCase):
+    def setUp(self):
+        self.author = make_user("ayse", "ayse@example.com")
+        self.boss = make_user("boss", OWNER_EMAIL)
+        self.ticket = make_ticket(self.author)
+        TicketMessage.objects.create(ticket=self.ticket, author=self.author, body="more")
+
+    def delete(self, user, ticket=None):
+        self.client.force_login(user)
+        return self.client.post(reverse("support:delete", args=[(ticket or self.ticket).pk]))
+
+    def test_the_author_can_delete_their_ticket_with_its_thread(self):
+        response = self.delete(self.author)
+
+        self.assertRedirects(response, reverse("support:list"))
+        self.assertFalse(Ticket.objects.exists())
+        self.assertFalse(TicketMessage.objects.exists())
+
+    def test_the_owner_can_delete_any_ticket_and_lands_back_in_the_inbox(self):
+        response = self.delete(self.boss)
+
+        self.assertRedirects(response, reverse("support:inbox"))
+        self.assertFalse(Ticket.objects.exists())
+
+    def test_other_users_cannot_delete_it(self):
+        response = self.delete(make_user("deniz", "deniz@example.com"))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Ticket.objects.exists())
+
+    def test_deleting_needs_post_and_login(self):
+        self.client.force_login(self.author)
+        self.assertEqual(self.client.get(reverse("support:delete", args=[self.ticket.pk])).status_code, 405)
+        self.client.logout()
+        self.assertEqual(self.client.post(reverse("support:delete", args=[self.ticket.pk])).status_code, 302)
+        self.assertTrue(Ticket.objects.exists())
+
+    def test_the_page_asks_for_confirmation_through_the_dialog(self):
+        self.client.force_login(self.author)
+
+        page = self.client.get(reverse("support:detail", args=[self.ticket.pk]))
+
+        self.assertContains(page, "data-confirm=")
+        self.assertContains(page, 'id="confirm-dialog"')

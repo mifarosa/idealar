@@ -41,4 +41,9 @@
 {% else %}
 <p class="muted">{% trans "Bu kayıt kapatıldı. Yeni bir konu için yeni kayıt açabilirsin." %}</p>
 {% endif %}
+
+<form method="post" action="{% url 'support:delete' ticket.pk %}" data-confirm="{% trans 'Bu kayıt ve içindeki yazışma silinsin mi?' %}" style="margin-top: 40px">
+  {% csrf_token %}
+  <button class="btn quiet danger" type="submit">{% trans "Kaydı sil" %}</button>
+</form>
 {% endblock %}

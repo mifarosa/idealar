@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 01:38+0300\n"
+"POT-Creation-Date: 2026-10-31 01:47+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -951,6 +951,11 @@ msgstr "Your reply was added."
 msgid "Durum güncellendi."
 msgstr "Status updated."
 
+#: support/views.py:119
+#| msgid "Sohbet silindi."
+msgid "Kayıt silindi."
+msgstr "Ticket deleted."
+
 #: templates/_language_switch.html:5
 msgid "Dil"
 msgstr "Language"
@@ -1070,7 +1075,6 @@ msgstr[0] "See all (+%(counter)s)"
 msgstr[1] "See all (+%(counter)s)"
 
 #: templates/accounts/login.html:51
-#| msgid "Kapat"
 msgctxt "dialog"
 msgid "Kapat"
 msgstr "Close"
@@ -1147,27 +1151,40 @@ msgid "Yapay zekâ özellikleri için kendi AI anahtarını ekle →"
 msgstr "Add your own AI key to use the AI features →"
 
 #: templates/base.html:76
+msgid "Onayla"
+msgstr "Confirm"
+
+#: templates/base.html:77 templates/ideas/ai_model_form.html:20
+#: templates/ideas/feature_copy.html:12
+#: templates/ideas/idea_confirm_delete.html:11
+#: templates/ideas/idea_form.html:12 templates/ideas/idea_list.html:13
+#: templates/ideas/project_confirm_delete.html:11
+#: templates/ideas/project_form.html:11 templates/support/ticket_form.html:19
+msgid "Vazgeç"
+msgstr "Cancel"
+
+#: templates/base.html:83
 msgid "Kaydedilemedi, bağlantını kontrol et."
 msgstr "Could not be saved, check your connection."
 
-#: templates/base.html:77
+#: templates/base.html:84
 msgid "Kaydedilemedi."
 msgstr "Could not be saved."
 
-#: templates/base.html:78
+#: templates/base.html:85
 msgid "Kart taşınamadı."
 msgstr "The card could not be moved."
 
-#: templates/base.html:79
+#: templates/base.html:86
 msgid "Panoya kopyalandı. Claude'a yapıştırabilirsin."
 msgstr "Copied to the clipboard. You can paste it into Claude."
 
-#: templates/base.html:80 templates/ideas/feature_copy.html:11
+#: templates/base.html:87 templates/ideas/feature_copy.html:11
 #: templates/ideas/idea_prompt.html:18
 msgid "Kopyala"
 msgstr "Copy"
 
-#: templates/base.html:81
+#: templates/base.html:88
 msgid "Otomatik kopyalanamadı; metin seçili, Ctrl+C ile kopyala."
 msgstr "Automatic copy failed; the text is selected, copy it with Ctrl+C."
 
@@ -1448,14 +1465,6 @@ msgstr "Add model"
 #: templates/ideas/idea_list.html:14 templates/ideas/project_form.html:10
 msgid "Kaydet"
 msgstr "Save"
-
-#: templates/ideas/ai_model_form.html:20 templates/ideas/feature_copy.html:12
-#: templates/ideas/idea_confirm_delete.html:11
-#: templates/ideas/idea_form.html:12 templates/ideas/idea_list.html:13
-#: templates/ideas/project_confirm_delete.html:11
-#: templates/ideas/project_form.html:11 templates/support/ticket_form.html:19
-msgid "Vazgeç"
-msgstr "Cancel"
 
 #: templates/ideas/ai_models.html:10
 msgid ""
@@ -2116,6 +2125,15 @@ msgstr "Add a reply"
 #: templates/support/ticket_detail.html:42
 msgid "Bu kayıt kapatıldı. Yeni bir konu için yeni kayıt açabilirsin."
 msgstr "This ticket was closed. For a new topic you can open a new one."
+
+#: templates/support/ticket_detail.html:45
+msgid "Bu kayıt ve içindeki yazışma silinsin mi?"
+msgstr "Delete this ticket and its conversation?"
+
+#: templates/support/ticket_detail.html:47
+#| msgid "Kartı sil"
+msgid "Kaydı sil"
+msgstr "Delete ticket"
 
 #: templates/support/ticket_form.html:3 templates/support/ticket_form.html:6
 #: templates/support/ticket_list.html:7

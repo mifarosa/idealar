@@ -70,6 +70,13 @@
     <a href="{% url 'accounts:settings' %}" {% if nav_section == 'settings' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-settings"/></svg>{% trans "Ayarlar" %}</a>
   </nav>
   {% endif %}
+  <dialog class="dialog dialog-small" id="confirm-dialog" aria-labelledby="confirm-text">
+    <p id="confirm-text" class="confirm-text"></p>
+    <div class="actions">
+      <button class="btn danger" type="button" data-confirm-yes>{% trans "Onayla" %}</button>
+      <button class="btn quiet" type="button" data-close-dialog>{% trans "Vazgeç" %}</button>
+    </div>
+  </dialog>
   <script>
     // Texts the scripts show (alerts, copy feedback) in the language of the page.
     window.IDEALAR_TEXT = {

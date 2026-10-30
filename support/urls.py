@@ -9,4 +9,5 @@ urlpatterns = [
     path("destek/yeni/", views.TicketCreateView.as_view(), name="create"),
     path("destek/gelen/", views.InboxView.as_view(), name="inbox"),
     path("destek/<int:pk>/", views.TicketDetailView.as_view(), name="detail"),
+    path("destek/<int:pk>/sil/", views.TicketDeleteView.as_view(), name="delete"),
 ]

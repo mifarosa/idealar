@@ -105,6 +105,21 @@ class TicketDetailView(LoginRequiredMixin, View):
         return redirect("support:detail", pk=ticket.pk)
 
 
+class TicketDeleteView(LoginRequiredMixin, View):
+    """The author may delete their own ticket (and its thread); the site owner may delete any."""
+
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        ticket = get_object_or_404(Ticket, pk=pk)
+        if ticket.owner_id != request.user.pk and not can_manage(request.user):
+            raise Http404
+        by_owner_of_site = ticket.owner_id != request.user.pk
+        ticket.delete()
+        messages.success(request, _("Kayıt silindi."))
+        return redirect("support:inbox" if by_owner_of_site else "support:list")
+
+
 class InboxView(ManagerRequiredMixin, View):
     """Every ticket of every user, for the site owner."""
 
