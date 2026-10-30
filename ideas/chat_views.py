@@ -15,6 +15,11 @@ MAX_TITLE_CHARS = Conversation._meta.get_field("title").max_length
 NO_ANSWER_MESSAGE = "Hiçbir AI yanıt veremedi. Mesajın kaydedildi; başka bir AI seçip tekrar deneyebilirsin."
 
 
+def no_answer_message(conversation: Conversation) -> str:
+    reason = getattr(conversation, "failure_reason", "")
+    return f"{NO_ANSWER_MESSAGE} Sebep: {reason}" if reason else NO_ANSWER_MESSAGE
+
+
 def scope_chat_url(scope: ChatScope) -> str:
     """The page listing a scope's conversations."""
     if scope.idea:
@@ -78,7 +83,7 @@ class ConversationListView(LoginRequiredMixin, View):
             return redirect(scope_chat_url(scope))
         conversation = chat_service.start_conversation(scope, text)
         if chat_service.ask_assistant(conversation, provider=chosen_provider(request)) is None:
-            messages.error(request, NO_ANSWER_MESSAGE)
+            messages.error(request, no_answer_message(conversation))
         return redirect(conversation_url(conversation))
 
 
@@ -108,7 +113,7 @@ class ConversationView(LoginRequiredMixin, View):
         # An empty post is a "retry" of an unanswered message; otherwise there is nothing to do.
         needs_answer = chat_service.needs_reply(conversation)
         if needs_answer and chat_service.ask_assistant(conversation, provider=chosen_provider(request)) is None:
-            messages.error(request, NO_ANSWER_MESSAGE)
+            messages.error(request, no_answer_message(conversation))
         return redirect(conversation_url(conversation))
 
     @staticmethod

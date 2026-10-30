@@ -3,7 +3,7 @@ import logging
 from ai.chat import ACTION_ADD_FEATURE, ACTION_NEW_IDEA, ChatAction, ChatAssistant, ChatTurn
 from ai.errors import AIError
 
-from . import ai_registry
+from . import ai_failure, ai_registry
 from .chat_context import ChatScope, build_context
 from .errors import ActionNotApplicable
 from .models import (
@@ -67,6 +67,7 @@ def ask_assistant(conversation: Conversation, assistant_factory=None, provider: 
         reply = assistant.respond(build_context(scope), history)
     except AIError as error:
         logger.warning("AI chat failed (%s scope): %s", scope.kind, error)
+        conversation.failure_reason = ai_failure.describe(error)  # read by the view; not stored
         return None
     return _add_message(
         conversation,
