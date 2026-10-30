@@ -17,6 +17,7 @@ class Feature:
 
 
 TIMELINE = (
+    Feature(date(2026, 10, 30), "Öneri ve şikayet kutusu", "Bir şey bozuksa ya da bir fikrin varsa yaz; yanıtı ve durumu (açık, inceleniyor, çözüldü) aynı yerden takip et."),
     Feature(date(2026, 10, 30), "Sohbetten projeye ekle", "AI ile konuşurken “bu fikri şu projeye bağla” de; öneriyi tek tıkla onaylarsın."),
     Feature(date(2026, 10, 30), "Tüm notlarını okuyan öneriler", "Yeni bir fikir yazınca AI diğer bütün notlarına bakar: ilgili notlar, birleştirilebilecekler, ödünç alınabilecek özellikler, yeni fikirler."),
     Feature(date(2026, 10, 30), "Kendi yapay zekânı getir", "Claude, ChatGPT, Gemini, Groq ve daha fazlası. Anahtarın şifrelenerek saklanır, kimse görmez."),

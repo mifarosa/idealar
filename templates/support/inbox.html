@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Gelen kutusu · Idealar{% endblock %}
+{% block inner_class %}wide{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Gelen kutusu</h1></div>
+<nav class="tabs" aria-label="Durum" style="margin-bottom: 12px">
+  <a href="?durum=aktif{% if kind %}&tur={{ kind }}{% endif %}" {% if status == 'aktif' %}aria-current="true"{% endif %}>Aktif<b>{{ counts.active }}</b></a>
+  <a href="?durum=done{% if kind %}&tur={{ kind }}{% endif %}" {% if status == 'done' %}aria-current="true"{% endif %}>Çözüldü<b>{{ counts.done }}</b></a>
+  <a href="?durum=closed{% if kind %}&tur={{ kind }}{% endif %}" {% if status == 'closed' %}aria-current="true"{% endif %}>Kapalı<b>{{ counts.closed }}</b></a>
+  <a href="?durum=hepsi{% if kind %}&tur={{ kind }}{% endif %}" {% if status == 'hepsi' %}aria-current="true"{% endif %}>Hepsi<b>{{ counts.total }}</b></a>
+</nav>
+<form method="get" class="actions" style="margin-bottom: 12px">
+  <input type="hidden" name="durum" value="{{ status }}">
+  <select class="select" name="tur" aria-label="Tür" data-autosubmit>
+    <option value="">Tüm türler</option>
+    {% for value, label in kinds %}<option value="{{ value }}" {% if value == kind %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+</form>
+<ul class="list">
+  {% for ticket in tickets %}
+  <li><a href="{% url 'support:detail' ticket.pk %}">
+    <span class="title">{{ ticket.title }}</span><br>
+    <span class="meta"><span class="tag">{{ ticket.get_kind_display }}</span> <span class="tag status-{{ ticket.status }}">{{ ticket.get_status_display }}</span> · {{ ticket.owner.get_username }} · {{ ticket.updated_at|date:"d M Y H:i" }}{% if ticket.reply_count %} · {{ ticket.reply_count }} yanıt{% endif %}</span>
+  </a></li>
+  {% empty %}
+  <li><p class="muted" style="padding:12px 4px">Burada kayıt yok.</p></li>
+  {% endfor %}
+</ul>
+{% endblock %}

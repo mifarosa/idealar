@@ -5,6 +5,7 @@
 <dl class="spec">
   <dt>Kullanıcı</dt><dd>{{ user.get_username }}</dd>
   <dt>Tema</dt><dd>{% include "_theme_switch.html" %}</dd>
+  <dt>Destek</dt><dd><a href="{% url 'support:list' %}">Öneri veya şikayet yaz</a>{% if can_manage_tickets %} · <a href="{% url 'support:inbox' %}">Gelen kutusu ({{ open_ticket_count }})</a>{% endif %}</dd>
   <dt>AI</dt><dd><a href="{% url 'ideas:ai-models' %}">AI modellerimi yönet</a></dd>
 </dl>
 <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn" type="submit">Çıkış yap</button></form>

@@ -9,7 +9,10 @@ def navigation(request):
     """Which sidebar/tab section is active, plus the counts shown next to its entries."""
     if not request.user.is_authenticated:
         return {}
-    name = request.resolver_match.url_name if request.resolver_match else ""
+    match = request.resolver_match
+    name = match.url_name if match else ""
+    if match and match.namespace == "support":
+        name = "support"
     return {
         "nav_section": _section(name),
         "nav_idea_count": Idea.objects.owned_by(request.user).count(),
@@ -23,6 +26,8 @@ def _section(url_name: str) -> str:
         return "chat"
     if url_name.startswith("project-"):
         return "projects"
+    if url_name == "support":
+        return "support"
     if url_name == "settings" or url_name.startswith("ai-model"):
         return "settings"
     return "ideas" if url_name in IDEA_VIEWS else ""

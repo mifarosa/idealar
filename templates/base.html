@@ -34,6 +34,8 @@
         <a href="{% url 'ideas:project-list' %}" {% if nav_section == 'projects' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-folder"/></svg>Projeler<span class="count">{{ nav_project_count }}</span></a>
         <a href="{% url 'ideas:chat' %}" {% if nav_section == 'chat' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-chat"/></svg>Sohbet</a>
         <a href="{% url 'accounts:settings' %}" {% if nav_section == 'settings' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-settings"/></svg>Ayarlar</a>
+        <a href="{% url 'support:list' %}" {% if nav_section == 'support' %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-help"/></svg>Öneri &amp; şikayet</a>
+        {% if can_manage_tickets %}<a href="{% url 'support:inbox' %}"><svg class="icon"><use href="#i-chat"/></svg>Gelen kutusu<span class="count">{{ open_ticket_count }}</span></a>{% endif %}
       </nav>
       <div class="side-foot">
         {% include "_theme_switch.html" %}

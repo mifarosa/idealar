@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Yeni kayıt · Idealar{% endblock %}
+{% block content %}
+<a class="crumb" href="{% url 'support:list' %}"><svg class="icon"><use href="#i-back"/></svg>Öneri &amp; şikayet</a>
+<div class="page-head"><h1>Yeni kayıt</h1></div>
+<form method="post" class="form">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% for field in form %}
+  <div class="form-field">
+    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {{ field.errors }}
+  </div>
+  {% endfor %}
+  <div class="actions">
+    <button class="btn primary" type="submit">Gönder</button>
+    <a class="btn quiet" href="{% url 'support:list' %}">Vazgeç</a>
+  </div>
+</form>
+{% endblock %}

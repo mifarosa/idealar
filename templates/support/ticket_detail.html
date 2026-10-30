@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ ticket.title }} · Idealar{% endblock %}
+{% block content %}
+<a class="crumb" href="{% if manager and ticket.owner_id != user.pk %}{% url 'support:inbox' %}{% else %}{% url 'support:list' %}{% endif %}"><svg class="icon"><use href="#i-back"/></svg>{% if manager and ticket.owner_id != user.pk %}Gelen kutusu{% else %}Öneri &amp; şikayet{% endif %}</a>
+<div class="page-head"><h1>{{ ticket.title }}</h1></div>
+<p class="meta">
+  <span class="tag">{{ ticket.get_kind_display }}</span> <span class="tag status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+  · {{ ticket.created_at|date:"d M Y H:i" }}
+  {% if manager and ticket.owner_id != user.pk %}· <strong>{{ ticket.owner.get_username }}</strong>{% if ticket.owner.email %} ({{ ticket.owner.email }}){% endif %}{% endif %}
+</p>
+
+<div class="chat-log" style="margin: 16px 0 24px">
+  <div class="bubble bubble-user" style="align-self: stretch; max-width: none"><p>{{ ticket.body|linebreaksbr }}</p></div>
+  {% for message in thread %}
+  <div class="bubble {% if message.from_admin %}bubble-assistant{% else %}bubble-user{% endif %}" style="max-width: none">
+    <p>{{ message.body|linebreaksbr }}</p>
+    <p class="provider-badge">{% if message.from_admin %}Destek{% else %}{% if message.author_id == ticket.owner_id %}Kullanıcı{% else %}{{ message.author.get_username }}{% endif %}{% endif %} · {{ message.created_at|date:"d M Y H:i" }}</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% if manager %}
+<form method="post" class="form actions" style="margin-bottom: 24px">
+  {% csrf_token %}<input type="hidden" name="action" value="status">
+  {{ status_form.status }}
+  <button class="btn" type="submit">Durumu kaydet</button>
+</form>
+{% endif %}
+
+{% if can_reply %}
+<form method="post" class="form">
+  {% csrf_token %}
+  {{ reply_form.body.errors }}
+  <div class="form-field">
+    <label class="form-label" for="{{ reply_form.body.id_for_label }}">{% if manager and ticket.owner_id != user.pk %}Kullanıcıya yanıt{% else %}Yanıt ekle{% endif %}</label>
+    {{ reply_form.body }}
+  </div>
+  <div class="actions"><button class="btn primary" type="submit">Gönder</button></div>
+</form>
+{% else %}
+<p class="muted">Bu kayıt kapatıldı. Yeni bir konu için yeni kayıt açabilirsin.</p>
+{% endif %}
+{% endblock %}

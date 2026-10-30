@@ -62,6 +62,10 @@ Giriş yalnızca Google iledir (şifreli form kalktı). Yönetici (staff) şifre
 3. Varsayılan model `claude-opus-5-5`. Not almak için daha ucuz bir model yeterliyse `ANTHROPIC_MODEL=claude-haiku-5-5` yaz; geçerli adları `docker compose exec web python manage.py ai_models` listeler.
 4. Claude bir isteği reddederse veya hata verirse zincir otomatik olarak sıradaki sağlayıcıya geçer; fikrin kaybolmaz.
 
+### Öneri ve şikayet kutusu (ticket)
+Her kullanıcı sol menüdeki **Öneri & şikayet** sayfasından öneri, şikayet ya da hata bildirimi yazar ve yanıtları aynı sayfada takip eder. Kullanıcı yalnızca **kendi** kayıtlarını görür; başkasının kaydını açamaz.
+Site sahibi **Gelen kutusu**'nda tüm kayıtları görür, durum değiştirir (açık, inceleniyor, çözüldü, kapalı) ve yanıt verir. Yetki, yönetici bayrağına değil **e-posta adresine** bağlıdır: `.env`'e `TICKET_ADMIN_EMAILS=senin@gmail.com` yaz (virgülle birden fazla olabilir), `docker compose up -d` yap ve o adresle Google'dan giriş yap. Değer boşsa kimse gelen kutusunu açamaz. Kullanıcı yanıtlarda senin kimliğini değil "Destek" adını görür. Bir kullanıcı günde en fazla 10 kayıt açabilir. Uygulama e-posta göndermez; yeni kayıtları gelen kutusundaki sayıdan takip edersin.
+
 ### Tüm notlarına göre öneriler
 Bir fikri kaydedince (ya da fikir sayfasındaki **Notlarıma göre öneri al** tuşuna basınca) AI, o fikirle birlikte **tüm diğer notlarını**, projelerini ve kullandığın etiketleri okur. Çıkan kartlar: ilgili not, birleştirilebilecek not, başka fikirden özellik ödünç alma, projeye bağlama, tutarlı etiket ve notlar birleşince ortaya çıkan yeni fikirler. Hiçbiri sen onaylamadan uygulanmaz; birleştirme ise hiç otomatik yapılmaz, yalnızca diğer notu açan bir bağlantı verilir.
 Notlar tek istekte kompakt bir liste olarak gider (başlık, özet, etiket, proje, açık özellikler). Arşiv çok büyükse (yaklaşık 120 bin karakteri aşarsa) önce not metinleri kısaltılır, en eski notlar en son elenir. Not sayın arttıkça her öneri biraz daha çok token harcar; ücretli bir sağlayıcı kullanıyorsan bunu hesaba kat. Notların seçtiğin sağlayıcıya gönderilir.

@@ -319,3 +319,6 @@ code { font: 13px "SFMono-Regular", Consolas, monospace; border: 1px solid var(-
   .landing .pitch { grid-row: 2; }
   .pitch h1 { font-size: 30px; }
 }
+.status-open { border-color: var(--signal); color: var(--ink); }
+.status-done { color: var(--muted); }
+.status-closed { color: var(--muted); text-decoration: line-through; }

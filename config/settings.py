@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "ideas",
+    "support",
     "pwa",
 ]
 
@@ -54,6 +55,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "ideas.context_processors.navigation",
+                "support.context.support",
             ],
         },
     },
@@ -84,6 +86,9 @@ GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
 # Whether an unknown Google account may create a new user. Existing users are always matched by e-mail.
 GOOGLE_SIGNUP = env_bool("GOOGLE_SIGNUP", default=False)
+
+# Accounts (by Google-verified e-mail) that may read and answer every support ticket. Empty = nobody.
+TICKET_ADMIN_EMAILS = [email.lower() for email in env_list("TICKET_ADMIN_EMAILS")]
 
 # Secret that seals users' AI API keys in the database. Falls back to SECRET_KEY; set it separately to rotate either one alone.
 KEYS_ENCRYPTION_KEY = os.environ.get("KEYS_ENCRYPTION_KEY", "").strip()
