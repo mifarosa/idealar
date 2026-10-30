@@ -1,18 +1,53 @@
 {% extends "base.html" %}
-{% block title %}Giriş · Idealar{% endblock %}
+{% block title %}Idealar · fikirlerini yapay zekâyla düşün{% endblock %}
 {% block body %}
-<main class="auth">
-  <div class="brand"><span class="dot"></span>Idealar</div>
-  <p class="muted">Fikirlerini yaz; kendi yapay zekân notlarını okuyup sana öneriler versin.</p>
-  {% if messages %}{% for message in messages %}<p class="{% if message.level_tag == 'error' %}error-text{% endif %}" role="alert">{{ message }}</p>{% endfor %}{% endif %}
-  {% if google_ready %}
-  <a class="btn primary google-btn" href="{% url 'accounts:google-start' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
-    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.35 11.1H12v3.2h5.35c-.5 2.4-2.55 3.8-5.35 3.8a6 6 0 1 1 0-12c1.5 0 2.85.55 3.9 1.45l2.3-2.3A9.2 9.2 0 0 0 12 2.8a9.2 9.2 0 1 0 0 18.4c5.3 0 8.8-3.7 8.8-8.9 0-.4-.05-.8-.15-1.2z"/></svg>
-    Google ile giriş yap
-  </a>
-  {% else %}
-  <p class="error-text">Google girişi henüz ayarlanmadı (<code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>).</p>
-  {% endif %}
-  {% include "_theme_switch.html" %}
+<main class="page landing">
+  <div class="landing-grid">
+    <aside class="login-card" aria-label="Giriş">
+      <div class="brand"><span class="dot"></span>Idealar</div>
+      <h2>Giriş yap</h2>
+      {% if messages %}{% for message in messages %}<p class="{% if message.level_tag == 'error' %}error-text{% endif %}" role="alert">{{ message }}</p>{% endfor %}{% endif %}
+      {% if google_ready %}
+      <a class="btn primary google-btn" href="{% url 'accounts:google-start' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.35 11.1H12v3.2h5.35c-.5 2.4-2.55 3.8-5.35 3.8a6 6 0 1 1 0-12c1.5 0 2.85.55 3.9 1.45l2.3-2.3A9.2 9.2 0 0 0 12 2.8a9.2 9.2 0 1 0 0 18.4c5.3 0 8.8-3.7 8.8-8.9 0-.4-.05-.8-.15-1.2z"/></svg>
+        Google ile giriş yap
+      </a>
+      {% else %}
+      <p class="error-text">Google girişi henüz ayarlanmadı (<code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>).</p>
+      {% endif %}
+      <p class="muted">İlk girişte hesabın kendiliğinden açılır. Yapay zekâ özellikleri için kendi API anahtarını eklersin.</p>
+      {% include "_theme_switch.html" %}
+    </aside>
+
+    <section class="pitch">
+      <h1>Fikirlerini yaz.<br>Yapay zekân hepsini bilsin.</h1>
+      <p class="lead">Idealar, yapay zekâlı bir fikir defteri. Aklına geleni yazarsın; notlarının hepsini okuyan bir yardımcı bağlantıları, tekrarları ve eksikleri sana gösterir.</p>
+
+      <div class="mock" aria-hidden="true">
+        <div class="mock-bar"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div class="mock-row"><b>Alışkanlık sayacı</b><i>3 / 5</i></div>
+          <div class="mock-row"><b>Uyku günlüğü</b><i>1 / 4</i></div>
+          <div class="mock-row mock-new"><b>Yeni fikir: günlük su takibi…</b></div>
+          <div class="mock-card">
+            <span class="tag">tüm notlarına göre</span>
+            <p><b>Alışkanlık sayacı</b> ile bağlantılı: ikisi de günlük kayıt tutuyor. Hatırlatıcı özelliğini oradan alabilirsin.</p>
+            <div class="mock-actions"><span>Özellik olarak ekle</span><span>Gizle</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="timeline-title">Neler var, neler geliyor</h2>
+      <ol class="timeline">
+        {% for item in timeline %}
+        <li>
+          <time datetime="{{ item.day|date:'Y-m-d' }}">{{ item.day|date:"j F Y" }}</time>
+          <h3>{{ item.title }}{% if item.is_new %} <span class="badge-new">Yeni</span>{% endif %}</h3>
+          <p>{{ item.text }}</p>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+  </div>
 </main>
 {% endblock %}

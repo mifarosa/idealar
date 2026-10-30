@@ -11,6 +11,7 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from . import google
+from .timeline import TIMELINE
 
 logger = logging.getLogger(__name__)
 NEXT_SESSION_KEY = "login_next"
@@ -28,7 +29,7 @@ class LoginView(View):
     def get(self, request):
         if request.user.is_authenticated:
             return redirect("ideas:list")
-        return render(request, "accounts/login.html", {"google_ready": google.is_configured(), "next": request.GET.get("next", "")})
+        return render(request, "accounts/login.html", {"google_ready": google.is_configured(), "next": request.GET.get("next", ""), "timeline": TIMELINE})
 
 
 class GoogleStartView(View):

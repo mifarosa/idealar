@@ -186,3 +186,29 @@ class LinkGoogleCommandTests(TestCase):
 
         user.refresh_from_db()
         self.assertEqual(user.email, "faruk@example.com")
+
+
+@override_settings(**GOOGLE)
+class LandingTests(TestCase):
+    def test_timeline_is_listed_newest_first_and_shown_on_the_login_page(self):
+        from accounts.timeline import TIMELINE
+
+        days = [item.day for item in TIMELINE]
+        self.assertEqual(days, sorted(days, reverse=True))  # new features are added at the top
+        page = self.client.get(reverse("accounts:login"))
+        for item in TIMELINE:
+            self.assertContains(page, item.title)
+
+    def test_only_recent_entries_get_the_new_badge(self):
+        from datetime import date, timedelta
+
+        from accounts.timeline import Feature
+
+        self.assertTrue(Feature(date.today(), "a", "b").is_new)
+        self.assertFalse(Feature(date.today() - timedelta(days=60), "a", "b").is_new)
+
+    def test_login_card_and_pitch_are_both_on_the_page(self):
+        page = self.client.get(reverse("accounts:login"))
+
+        self.assertContains(page, "Google ile giriş yap")
+        self.assertContains(page, "Neler var, neler geliyor")
