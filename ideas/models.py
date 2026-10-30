@@ -99,6 +99,9 @@ class Idea(models.Model):
     # Possible duplicates: [{"kind", "id", "title", "verdict", "reason", "source", "status"}].
     similar = models.JSONField(default=list, blank=True)
     similarity_status = models.CharField(max_length=12, blank=True)  # "", done, words_only
+    # Advice from reading the whole notebook: [{"kind", "text", "target", "target_title", "reason", "status"}].
+    advice = models.JSONField(default=list, blank=True)
+    advice_status = models.CharField(max_length=12, blank=True)  # "", done, failed
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
-from . import ai_enrichment, build_prompt, prompt_brief, similarity
+from . import advice, ai_enrichment, ai_registry, build_prompt, prompt_brief, similarity
 from .errors import ActionNotApplicable
 from .mixins import idea_panel_url
 from .models import SUGGESTION_PENDING, Feature, Idea
@@ -26,6 +26,34 @@ class IdeaEnrichView(OwnedIdeaActionView):
         else:
             messages.error(request, "AI şu an yanıt veremedi. Fikir kaydedildi; sonra tekrar deneyebilirsin.")
         similarity.check_idea(idea)  # separate AI call; its failure never undoes the enrichment above
+        if ai_registry.has_models(request.user):
+            advice.advise_idea(idea)  # reads the whole notebook; likewise independent of the steps above
+        return redirect(idea_panel_url(idea.pk))
+
+
+class AdviceView(OwnedIdeaActionView):
+    """Manual "advise me from all my notes" button."""
+
+    def post(self, request, pk):
+        idea = self.get_idea(pk)
+        if advice.advise_idea(idea):
+            count = len([entry for entry in idea.advice if entry["status"] == SUGGESTION_PENDING])
+            messages.success(request, f"Tüm notların okundu: {count} öneri hazır." if count else "Tüm notların okundu; şimdilik önerecek bir şey bulamadım.")
+        else:
+            messages.error(request, "AI şu an yanıt veremedi. Biraz sonra tekrar dene.")
+        return redirect(idea_panel_url(idea.pk))
+
+
+class AdviceDecideView(OwnedIdeaActionView):
+    def post(self, request, pk, index):
+        idea = self.get_idea(pk)
+        if index < len(idea.advice):
+            apply = request.POST.get("decision") == "apply"
+            try:
+                advice.decide_advice(idea, index, apply)
+                messages.success(request, "Uygulandı." if apply else "Tamam, öneri gizlendi.")
+            except ActionNotApplicable:
+                messages.error(request, "Bu kayıt artık yok (silinmiş olabilir).")
         return redirect(idea_panel_url(idea.pk))
 
 

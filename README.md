@@ -62,6 +62,10 @@ Giriş yalnızca Google iledir (şifreli form kalktı). Yönetici (staff) şifre
 3. Varsayılan model `claude-opus-5-5`. Not almak için daha ucuz bir model yeterliyse `ANTHROPIC_MODEL=claude-haiku-5-5` yaz; geçerli adları `docker compose exec web python manage.py ai_models` listeler.
 4. Claude bir isteği reddederse veya hata verirse zincir otomatik olarak sıradaki sağlayıcıya geçer; fikrin kaybolmaz.
 
+### Tüm notlarına göre öneriler
+Bir fikri kaydedince (ya da fikir sayfasındaki **Notlarıma göre öneri al** tuşuna basınca) AI, o fikirle birlikte **tüm diğer notlarını**, projelerini ve kullandığın etiketleri okur. Çıkan kartlar: ilgili not, birleştirilebilecek not, başka fikirden özellik ödünç alma, projeye bağlama, tutarlı etiket ve notlar birleşince ortaya çıkan yeni fikirler. Hiçbiri sen onaylamadan uygulanmaz; birleştirme ise hiç otomatik yapılmaz, yalnızca diğer notu açan bir bağlantı verilir.
+Notlar tek istekte kompakt bir liste olarak gider (başlık, özet, etiket, proje, açık özellikler). Arşiv çok büyükse (yaklaşık 120 bin karakteri aşarsa) önce not metinleri kısaltılır, en eski notlar en son elenir. Not sayın arttıkça her öneri biraz daha çok token harcar; ücretli bir sağlayıcı kullanıyorsan bunu hesaba kat. Notların seçtiğin sağlayıcıya gönderilir.
+
 ### Herkes kendi AI'ını getirir
 Her kullanıcı **Ayarlar → AI modellerimi yönet** sayfasından kendi modellerini ve API anahtarlarını ekler (Groq, Gemini, Claude, OpenRouter). Sunucudaki `.env` anahtarları artık diğer kullanıcılar için kullanılmaz.
 - Üstteki model önce denenir; hata verirse sıradakine geçilir. **Dene** tuşu modelin cevap verdiğini kontrol eder, **Modeller** tuşu anahtarın kullanabildiği model adlarını listeler.

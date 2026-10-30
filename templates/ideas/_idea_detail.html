@@ -40,6 +40,32 @@
   {% if idea.similarity_status == 'words_only' %}<p class="callout-note">AI kontrolü yapılamadı; yalnızca kelime benzerliğine baktım.</p>
   {% elif idea.similarity_status == 'done' and not idea.similar %}<p class="callout-note">Benzer bir kayıt bulunmadı.</p>{% endif %}
 
+  {% if idea.advice %}
+  <div class="sec"><h3>Tüm notlarına göre öneriler</h3></div>
+  {% for item in idea.advice %}{% if item.status != 'dismissed' %}
+  <div class="callout advice">
+    <p class="callout-title">
+      <span class="tag">{% if item.kind == 'related' %}ilgili not{% elif item.kind == 'merge' %}birleştirilebilir{% elif item.kind == 'borrow_feature' %}özellik fikri{% elif item.kind == 'add_to_project' %}proje{% elif item.kind == 'tag' %}etiket{% else %}yeni fikir{% endif %}</span>
+      {% if item.kind == 'tag' %}<span>{{ item.text }}</span>{% elif item.target_title %}<span>{{ item.target_title }}</span>{% endif %}
+    </p>
+    {% if item.kind == 'borrow_feature' or item.kind == 'new_idea' %}<p>{{ item.text }}</p>{% endif %}
+    <p class="why">{{ item.reason }}</p>
+    {% if item.status == 'pending' %}
+    <form method="post" action="{% url 'ideas:idea-advice-decide' idea.pk forloop.counter0 %}" class="actions">
+      {% csrf_token %}
+      {% if item.kind == 'related' or item.kind == 'merge' %}<a class="btn" href="{% url 'ideas:detail' item.target %}">Notu aç</a>
+      {% elif item.kind == 'borrow_feature' %}<button class="btn primary" name="decision" value="apply" type="submit">Özellik olarak ekle</button>
+      {% elif item.kind == 'add_to_project' %}<button class="btn primary" name="decision" value="apply" type="submit">Bu projeye bağla</button>
+      {% elif item.kind == 'tag' %}<button class="btn primary" name="decision" value="apply" type="submit">Etiketi ekle</button>
+      {% else %}<button class="btn primary" name="decision" value="apply" type="submit">Yeni fikir olarak kaydet</button>{% endif %}
+      <button class="btn quiet" name="decision" value="dismiss" type="submit">Gizle</button>
+    </form>
+    {% else %}<p class="muted">Uygulandı.</p>{% endif %}
+  </div>
+  {% endif %}{% endfor %}
+  {% elif idea.advice_status == 'done' %}<p class="callout-note">Tüm notların okundu; şimdilik önerecek bir şey bulamadım.</p>
+  {% elif idea.advice_status == 'failed' %}<p class="callout-note">AI şu an yanıt veremedi; "Notlarıma göre öneri al" ile tekrar dene.</p>{% endif %}
+
   <div class="sec"><h3>Özellikler</h3><span class="feature-count">{{ idea.progress.done }} / {{ idea.progress.total }}</span></div>
   <ul class="checks">
     {% for feature in idea.features.all %}
@@ -87,7 +113,8 @@
     <a class="btn" href="{% url 'ideas:idea-chat' idea.pk %}"><svg class="icon"><use href="#i-chat"/></svg>Sohbet</a>
     <a class="btn quiet" href="{% url 'ideas:update' idea.pk %}">Düzenle</a>
     <a class="btn quiet" href="{% url 'ideas:idea-prompt' idea.pk %}">Claude için prompt</a>
-    <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="{% if idea.ai_status == 'done' %}Yenileniyor…{% else %}Dolduruluyor…{% endif %}" data-busy-note="AI başlık, özet, etiket ve önerileri hazırlıyor, ardından benzerlik kontrolü yapıyor. Birkaç saniye sürebilir.">{% if idea.ai_status == 'done' %}AI ile yenile{% else %}AI ile doldur{% endif %}</button></form>
+    <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="{% if idea.ai_status == 'done' %}Yenileniyor…{% else %}Dolduruluyor…{% endif %}" data-busy-note="AI başlık, özet, etiket ve önerileri hazırlıyor, benzerlik kontrolü yapıyor ve tüm notlarını okuyup öneri çıkarıyor. Birkaç saniye sürebilir.">{% if idea.ai_status == 'done' %}AI ile yenile{% else %}AI ile doldur{% endif %}</button></form>
+    <form method="post" action="{% url 'ideas:idea-advice' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="Notların okunuyor…" data-busy-note="AI tüm notlarını okuyup bu fikre göre öneri hazırlıyor. Notların çoksa biraz sürebilir.">Notlarıma göre öneri al</button></form>
     <form method="post" action="{% url 'ideas:idea-similar-check' idea.pk %}">{% csrf_token %}<button class="btn quiet" type="submit" data-pending="Aranıyor…" data-busy-note="Tüm fikirlerin ve projelerinle karşılaştırılıyor. Birkaç saniye sürebilir.">Benzerleri ara</button></form>
     <a class="btn quiet danger" href="{% url 'ideas:delete' idea.pk %}">Sil</a>
     {% if idea.ai_status == 'failed' %}<span class="muted">AI daha önce yanıt veremedi.</span>{% endif %}
