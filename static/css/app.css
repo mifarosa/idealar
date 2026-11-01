@@ -359,3 +359,8 @@ a.card-title:hover { text-decoration: underline; }
 .prose h2 { font-size: 17px; margin: 28px 0 6px; }
 .prose p { max-width: 42rem; color: var(--ink); margin-bottom: 8px; }
 .prose p + p { margin-top: 8px; }
+
+/* Chat waiting state */
+.chat-form[aria-busy="true"] .send { opacity: 0.45; cursor: progress; }
+.chat-form[aria-busy="true"] textarea { cursor: progress; }
+.chat-form[aria-busy="true"] .field { background: var(--hover); }

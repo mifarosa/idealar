@@ -1,8 +1,11 @@
 import logging
+from datetime import timedelta
 
 from ai.chat import ACTION_ADD_FEATURE, ACTION_LINK_PROJECT, ACTION_NEW_IDEA, ChatAction, ChatAssistant, ChatTurn
 from ai.errors import AIError
 
+from django.db.models import Q
+from django.utils import timezone
 from kanban import services as kanban
 
 from . import ai_failure, ai_registry
@@ -53,6 +56,32 @@ def _add_message(conversation: Conversation, role: str, text: str, **extra) -> C
     message = ChatMessage.objects.create(conversation=conversation, role=role, content=text, **extra)
     conversation.save(update_fields=["updated_at"])  # keeps the most recently used chat on top
     return message
+
+
+# Longer than a whole fallback chain can take, so a crashed request cannot keep a chat locked for long.
+ANSWER_LOCK_SECONDS = 180
+
+
+def _stale_before():
+    return timezone.now() - timedelta(seconds=ANSWER_LOCK_SECONDS)
+
+
+def begin_answer(conversation: Conversation) -> bool:
+    """Claims the right to answer this conversation; False when another request is already waiting for the AI."""
+    claimed = (
+        Conversation.objects.filter(pk=conversation.pk)
+        .filter(Q(answering_since__isnull=True) | Q(answering_since__lt=_stale_before()))
+        .update(answering_since=timezone.now())
+    )
+    return bool(claimed)
+
+
+def end_answer(conversation: Conversation) -> None:
+    Conversation.objects.filter(pk=conversation.pk).update(answering_since=None)
+
+
+def is_answering(conversation: Conversation) -> bool:
+    return Conversation.objects.filter(pk=conversation.pk, answering_since__gte=_stale_before()).exists()
 
 
 def needs_reply(conversation: Conversation) -> bool:

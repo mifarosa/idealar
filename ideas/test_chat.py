@@ -549,3 +549,100 @@ class LinkProjectTests(TestCase):
         self.assertContains(page, "fikrini")
         self.assertContains(page, "Apple Store")
         self.assertContains(page, "Bağla")
+
+
+class AnsweringLockTests(TestCase):
+    """One message at a time: a second send while the AI is still answering is refused, not queued or duplicated."""
+
+    def setUp(self):
+        from django.utils import timezone
+
+        self.timezone = timezone
+        self.user = make_user()
+        self.client.force_login(self.user)
+        self.conversation = chat_service.start_conversation(ChatScope(self.user), "first")
+        self.assistant = StubAssistant()
+        patcher = patch("ideas.chat_service.build_assistant", return_value=self.assistant)
+        self.build = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.url = reverse("ideas:conversation", args=[self.conversation.pk])
+
+    def hold_lock(self, seconds_ago=1):
+        from datetime import timedelta
+
+        Conversation.objects.filter(pk=self.conversation.pk).update(answering_since=self.timezone.now() - timedelta(seconds=seconds_ago))
+
+    def test_the_lock_can_be_claimed_once_and_released(self):
+        self.assertTrue(chat_service.begin_answer(self.conversation))
+        self.assertFalse(chat_service.begin_answer(self.conversation))
+        self.assertTrue(chat_service.is_answering(self.conversation))
+
+        chat_service.end_answer(self.conversation)
+
+        self.assertTrue(chat_service.begin_answer(self.conversation))
+
+    def test_a_stale_lock_from_a_crashed_request_expires(self):
+        self.hold_lock(seconds_ago=chat_service.ANSWER_LOCK_SECONDS + 5)
+
+        self.assertFalse(chat_service.is_answering(self.conversation))
+        self.assertTrue(chat_service.begin_answer(self.conversation))
+
+    def test_a_message_sent_while_the_ai_is_answering_is_refused_and_not_saved(self):
+        self.hold_lock()
+
+        response = self.client.post(self.url, {"text": "second"}, follow=True)
+
+        self.assertContains(response, "AI hâlâ cevap yazıyor")
+        self.assertEqual(list(self.conversation.messages.values_list("content", flat=True)), ["first"])
+        self.build.assert_not_called()
+
+    def test_a_normal_message_is_answered_and_the_lock_is_released(self):
+        self.client.post(self.url, {"text": "second"})
+
+        self.conversation.refresh_from_db()
+        self.assertIsNone(self.conversation.answering_since)
+        self.assertEqual(self.conversation.messages.count(), 3)  # first, second, the answer
+
+    def test_the_lock_is_released_even_when_something_unexpected_breaks(self):
+        self.build.side_effect = RuntimeError("boom")
+        self.client.raise_request_exception = False
+
+        response = self.client.post(self.url, {"text": "second"})
+
+        self.assertEqual(response.status_code, 500)
+        self.conversation.refresh_from_db()
+        self.assertIsNone(self.conversation.answering_since)
+
+    def test_a_failed_answer_unlocks_so_the_retry_button_works(self):
+        self.build.side_effect = AllProvidersFailed([("x", AIProviderError("down"))])
+        self.client.post(self.url, {"text": "second"})
+        self.build.side_effect = None
+
+        self.client.post(self.url, {})  # the retry form sends no text
+
+        self.assertEqual(self.conversation.messages.last().role, "assistant")
+
+    def test_posting_nothing_when_nothing_is_unanswered_does_not_touch_the_lock(self):
+        chat_service.ask_assistant(self.conversation)
+
+        self.client.post(self.url, {})
+
+        self.conversation.refresh_from_db()
+        self.assertIsNone(self.conversation.answering_since)
+        self.build.assert_called_once()  # only the first answer, no extra call
+
+    def test_the_page_shows_the_waiting_state_only_while_the_lock_is_fresh(self):
+        self.hold_lock()
+        busy = self.client.get(self.url)
+        self.assertContains(busy, 'data-busy="1"')
+        self.assertNotContains(busy, 'class="muted typing" hidden')
+
+        self.hold_lock(seconds_ago=chat_service.ANSWER_LOCK_SECONDS + 5)
+        idle = self.client.get(self.url)
+        self.assertNotContains(idle, 'data-busy="1"')
+        self.assertContains(idle, 'class="muted typing" hidden')
+
+    def test_other_users_conversations_stay_out_of_reach(self):
+        self.client.force_login(make_user("intruder"))
+
+        self.assertEqual(self.client.post(self.url, {"text": "hi"}).status_code, 404)

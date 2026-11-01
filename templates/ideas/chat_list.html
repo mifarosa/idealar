@@ -30,7 +30,7 @@
 </main>
 {% endblock %}
 {% block composer %}
-<form method="post" action="{{ post_url }}" class="composer chat-form">
+<form method="post" action="{{ post_url }}" class="composer chat-form" data-waiting="{% trans "AI cevap yazıyor…" %}">
   {% csrf_token %}
   {% include "ideas/_provider_select.html" %}
   <label class="field"><textarea name="text" rows="1" placeholder="{% trans "Yeni sohbet başlat…" %}" aria-label="{% trans "Yeni sohbet" %}" required></textarea></label>

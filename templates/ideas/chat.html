@@ -45,20 +45,20 @@
       {% endfor %}
 
       {% if needs_reply %}
-      <form method="post" action="{{ post_url }}" class="chat-retry">
+      <form method="post" action="{{ post_url }}" class="chat-retry chat-form">
         {% csrf_token %}
         <span class="muted">{% trans "Son mesajına yanıt gelmedi." %}</span>
         {% include "ideas/_provider_select.html" %}
         <button class="btn" type="submit">{% trans "Tekrar dene" %}</button>
       </form>
       {% endif %}
-      <p class="muted typing" hidden role="status">{% trans "AI yazıyor…" %}</p>
+      <p class="muted typing" {% if not answering %}hidden{% endif %} role="status">{% trans "AI yazıyor…" %}</p>
     </div>
   </div>
 </main>
 {% endblock %}
 {% block composer %}
-<form method="post" action="{{ post_url }}" class="composer chat-form">
+<form method="post" action="{{ post_url }}" class="composer chat-form" {% if answering %}data-busy="1"{% endif %} data-waiting="{% trans "AI cevap yazıyor…" %}">
   {% csrf_token %}
   {% include "ideas/_provider_select.html" %}
   <label class="field"><textarea name="text" rows="1" placeholder="{% trans "Mesaj yaz…" %}" aria-label="{% trans "Mesaj" %}" required></textarea></label>

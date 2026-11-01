@@ -185,6 +185,8 @@ class Conversation(models.Model):
     idea = models.ForeignKey(Idea, null=True, blank=True, on_delete=models.CASCADE, related_name="conversations")
     project = models.ForeignKey(Project, null=True, blank=True, on_delete=models.CASCADE, related_name="conversations")
     title = models.CharField(max_length=100, blank=True)
+    # Set while a request is waiting for the AI to answer; it keeps a second message from racing the first.
+    answering_since = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

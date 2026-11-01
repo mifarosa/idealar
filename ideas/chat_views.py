@@ -100,6 +100,7 @@ class ConversationView(LoginRequiredMixin, View):
             "scope": scope,
             "chat_messages": self._messages_with_action_views(conversation),
             "needs_reply": chat_service.needs_reply(conversation),
+            "answering": chat_service.is_answering(conversation),
             "post_url": conversation_url(conversation),
             "list_url": scope_chat_url(scope),
             "providers": provider_choices(request.user),
@@ -109,12 +110,20 @@ class ConversationView(LoginRequiredMixin, View):
     def post(self, request, pk):
         conversation = self.get_conversation(pk)
         text = request.POST.get("text", "").strip()[:MAX_USER_MESSAGE_CHARS]
-        if text:
-            chat_service.save_user_message(conversation, text)
         # An empty post is a "retry" of an unanswered message; otherwise there is nothing to do.
-        needs_answer = chat_service.needs_reply(conversation)
-        if needs_answer and chat_service.ask_assistant(conversation, provider=chosen_provider(request)) is None:
-            messages.error(request, no_answer_message(conversation))
+        if not text and not chat_service.needs_reply(conversation):
+            return redirect(conversation_url(conversation))
+        if not chat_service.begin_answer(conversation):
+            # The AI is still busy with the previous message (double click, second tab): nothing is saved or sent twice.
+            messages.warning(request, _("AI hâlâ cevap yazıyor; cevap gelince tekrar gönder."))
+            return redirect(conversation_url(conversation))
+        try:
+            if text:
+                chat_service.save_user_message(conversation, text)
+            if chat_service.ask_assistant(conversation, provider=chosen_provider(request)) is None:
+                messages.error(request, no_answer_message(conversation))
+        finally:
+            chat_service.end_answer(conversation)
         return redirect(conversation_url(conversation))
 
     @staticmethod

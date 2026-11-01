@@ -349,14 +349,54 @@ document.addEventListener("change", (event) => {
   if (event.target.matches("[data-autosubmit]")) event.target.form.submit();
 });
 
-const chatForm = document.querySelector(".chat-form");
-if (chatForm) {
+// Chat: one message at a time. While the AI answers, the box is locked and says so; a second send is ignored.
+const chatForms = document.querySelectorAll(".chat-form");
+if (chatForms.length) {
   const page = document.querySelector(".page");
-  if (page) page.scrollTop = page.scrollHeight;
-  chatForm.addEventListener("submit", () => {
-    const typing = document.querySelector(".typing");
+  const typing = document.querySelector(".typing");
+  const scrollDown = () => { if (page) page.scrollTop = page.scrollHeight; };
+  scrollDown();
+
+  const lock = (form) => {
+    form.dataset.busy = "1";
+    const box = form.querySelector("textarea");
+    if (box) {
+      box.readOnly = true; // read-only, not disabled: a disabled field would not be sent with the form
+      if (form.dataset.waiting) box.placeholder = form.dataset.waiting;
+    }
+    form.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+    form.setAttribute("aria-busy", "true");
     if (typing) typing.hidden = false;
-    if (page) page.scrollTop = page.scrollHeight;
+    scrollDown();
+  };
+
+  const unlock = (form) => {
+    delete form.dataset.busy;
+    const box = form.querySelector("textarea");
+    if (box) box.readOnly = false;
+    form.querySelectorAll("button").forEach((button) => { button.disabled = false; });
+    form.removeAttribute("aria-busy");
+    if (typing) typing.hidden = true;
+  };
+
+  chatForms.forEach((form) => {
+    if (form.dataset.busy) {
+      // The server says an answer is still being written (another tab, a reload): wait, then look again.
+      lock(form);
+      setTimeout(() => window.location.reload(), 3000);
+    }
+    form.addEventListener("submit", (event) => {
+      if (form.dataset.busy) {
+        event.preventDefault(); // already waiting for an answer
+        return;
+      }
+      lock(form);
+    });
+  });
+
+  // Coming back with the browser's back button restores the page as it was; the wait is over by then.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) chatForms.forEach(unlock);
   });
 }
 
