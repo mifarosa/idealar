@@ -7,6 +7,14 @@
   <dt>{% trans "Kullanıcı" %}</dt><dd>{{ user.get_username }}</dd>
   <dt>{% trans "Tema" %}</dt><dd>{% include "_theme_switch.html" %}</dd>
   <dt>{% trans "Destek" %}</dt><dd><a href="{% url 'support:list' %}">{% trans "Öneri veya şikayet yaz" %}</a>{% if can_manage_tickets %} · <a href="{% url 'support:inbox' %}">{% blocktranslate with count=open_ticket_count %}Gelen kutusu ({{ count }}){% endblocktranslate %}</a>{% endif %}</dd>
+  <dt>{% trans "Yeni fikirde" %}</dt><dd>
+    <select class="select" data-suggest-pref aria-label="{% trans 'Yeni fikirde AI önerisi' %}">
+      <option value="ask">{% trans "Önce sor" %}</option>
+      <option value="always">{% trans "Hep öner" %}</option>
+      <option value="never">{% trans "Hiç önerme" %}</option>
+    </select>
+    <span class="muted"> {% trans "(bu cihazda geçerli)" %}</span>
+  </dd>
   <dt>AI</dt><dd><a href="{% url 'ideas:ai-models' %}">{% trans "AI modellerimi yönet" %}</a></dd>
   <dt>{% trans "Verilerim" %}</dt><dd><a href="{% url 'accounts:export' %}">{% trans "Verilerimi indir (JSON)" %}</a> · <a href="{% url 'accounts:privacy' %}">{% trans "Gizlilik" %}</a></dd>
 </dl>

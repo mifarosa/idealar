@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 18:16+0300\n"
+"POT-Creation-Date: 2026-11-02 16:45+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -445,7 +445,7 @@ msgid_plural "Tüm notların okundu: {n} öneri hazır."
 msgstr[0] "All your notes were read: {n} suggestion is ready."
 msgstr[1] "All your notes were read: {n} suggestions are ready."
 
-#: ideas/ai_views.py:42 templates/ideas/_idea_detail.html:66
+#: ideas/ai_views.py:42 templates/ideas/_idea_detail.html:79
 msgid "Tüm notların okundu; şimdilik önerecek bir şey bulamadım."
 msgstr "All your notes were read; I have nothing to suggest for now."
 
@@ -453,7 +453,7 @@ msgstr "All your notes were read; I have nothing to suggest for now."
 msgid "AI şu an yanıt veremedi. Biraz sonra tekrar dene."
 msgstr "The AI could not answer right now. Try again in a moment."
 
-#: ideas/ai_views.py:55 templates/ideas/_idea_detail.html:63
+#: ideas/ai_views.py:55 templates/ideas/_idea_detail.html:76
 msgid "Uygulandı."
 msgstr "Applied."
 
@@ -481,7 +481,7 @@ msgid "Benzerlik kontrolü tamamlandı: benzer kayıt bulunmadı."
 msgstr "Similarity check finished: no similar items found."
 
 #: ideas/ai_views.py:88 ideas/chat_views.py:190
-#: templates/ideas/_idea_detail.html:37
+#: templates/ideas/_idea_detail.html:50
 msgid "Eklendi."
 msgstr "Added."
 
@@ -686,7 +686,7 @@ msgstr "New idea…"
 msgid "Yeni fikir"
 msgstr "New idea"
 
-#: ideas/forms.py:25 templates/ideas/_idea_detail.html:11
+#: ideas/forms.py:25 templates/ideas/_idea_detail.html:24
 msgid "Platformlar"
 msgstr "Platforms"
 
@@ -843,31 +843,31 @@ msgstr "There were no new projects to add."
 msgid "Ortak kelimeler: {words}"
 msgstr "Shared words: {words}"
 
-#: ideas/views.py:22
+#: ideas/views.py:23
 msgid "Yeni → eski"
 msgstr "Newest first"
 
-#: ideas/views.py:22
+#: ideas/views.py:23
 msgid "Eski → yeni"
 msgstr "Oldest first"
 
-#: ideas/views.py:22
+#: ideas/views.py:23
 msgid "Son güncellenen"
 msgstr "Recently updated"
 
-#: ideas/views.py:22
+#: ideas/views.py:23
 msgid "İlerleme"
 msgstr "Progress"
 
-#: ideas/views.py:125
+#: ideas/views.py:127
 msgid "Fikir kaydedildi."
 msgstr "Idea saved."
 
-#: ideas/views.py:138
+#: ideas/views.py:142
 msgid "Fikir güncellendi."
 msgstr "Idea updated."
 
-#: ideas/views.py:146
+#: ideas/views.py:150
 msgid "Fikir silindi."
 msgstr "Idea deleted."
 
@@ -1062,7 +1062,7 @@ msgstr ""
 " features you add your own API key."
 
 #: templates/accounts/login.html:21 templates/accounts/privacy.html:3
-#: templates/accounts/privacy.html:8 templates/accounts/settings.html:11
+#: templates/accounts/privacy.html:8 templates/accounts/settings.html:19
 msgid "Gizlilik"
 msgstr "Privacy"
 
@@ -1108,11 +1108,11 @@ msgstr ""
 "Linked to <b>Habit tracker</b>: both keep a daily log. You can borrow its "
 "reminder feature."
 
-#: templates/accounts/login.html:37 templates/ideas/_idea_detail.html:57
+#: templates/accounts/login.html:37 templates/ideas/_idea_detail.html:70
 msgid "Özellik olarak ekle"
 msgstr "Add as a feature"
 
-#: templates/accounts/login.html:37 templates/ideas/_idea_detail.html:61
+#: templates/accounts/login.html:37 templates/ideas/_idea_detail.html:74
 msgid "Gizle"
 msgstr "Hide"
 
@@ -1254,22 +1254,47 @@ msgid "Gelen kutusu (%(count)s)"
 msgstr "Inbox (%(count)s)"
 
 #: templates/accounts/settings.html:10
+#| msgid "Yeni fikir"
+msgid "Yeni fikirde"
+msgstr "For a new idea"
+
+#: templates/accounts/settings.html:11
+msgid "Yeni fikirde AI önerisi"
+msgstr "AI suggestions for a new idea"
+
+#: templates/accounts/settings.html:12
+msgid "Önce sor"
+msgstr "Ask first"
+
+#: templates/accounts/settings.html:13
+msgid "Hep öner"
+msgstr "Always suggest"
+
+#: templates/accounts/settings.html:14
+msgid "Hiç önerme"
+msgstr "Never suggest"
+
+#: templates/accounts/settings.html:16
+msgid "(bu cihazda geçerli)"
+msgstr "(applies on this device)"
+
+#: templates/accounts/settings.html:18
 msgid "AI modellerimi yönet"
 msgstr "Manage my AI models"
 
-#: templates/accounts/settings.html:11
+#: templates/accounts/settings.html:19
 msgid "Verilerim"
 msgstr "My data"
 
-#: templates/accounts/settings.html:11
+#: templates/accounts/settings.html:19
 msgid "Verilerimi indir (JSON)"
 msgstr "Download my data (JSON)"
 
-#: templates/accounts/settings.html:13
+#: templates/accounts/settings.html:21
 msgid "Çıkış yap"
 msgstr "Sign out"
 
-#: templates/accounts/settings.html:15
+#: templates/accounts/settings.html:23
 msgid ""
 "Hesabın ve tüm fikirlerin, projelerin, sohbetlerin, panoların ve kayıtların "
 "kalıcı olarak silinecek. Bu geri alınamaz. Emin misin?"
@@ -1277,7 +1302,7 @@ msgstr ""
 "Your account and all your ideas, projects, chats, boards and tickets will be"
 " deleted permanently. This cannot be undone. Are you sure?"
 
-#: templates/accounts/settings.html:17
+#: templates/accounts/settings.html:25
 msgid "Hesabımı ve tüm verilerimi sil"
 msgstr "Delete my account and all my data"
 
@@ -1308,7 +1333,7 @@ msgid "Fikirler"
 msgstr "Ideas"
 
 #: templates/base.html:58 templates/base.html:87
-#: templates/ideas/_idea_detail.html:113
+#: templates/ideas/_idea_detail.html:126
 msgid "Sohbet"
 msgstr "Chat"
 
@@ -1379,167 +1404,33 @@ msgstr "Automatic copy failed; the text is selected, copy it with Ctrl+C."
 msgid "AI düşünüyor…"
 msgstr "The AI is thinking…"
 
-#: templates/ideas/_idea_detail.html:13 templates/ideas/idea_list.html:36
-msgid "Proje"
-msgstr "Project"
-
-#: templates/ideas/_idea_detail.html:15
-msgid "Etiketler"
-msgstr "Tags"
-
-#: templates/ideas/_idea_detail.html:17
-msgid "Kaydedildi"
-msgstr "Saved"
-
-#: templates/ideas/_idea_detail.html:25
-msgid "Buna benzer bir projen var:"
-msgstr "You have a similar project:"
-
-#: templates/ideas/_idea_detail.html:25
-msgid "Buna benzer bir fikrin var:"
-msgstr "You have a similar idea:"
-
-#: templates/ideas/_idea_detail.html:27
-msgid "aynısı"
-msgstr "the same"
-
-#: templates/ideas/_idea_detail.html:27
-msgid "benzer"
-msgstr "similar"
-
-#: templates/ideas/_idea_detail.html:27
-msgid "ilgili"
-msgstr "related"
-
-#: templates/ideas/_idea_detail.html:28
-msgid "kelime benzerliği"
-msgstr "word similarity"
-
-#: templates/ideas/_idea_detail.html:34 templates/ideas/_idea_detail.html:58
-msgid "Bu projeye bağla"
-msgstr "Link to this project"
-
-#: templates/ideas/_idea_detail.html:34
-msgid "O fikre özellik olarak ekle"
-msgstr "Add to that idea as a feature"
-
-#: templates/ideas/_idea_detail.html:35
-msgid "Farklı, yoksay"
-msgstr "Different, dismiss"
-
-#: templates/ideas/_idea_detail.html:40
-msgid "AI kontrolü yapılamadı; yalnızca kelime benzerliğine baktım."
-msgstr "The AI check could not be done; I only looked at word similarity."
-
-#: templates/ideas/_idea_detail.html:41
-msgid "Benzer bir kayıt bulunmadı."
-msgstr "No similar item found."
-
-#: templates/ideas/_idea_detail.html:44
-msgid "Tüm notlarına göre öneriler"
-msgstr "Suggestions based on all your notes"
-
-#: templates/ideas/_idea_detail.html:48
-msgid "ilgili not"
-msgstr "related note"
-
-#: templates/ideas/_idea_detail.html:48
-msgid "birleştirilebilir"
-msgstr "can be merged"
-
-#: templates/ideas/_idea_detail.html:48
-msgid "özellik fikri"
-msgstr "feature idea"
-
-#: templates/ideas/_idea_detail.html:48
-msgid "proje"
-msgstr "project"
-
-#: templates/ideas/_idea_detail.html:48
-msgid "etiket"
-msgstr "tag"
-
-#: templates/ideas/_idea_detail.html:48
-msgid "yeni fikir"
-msgstr "new idea"
-
-#: templates/ideas/_idea_detail.html:56
-msgid "Notu aç"
-msgstr "Open note"
-
-#: templates/ideas/_idea_detail.html:59
-msgid "Etiketi ekle"
-msgstr "Add tag"
-
-#: templates/ideas/_idea_detail.html:60
-msgid "Yeni fikir olarak kaydet"
-msgstr "Save as a new idea"
-
-#: templates/ideas/_idea_detail.html:67
-msgid "AI şu an yanıt veremedi; \"Notlarıma göre öneri al\" ile tekrar dene."
-msgstr ""
-"The AI could not answer right now; try again with \"Get suggestions from my "
-"notes\"."
-
-#: templates/ideas/_idea_detail.html:69
-msgid "Özellikler"
-msgstr "Features"
-
-#: templates/ideas/_idea_detail.html:79 templates/ideas/chat.html:11
-#: templates/ideas/chat_list.html:15 templates/kanban/board.html:33
-msgid "Adı değiştir"
-msgstr "Rename"
-
-#: templates/ideas/_idea_detail.html:80
-msgid "Başka fikre kopyala"
-msgstr "Copy to another idea"
-
-#: templates/ideas/_idea_detail.html:81 templates/ideas/_idea_detail.html:119
-#: templates/ideas/ai_models.html:35 templates/ideas/chat.html:14
-#: templates/ideas/chat_list.html:16 templates/ideas/idea_form.html:13
-#: templates/ideas/project_detail.html:13 templates/kanban/board.html:34
-msgid "Sil"
-msgstr "Delete"
-
-#: templates/ideas/_idea_detail.html:81
-msgid "Özelliği sil"
-msgstr "Delete feature"
-
-#: templates/ideas/_idea_detail.html:85
-msgid "Henüz özellik yok."
-msgstr "No features yet."
-
-#: templates/ideas/_idea_detail.html:92 templates/ideas/_idea_detail.html:104
-#: templates/ideas/chat.html:37
-msgid "Ekle"
-msgstr "Add"
-
-#: templates/ideas/_idea_detail.html:96
-msgid "AI önerileri"
+#: templates/ideas/_idea_detail.html:11
+#| msgid "AI önerileri"
+msgid "AI önerisi"
 msgstr "AI suggestions"
 
-#: templates/ideas/_idea_detail.html:105
-msgid "Öneriyi yoksay"
-msgstr "Dismiss suggestion"
+#: templates/ideas/_idea_detail.html:12
+msgid "Bu fikre öneri vereyim mi?"
+msgstr "Shall I give suggestions for this idea?"
 
-#: templates/ideas/_idea_detail.html:114
-#: templates/ideas/project_detail.html:12
-msgid "Düzenle"
-msgstr "Edit"
+#: templates/ideas/_idea_detail.html:12
+#| msgid ""
+#| "AI başlık, özet, etiket ve önerileri hazırlıyor, benzerlik kontrolü yapıyor "
+#| "ve tüm notlarını okuyup öneri çıkarıyor. Birkaç saniye sürebilir."
+msgid ""
+"Başlık, özet, etiket ve özellik önerileri hazırlar, benzer fikirlerine bakar"
+" ve tüm notlarına göre öneri çıkarırım. Bu, AI anahtarından birkaç çağrı "
+"harcar."
+msgstr ""
+"I prepare a title, summary, tags and feature suggestions, check your similar"
+" ideas and come up with advice based on all your notes. This uses a few "
+"calls of your AI key."
 
-#: templates/ideas/_idea_detail.html:115 templates/ideas/idea_prompt.html:7
-msgid "Claude için prompt"
-msgstr "Prompt for Claude"
+#: templates/ideas/_idea_detail.html:15 templates/ideas/idea_prompt.html:22
+msgid "Hazırlanıyor…"
+msgstr "Preparing…"
 
-#: templates/ideas/_idea_detail.html:116
-msgid "Yenileniyor…"
-msgstr "Refreshing…"
-
-#: templates/ideas/_idea_detail.html:116
-msgid "Dolduruluyor…"
-msgstr "Filling in…"
-
-#: templates/ideas/_idea_detail.html:116
+#: templates/ideas/_idea_detail.html:15 templates/ideas/_idea_detail.html:129
 msgid ""
 "AI başlık, özet, etiket ve önerileri hazırlıyor, benzerlik kontrolü yapıyor "
 "ve tüm notlarını okuyup öneri çıkarıyor. Birkaç saniye sürebilir."
@@ -1548,19 +1439,192 @@ msgstr ""
 "similar items and reading all your notes to come up with advice. It can take"
 " a few seconds."
 
-#: templates/ideas/_idea_detail.html:116
+#: templates/ideas/_idea_detail.html:15
+#| msgid "Evet, sil"
+msgid "Evet, öner"
+msgstr "Yes, suggest"
+
+#: templates/ideas/_idea_detail.html:17
+msgid "Şimdilik hayır"
+msgstr "Not now"
+
+#: templates/ideas/_idea_detail.html:19
+msgid "Bir daha sorma, bu cevabı hatırla"
+msgstr "Don't ask again, remember this answer"
+
+#: templates/ideas/_idea_detail.html:26 templates/ideas/idea_list.html:36
+msgid "Proje"
+msgstr "Project"
+
+#: templates/ideas/_idea_detail.html:28
+msgid "Etiketler"
+msgstr "Tags"
+
+#: templates/ideas/_idea_detail.html:30
+msgid "Kaydedildi"
+msgstr "Saved"
+
+#: templates/ideas/_idea_detail.html:38
+msgid "Buna benzer bir projen var:"
+msgstr "You have a similar project:"
+
+#: templates/ideas/_idea_detail.html:38
+msgid "Buna benzer bir fikrin var:"
+msgstr "You have a similar idea:"
+
+#: templates/ideas/_idea_detail.html:40
+msgid "aynısı"
+msgstr "the same"
+
+#: templates/ideas/_idea_detail.html:40
+msgid "benzer"
+msgstr "similar"
+
+#: templates/ideas/_idea_detail.html:40
+msgid "ilgili"
+msgstr "related"
+
+#: templates/ideas/_idea_detail.html:41
+msgid "kelime benzerliği"
+msgstr "word similarity"
+
+#: templates/ideas/_idea_detail.html:47 templates/ideas/_idea_detail.html:71
+msgid "Bu projeye bağla"
+msgstr "Link to this project"
+
+#: templates/ideas/_idea_detail.html:47
+msgid "O fikre özellik olarak ekle"
+msgstr "Add to that idea as a feature"
+
+#: templates/ideas/_idea_detail.html:48
+msgid "Farklı, yoksay"
+msgstr "Different, dismiss"
+
+#: templates/ideas/_idea_detail.html:53
+msgid "AI kontrolü yapılamadı; yalnızca kelime benzerliğine baktım."
+msgstr "The AI check could not be done; I only looked at word similarity."
+
+#: templates/ideas/_idea_detail.html:54
+msgid "Benzer bir kayıt bulunmadı."
+msgstr "No similar item found."
+
+#: templates/ideas/_idea_detail.html:57
+msgid "Tüm notlarına göre öneriler"
+msgstr "Suggestions based on all your notes"
+
+#: templates/ideas/_idea_detail.html:61
+msgid "ilgili not"
+msgstr "related note"
+
+#: templates/ideas/_idea_detail.html:61
+msgid "birleştirilebilir"
+msgstr "can be merged"
+
+#: templates/ideas/_idea_detail.html:61
+msgid "özellik fikri"
+msgstr "feature idea"
+
+#: templates/ideas/_idea_detail.html:61
+msgid "proje"
+msgstr "project"
+
+#: templates/ideas/_idea_detail.html:61
+msgid "etiket"
+msgstr "tag"
+
+#: templates/ideas/_idea_detail.html:61
+msgid "yeni fikir"
+msgstr "new idea"
+
+#: templates/ideas/_idea_detail.html:69
+msgid "Notu aç"
+msgstr "Open note"
+
+#: templates/ideas/_idea_detail.html:72
+msgid "Etiketi ekle"
+msgstr "Add tag"
+
+#: templates/ideas/_idea_detail.html:73
+msgid "Yeni fikir olarak kaydet"
+msgstr "Save as a new idea"
+
+#: templates/ideas/_idea_detail.html:80
+msgid "AI şu an yanıt veremedi; \"Notlarıma göre öneri al\" ile tekrar dene."
+msgstr ""
+"The AI could not answer right now; try again with \"Get suggestions from my "
+"notes\"."
+
+#: templates/ideas/_idea_detail.html:82
+msgid "Özellikler"
+msgstr "Features"
+
+#: templates/ideas/_idea_detail.html:92 templates/ideas/chat.html:11
+#: templates/ideas/chat_list.html:15 templates/kanban/board.html:33
+msgid "Adı değiştir"
+msgstr "Rename"
+
+#: templates/ideas/_idea_detail.html:93
+msgid "Başka fikre kopyala"
+msgstr "Copy to another idea"
+
+#: templates/ideas/_idea_detail.html:94 templates/ideas/_idea_detail.html:132
+#: templates/ideas/ai_models.html:35 templates/ideas/chat.html:14
+#: templates/ideas/chat_list.html:16 templates/ideas/idea_form.html:13
+#: templates/ideas/project_detail.html:13 templates/kanban/board.html:34
+msgid "Sil"
+msgstr "Delete"
+
+#: templates/ideas/_idea_detail.html:94
+msgid "Özelliği sil"
+msgstr "Delete feature"
+
+#: templates/ideas/_idea_detail.html:98
+msgid "Henüz özellik yok."
+msgstr "No features yet."
+
+#: templates/ideas/_idea_detail.html:105 templates/ideas/_idea_detail.html:117
+#: templates/ideas/chat.html:37
+msgid "Ekle"
+msgstr "Add"
+
+#: templates/ideas/_idea_detail.html:109
+msgid "AI önerileri"
+msgstr "AI suggestions"
+
+#: templates/ideas/_idea_detail.html:118
+msgid "Öneriyi yoksay"
+msgstr "Dismiss suggestion"
+
+#: templates/ideas/_idea_detail.html:127
+#: templates/ideas/project_detail.html:12
+msgid "Düzenle"
+msgstr "Edit"
+
+#: templates/ideas/_idea_detail.html:128 templates/ideas/idea_prompt.html:7
+msgid "Claude için prompt"
+msgstr "Prompt for Claude"
+
+#: templates/ideas/_idea_detail.html:129
+msgid "Yenileniyor…"
+msgstr "Refreshing…"
+
+#: templates/ideas/_idea_detail.html:129
+msgid "Dolduruluyor…"
+msgstr "Filling in…"
+
+#: templates/ideas/_idea_detail.html:129
 msgid "AI ile yenile"
 msgstr "Refresh with AI"
 
-#: templates/ideas/_idea_detail.html:116
+#: templates/ideas/_idea_detail.html:129
 msgid "AI ile doldur"
 msgstr "Fill in with AI"
 
-#: templates/ideas/_idea_detail.html:117
+#: templates/ideas/_idea_detail.html:130
 msgid "Notların okunuyor…"
 msgstr "Reading your notes…"
 
-#: templates/ideas/_idea_detail.html:117
+#: templates/ideas/_idea_detail.html:130
 msgid ""
 "AI tüm notlarını okuyup bu fikre göre öneri hazırlıyor. Notların çoksa biraz"
 " sürebilir."
@@ -1568,25 +1632,25 @@ msgstr ""
 "The AI is reading all your notes and preparing advice for this idea. It may "
 "take a while if you have many notes."
 
-#: templates/ideas/_idea_detail.html:117
+#: templates/ideas/_idea_detail.html:130
 msgid "Notlarıma göre öneri al"
 msgstr "Get suggestions from my notes"
 
-#: templates/ideas/_idea_detail.html:118
+#: templates/ideas/_idea_detail.html:131
 msgid "Aranıyor…"
 msgstr "Searching…"
 
-#: templates/ideas/_idea_detail.html:118
+#: templates/ideas/_idea_detail.html:131
 msgid ""
 "Tüm fikirlerin ve projelerinle karşılaştırılıyor. Birkaç saniye sürebilir."
 msgstr ""
 "Comparing with all your ideas and projects. It can take a few seconds."
 
-#: templates/ideas/_idea_detail.html:118
+#: templates/ideas/_idea_detail.html:131
 msgid "Benzerleri ara"
 msgstr "Find similar"
 
-#: templates/ideas/_idea_detail.html:120
+#: templates/ideas/_idea_detail.html:133
 msgid "AI daha önce yanıt veremedi."
 msgstr "The AI could not answer earlier."
 
@@ -1802,7 +1866,6 @@ msgid "AI yazıyor…"
 msgstr "The AI is typing…"
 
 #: templates/ideas/chat.html:61 templates/ideas/chat_list.html:33
-#| msgid "AI yazıyor…"
 msgid "AI cevap yazıyor…"
 msgstr "The AI is writing an answer…"
 
@@ -1985,10 +2048,6 @@ msgstr "Prompt"
 #: templates/ideas/idea_prompt.html:18
 msgid "Kopyalandı"
 msgstr "Copied"
-
-#: templates/ideas/idea_prompt.html:22
-msgid "Hazırlanıyor…"
-msgstr "Preparing…"
 
 #: templates/ideas/idea_prompt.html:22
 msgid "AI planını yenile"

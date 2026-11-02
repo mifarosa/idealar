@@ -106,11 +106,46 @@ class EnrichViewTests(TestCase):
         self.idea = Idea.objects.create(owner=self.user, body="track my habits")
         self.url = reverse("ideas:idea-enrich", args=[self.idea.pk])
 
-    def test_quick_capture_redirects_to_the_new_idea_with_enrich_marker(self):
-        response = self.client.post(reverse("ideas:create"), {"body": "brand new"})
+    def test_a_new_idea_with_a_usable_model_lands_on_a_page_that_offers_suggestions_but_does_not_run_the_ai(self):
+        from ideas.key_vault import seal
+        from ideas.models import AIModel
+
+        AIModel.objects.create(owner=self.user, kind="groq", label="G", model_name="m", api_key_sealed=seal("k", self.user.pk))
+
+        with patch("ideas.ai_views.ai_enrichment.enrich_idea") as enrich:
+            response = self.client.post(reverse("ideas:create"), {"body": "brand new"}, follow=True)
 
         new_idea = Idea.objects.get(body="brand new")
-        self.assertRedirects(response, f"{reverse('ideas:detail', args=[new_idea.pk])}?enrich=1", fetch_redirect_response=False)
+        self.assertEqual(response.redirect_chain[-1][0], f"{reverse('ideas:detail', args=[new_idea.pk])}?oner=1")
+        self.assertContains(response, "Bu fikre öneri vereyim mi?")
+        self.assertContains(response, "data-offer-yes")
+        self.assertNotContains(response, "data-enrich-url")  # nothing starts by itself
+        enrich.assert_not_called()
+
+    def test_without_a_usable_model_a_new_idea_gets_no_offer(self):
+        response = self.client.post(reverse("ideas:create"), {"body": "brand new"}, follow=True)
+
+        self.assertNotContains(response, "Bu fikre öneri vereyim mi?")
+
+    def test_the_offer_is_only_shown_when_asked_for_and_never_for_an_idea_that_already_has_suggestions(self):
+        url = reverse("ideas:detail", args=[self.idea.pk])
+
+        self.assertNotContains(self.client.get(url), "data-suggest-offer")
+        self.assertContains(self.client.get(url, {"oner": "1"}), "data-suggest-offer")
+        self.idea.ai_status = AI_DONE
+        self.idea.save()
+        self.assertNotContains(self.client.get(url, {"oner": "1"}), "data-suggest-offer")
+
+    def test_saying_yes_runs_the_ai_through_the_usual_button(self):
+        page = self.client.get(reverse("ideas:detail", args=[self.idea.pk]), {"oner": "1"})
+
+        self.assertContains(page, f'action="{self.url}"')  # the "yes" form posts to the enrich endpoint
+        with patch("ideas.ai_views.ai_enrichment.enrich_idea", return_value=True) as enrich, patch("ideas.ai_views.similarity.check_idea"):
+            self.client.post(self.url)
+        enrich.assert_called_once()
+
+    def test_settings_offers_the_remembered_choice(self):
+        self.assertContains(self.client.get(reverse("accounts:settings")), "data-suggest-pref")
 
     def test_detail_page_marks_the_new_idea_for_background_enrichment(self):
         response = self.client.get(reverse("ideas:detail", args=[self.idea.pk]), {"enrich": "1"})

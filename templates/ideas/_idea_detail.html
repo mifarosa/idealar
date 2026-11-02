@@ -7,6 +7,19 @@
   {% if idea.ai_summary %}<p class="lead">{{ idea.ai_summary }}</p>{% endif %}
   {% if view_mode == 'detail' and enrich and idea.ai_status != 'done' %}<p class="ai-working" role="status">{% trans "AI düşünüyor…" %}</p>{% endif %}
 
+  {% if view_mode == 'detail' and offer and idea.ai_status != 'done' and not enrich %}
+  <section class="offer" data-suggest-offer aria-label="{% trans 'AI önerisi' %}">
+    <p><strong>{% trans "Bu fikre öneri vereyim mi?" %}</strong> {% trans "Başlık, özet, etiket ve özellik önerileri hazırlar, benzer fikirlerine bakar ve tüm notlarına göre öneri çıkarırım. Bu, AI anahtarından birkaç çağrı harcar." %}</p>
+    <div class="actions">
+      <form method="post" action="{% url 'ideas:idea-enrich' idea.pk %}" data-offer-yes>{% csrf_token %}
+        <button class="btn primary" type="submit" data-pending="{% trans 'Hazırlanıyor…' %}" data-busy-note="{% trans 'AI başlık, özet, etiket ve önerileri hazırlıyor, benzerlik kontrolü yapıyor ve tüm notlarını okuyup öneri çıkarıyor. Birkaç saniye sürebilir.' %}">{% trans "Evet, öner" %}</button>
+      </form>
+      <button class="btn quiet" type="button" data-offer-no>{% trans "Şimdilik hayır" %}</button>
+    </div>
+    <label class="remember"><input type="checkbox" data-offer-remember> {% trans "Bir daha sorma, bu cevabı hatırla" %}</label>
+  </section>
+  {% endif %}
+
   <dl class="spec">
     <dt>{% trans "Platformlar" %}</dt>
     <dd>{% for label in idea.platform_labels %}<span class="tag">{{ label }}</span>{% empty %}<span class="muted">—</span>{% endfor %}</dd>
