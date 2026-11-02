@@ -364,3 +364,9 @@ a.card-title:hover { text-decoration: underline; }
 .chat-form[aria-busy="true"] .send { opacity: 0.45; cursor: progress; }
 .chat-form[aria-busy="true"] textarea { cursor: progress; }
 .chat-form[aria-busy="true"] .field { background: var(--hover); }
+
+/* Kanban overview: open cards of every board in one list */
+.overview-board { margin-bottom: 24px; }
+.overview-board h2 { font-size: 16px; margin-bottom: 8px; }
+.overview-list { list-style: none; margin: 0; padding: 0; }
+.overview-item { display: flex; align-items: baseline; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }

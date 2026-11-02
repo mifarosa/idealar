@@ -10,17 +10,20 @@ from ideas.models import Idea, Project
 
 from . import services
 from .forms import TaskForm
-from .models import STATUS_CHOICES, STATUS_TODO, STATUSES, Task
+from .models import STATUS_CHOICES, STATUS_DONE, STATUS_TODO, STATUSES, Task
+
+
+PERSONAL, OVERVIEW = "kisisel", "ozet"  # ?proje= values; no value at all opens the overview
 
 
 def board_url(project) -> str:
-    return reverse("kanban:board") + (f"?proje={project.pk}" if project else "")
+    return reverse("kanban:board") + (f"?proje={project.pk}" if project else f"?proje={PERSONAL}")
 
 
 class BoardMixin(LoginRequiredMixin):
     def get_project(self, raw) -> Project | None:
         """None is the personal board; a project id must be one of the user's own."""
-        if not raw:
+        if not raw or raw == PERSONAL:
             return None
         if not str(raw).isdigit():
             raise Http404
@@ -32,7 +35,10 @@ class BoardMixin(LoginRequiredMixin):
 
 class BoardView(BoardMixin, View):
     def get(self, request):
-        project = self.get_project(request.GET.get("proje"))
+        raw = request.GET.get("proje")
+        if raw in (None, "", OVERVIEW):
+            return self.overview(request)
+        project = self.get_project(raw)
         grouped = services.columns(request.user, project)
         ideas = Idea.objects.owned_by(request.user)
         if project:
@@ -48,6 +54,17 @@ class BoardView(BoardMixin, View):
             "card_count": sum(len(cards) for cards in grouped.values()),
         }
         return render(request, "kanban/board.html", context)
+
+
+    def overview(self, request):
+        projects = Project.objects.filter(owner=request.user)
+        boards = services.overview(request.user, projects)
+        context = {
+            "projects": projects,
+            "boards": boards,
+            "card_count": sum(len(cards) for _, grouped in boards for cards in grouped.values()),
+        }
+        return render(request, "kanban/overview.html", context)
 
 
 class TaskAddView(BoardMixin, View):

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Genel bakış" %} · {% trans "Kanban" %} · Idealar{% endblock %}
+{% block inner_class %}wide{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{% trans "Genel bakış" %} <span class="muted" style="font-size:14px;font-weight:400">{% blocktranslate count counter=card_count %}{{ counter }} açık kart{% plural %}{{ counter }} açık kart{% endblocktranslate %}</span></h1>
+  {% include "kanban/_board_select.html" with overview=True %}
+</div>
+
+{% for board, grouped in boards %}
+<section class="overview-board">
+  <h2>
+    <a href="{% url 'kanban:board' %}?proje={% if board %}{{ board.pk }}{% else %}kisisel{% endif %}">{% if board %}{{ board.name }}{% else %}{% trans "Kişisel pano" %}{% endif %}</a>
+  </h2>
+  <ul class="overview-list">
+    {% for status, cards in grouped.items %}{% for task in cards %}
+    <li class="overview-item">
+      <span class="tag">{% if status == 'doing' %}{% trans "Yapılıyor" %}{% else %}{% trans "Yapılacak" %}{% endif %}</span>
+      {% if task.idea %}<a href="{% url 'ideas:detail' task.idea.pk %}">{% if task.mirrors_idea %}{{ task.idea.display_title }}{% else %}{{ task.title }}{% endif %}</a>{% else %}<span>{{ task.title }}</span>{% endif %}
+      {% if task.mirrors_idea and task.idea.progress.total %}<span class="muted">{% blocktranslate with done=task.idea.progress.done total=task.idea.progress.total %}{{ done }}/{{ total }} özellik{% endblocktranslate %}</span>{% endif %}
+    </li>
+    {% endfor %}{% endfor %}
+  </ul>
+</section>
+{% empty %}
+<p class="muted">{% trans "Açık kart yok. Bir panoya kart ekleyince burada toplu halde görünür." %}</p>
+{% endfor %}
+{% endblock %}

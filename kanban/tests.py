@@ -88,13 +88,13 @@ class ViewTests(TestCase):
     def test_anonymous_users_are_sent_to_login(self):
         self.client.logout()
 
-        self.assertEqual(self.client.get(reverse("kanban:board")).status_code, 302)
+        self.assertEqual(self.client.get(reverse("kanban:board"), {"proje": "kisisel"}).status_code, 302)
 
     def test_personal_and_project_boards_render_their_own_cards(self):
         self.add()
         self.add(proje=str(self.project.pk), title="Upload screenshots")
 
-        personal = self.client.get(reverse("kanban:board"))
+        personal = self.client.get(reverse("kanban:board"), {"proje": "kisisel"})
         project = self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
 
         self.assertContains(personal, "Write copy")
@@ -186,7 +186,7 @@ class ViewTests(TestCase):
     def test_html_in_a_card_title_is_escaped(self):
         self.add(title="<b>bold</b>")
 
-        self.assertNotContains(self.client.get(reverse("kanban:board")), "<b>bold</b>")
+        self.assertNotContains(self.client.get(reverse("kanban:board"), {"proje": "kisisel"}), "<b>bold</b>")
 
     def test_deleting_a_project_removes_its_cards_and_an_idea_only_unlinks(self):
         self.add(proje=str(self.project.pk), idea=str(self.idea.pk), title="card")
@@ -254,7 +254,7 @@ class IdeaCardTests(TestCase):
     def test_the_personal_board_does_not_mirror_anything_by_itself(self):
         self.idea.projects.add(self.project)
 
-        self.client.get(reverse("kanban:board"))
+        self.client.get(reverse("kanban:board"), {"proje": "kisisel"})
 
         self.assertEqual(self.statuses(None), {})
 
@@ -263,7 +263,7 @@ class IdeaCardTests(TestCase):
             self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk)})
 
         self.assertEqual(self.statuses(None), {"Water app": "todo"})
-        self.assertNotContains(self.client.get(reverse("kanban:board")), f'<option value="{self.idea.pk}">')
+        self.assertNotContains(self.client.get(reverse("kanban:board"), {"proje": "kisisel"}), f'<option value="{self.idea.pk}">')
 
     def test_adding_an_idea_on_a_project_board_links_it_to_the_project(self):
         self.client.post(reverse("kanban:add-idea"), {"idea": str(self.idea.pk), "proje": str(self.project.pk)})
@@ -320,7 +320,7 @@ class IdeaCardTests(TestCase):
         self.client.get(reverse("kanban:board"), {"proje": self.project.pk})
 
         self.idea.delete()
-        personal = self.client.get(reverse("kanban:board"))
+        personal = self.client.get(reverse("kanban:board"), {"proje": "kisisel"})
 
         self.assertEqual(personal.status_code, 200)
         self.assertFalse(Task.objects.filter(mirrors_idea=True).exists())
@@ -334,7 +334,7 @@ class IdeaCardTests(TestCase):
         self.idea.title = "Renamed elsewhere"
         self.idea.save()
 
-        page = self.client.get(reverse("kanban:board"))
+        page = self.client.get(reverse("kanban:board"), {"proje": "kisisel"})
 
         self.assertContains(page, "Renamed elsewhere")
         self.assertContains(page, "1/2 özellik")
@@ -388,3 +388,38 @@ class ChatToBoardTests(TestCase):
 
         self.assertFalse(Idea.objects.exists())
         self.assertFalse(Task.objects.exists())
+
+
+class OverviewTests(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.client.force_login(self.user)
+        self.project = Project.objects.create(owner=self.user, name="Apple Store")
+
+    def test_kanban_opens_on_the_overview_with_open_cards_of_every_board(self):
+        services.add_task(self.user, None, "Personal chore", "todo")
+        services.add_task(self.user, self.project, "Ship build", "doing")
+        services.add_task(self.user, self.project, "Old task", "done")
+
+        page = self.client.get(reverse("kanban:board"))
+
+        self.assertTemplateUsed(page, "kanban/overview.html")
+        self.assertContains(page, "Personal chore")
+        self.assertContains(page, "Ship build")
+        self.assertContains(page, "Apple Store")
+        self.assertNotContains(page, "Old task")
+
+    def test_overview_is_also_reachable_from_the_board_select_and_hides_other_users_cards(self):
+        services.add_task(make_user("other"), None, "Secret", "todo")
+
+        page = self.client.get(reverse("kanban:board"), {"proje": "ozet"})
+
+        self.assertTemplateUsed(page, "kanban/overview.html")
+        self.assertNotContains(page, "Secret")
+
+    def test_personal_board_is_still_one_choice_away(self):
+        services.add_task(self.user, None, "Personal chore", "todo")
+
+        page = self.client.get(reverse("kanban:board"), {"proje": "kisisel"})
+
+        self.assertTemplateUsed(page, "kanban/board.html")
