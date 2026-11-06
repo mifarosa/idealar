@@ -423,3 +423,25 @@ class OverviewTests(TestCase):
         page = self.client.get(reverse("kanban:board"), {"proje": "kisisel"})
 
         self.assertTemplateUsed(page, "kanban/board.html")
+
+    def test_quick_actions_keep_the_user_on_the_overview(self):
+        task = services.add_task(self.user, None, "Personal chore", "todo")
+
+        moved = self.client.post(reverse("kanban:move", args=[task.pk]), {"direction": "right", "next": "ozet"})
+        added = self.client.post(reverse("kanban:add"), {"title": "Another", "proje": str(self.project.pk), "next": "ozet"})
+
+        self.assertRedirects(moved, reverse("kanban:board") + "?proje=ozet")
+        self.assertRedirects(added, reverse("kanban:board") + "?proje=ozet")
+        task.refresh_from_db()
+        self.assertEqual(task.status, "doing")
+        self.assertTrue(Task.objects.filter(title="Another", project=self.project).exists())
+
+    def test_in_progress_cards_come_first_and_the_personal_board_is_always_listed(self):
+        empty = self.client.get(reverse("kanban:board"))
+        self.assertContains(empty, f'action="{reverse("kanban:add")}"')
+
+        services.add_task(self.user, None, "Later", "todo")
+        services.add_task(self.user, None, "Now", "doing")
+        page = self.client.get(reverse("kanban:board")).content.decode()
+
+        self.assertLess(page.index("Now"), page.index("Later"))

@@ -1,7 +1,7 @@
 """Board rules: which tasks make up a board and how a card moves between and within columns."""
 from django.db import transaction
 
-from .models import STATUS_DONE, STATUS_TODO, STATUSES, Task
+from .models import STATUS_DOING, STATUS_TODO, STATUSES, Task
 
 
 def board_tasks(owner, project):
@@ -21,13 +21,14 @@ def columns(owner, project) -> dict[str, list[Task]]:
 
 
 def overview(owner, projects) -> list[tuple]:
-    """Open work (not "Bitti") across every board: [(project or None, {status: cards})], boards without open cards left out."""
+    """Open work (not "Bitti") across every board: [(project or None, cards)], what is in progress first.
+    The personal board is always listed (so a card can be added to it); project boards only when they have open cards."""
     boards = []
     for project in [None, *projects]:
         grouped = columns(owner, project)
-        grouped.pop(STATUS_DONE)
-        if any(grouped.values()):
-            boards.append((project, grouped))
+        cards = grouped[STATUS_DOING] + grouped[STATUS_TODO]
+        if project is None or cards:
+            boards.append((project, cards))
     return boards
 
 

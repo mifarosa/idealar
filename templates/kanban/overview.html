@@ -8,22 +8,29 @@
   {% include "kanban/_board_select.html" with overview=True %}
 </div>
 
-{% for board, grouped in boards %}
+{% for board, cards in boards %}
 <section class="overview-board">
-  <h2>
-    <a href="{% url 'kanban:board' %}?proje={% if board %}{{ board.pk }}{% else %}kisisel{% endif %}">{% if board %}{{ board.name }}{% else %}{% trans "Kişisel pano" %}{% endif %}</a>
-  </h2>
+  <h2><a href="{% url 'kanban:board' %}?proje={% if board %}{{ board.pk }}{% else %}kisisel{% endif %}">{% if board %}{{ board.name }}{% else %}{% trans "Kişisel pano" %}{% endif %}</a></h2>
   <ul class="overview-list">
-    {% for status, cards in grouped.items %}{% for task in cards %}
+    {% for task in cards %}
     <li class="overview-item">
-      <span class="tag">{% if status == 'doing' %}{% trans "Yapılıyor" %}{% else %}{% trans "Yapılacak" %}{% endif %}</span>
-      {% if task.idea %}<a href="{% url 'ideas:detail' task.idea.pk %}">{% if task.mirrors_idea %}{{ task.idea.display_title }}{% else %}{{ task.title }}{% endif %}</a>{% else %}<span>{{ task.title }}</span>{% endif %}
-      {% if task.mirrors_idea and task.idea.progress.total %}<span class="muted">{% blocktranslate with done=task.idea.progress.done total=task.idea.progress.total %}{{ done }}/{{ total }} özellik{% endblocktranslate %}</span>{% endif %}
+      <span class="tag status-{{ task.status }}">{% if task.status == 'doing' %}{% trans "Yapılıyor" %}{% else %}{% trans "Yapılacak" %}{% endif %}</span>
+      <span class="overview-title">
+        {% if task.idea %}<a href="{% url 'ideas:detail' task.idea.pk %}">{% if task.mirrors_idea %}{{ task.idea.display_title }}{% else %}{{ task.title }}{% endif %}</a>{% else %}{{ task.title }}{% endif %}
+        {% if task.mirrors_idea and task.idea.progress.total %}<span class="muted">{% blocktranslate with done=task.idea.progress.done total=task.idea.progress.total %}{{ done }}/{{ total }} özellik{% endblocktranslate %}</span>{% endif %}
+      </span>
+      <form method="post" action="{% url 'kanban:move' task.pk %}">{% csrf_token %}
+        <input type="hidden" name="direction" value="right"><input type="hidden" name="next" value="ozet">
+        <button class="btn small quiet" type="submit">{% if task.status == 'doing' %}{% trans "Bitir" %}{% else %}{% trans "Başla" %}{% endif %}</button>
+      </form>
     </li>
-    {% endfor %}{% endfor %}
+    {% endfor %}
   </ul>
+  <form method="post" action="{% url 'kanban:add' %}" class="card-add">
+    {% csrf_token %}
+    <input type="hidden" name="proje" value="{% if board %}{{ board.pk }}{% endif %}"><input type="hidden" name="next" value="ozet">
+    <label class="field"><svg class="icon"><use href="#i-plus"/></svg><input type="text" name="title" maxlength="200" placeholder="{% trans "Kart ekle…" %}" aria-label="{% blocktranslate with name=board.name|default:_('Kişisel pano') %}{{ name }} panosuna kart ekle{% endblocktranslate %}" required></label>
+  </form>
 </section>
-{% empty %}
-<p class="muted">{% trans "Açık kart yok. Bir panoya kart ekleyince burada toplu halde görünür." %}</p>
 {% endfor %}
 {% endblock %}

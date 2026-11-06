@@ -2342,11 +2342,18 @@ msgstr "You have no tickets yet."
 msgid "Genel bakış"
 msgstr "Overview"
 
-msgid "Açık kart yok. Bir panoya kart ekleyince burada toplu halde görünür."
-msgstr "No open cards. Cards you add to any board will show up here together."
-
 #, python-format
 msgid "%(counter)s açık kart"
 msgid_plural "%(counter)s açık kart"
 msgstr[0] "%(counter)s open card"
 msgstr[1] "%(counter)s open cards"
+
+msgid "Başla"
+msgstr "Start"
+
+msgid "Bitir"
+msgstr "Finish"
+
+#, python-format
+msgid "%(name)s panosuna kart ekle"
+msgstr "Add a card to %(name)s"

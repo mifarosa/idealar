@@ -16,6 +16,13 @@ from .models import STATUS_CHOICES, STATUS_DONE, STATUS_TODO, STATUSES, Task
 PERSONAL, OVERVIEW = "kisisel", "ozet"  # ?proje= values; no value at all opens the overview
 
 
+def back_url(request, project) -> str:
+    """Where a form goes after saving: the overview when it was sent from there, else the board."""
+    if request.POST.get("next") == OVERVIEW:
+        return reverse("kanban:board") + f"?proje={OVERVIEW}"
+    return board_url(project)
+
+
 def board_url(project) -> str:
     return reverse("kanban:board") + (f"?proje={project.pk}" if project else f"?proje={PERSONAL}")
 
@@ -62,7 +69,7 @@ class BoardView(BoardMixin, View):
         context = {
             "projects": projects,
             "boards": boards,
-            "card_count": sum(len(cards) for _, grouped in boards for cards in grouped.values()),
+            "card_count": sum(len(cards) for _, cards in boards),
         }
         return render(request, "kanban/overview.html", context)
 
@@ -78,7 +85,7 @@ class TaskAddView(BoardMixin, View):
             services.add_task(request.user, project, form.cleaned_data["title"], status if status in STATUSES else STATUS_TODO)
         else:
             messages.error(request, _("Kartın bir başlığı olmalı."))
-        return redirect(board_url(project))
+        return redirect(back_url(request, project))
 
 
 class IdeaAddView(BoardMixin, View):
@@ -109,7 +116,7 @@ class TaskMoveView(BoardMixin, View):
         direction = request.POST.get("direction")
         if direction in ("left", "right"):
             services.step_task(task, -1 if direction == "left" else 1)
-            return redirect(board_url(task.project))
+            return redirect(back_url(request, task.project))
         status, index = request.POST.get("status", ""), request.POST.get("index", "")
         if status not in STATUSES or not index.isdigit():
             return JsonResponse({"error": _("Geçersiz taşıma.")}, status=400)
