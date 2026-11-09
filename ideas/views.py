@@ -7,6 +7,7 @@ from django.utils.http import urlencode
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from django.utils.translation import gettext_lazy, gettext as _
 
+from . import ai_registry
 from .forms import FeatureForm, IdeaForm, QuickIdeaForm
 from .mixins import UserFormKwargsMixin
 from .models import Idea, Project
@@ -95,6 +96,7 @@ class IdeaListView(OwnedIdeaMixin, ListView):
             selected=selected,
             view_mode="detail" if self.kwargs.get("pk") else "list",
             enrich=self.request.GET.get("enrich") == "1",
+            offer=self.request.GET.get("oner") == "1",  # a just-saved idea: ask before the AI does anything
             search_text=self.search_text,
             status_filter=self.status_filter,
             project_filter=self.project_filter,
@@ -126,8 +128,10 @@ class IdeaCreateView(UserFormKwargsMixin, OwnedIdeaMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        # The detail page then asks the AI to fill the new idea in the background (see app.js).
-        return f"{reverse('ideas:detail', args=[self.object.pk])}?enrich=1"
+        # The detail page then offers AI suggestions (and only runs the AI if the user says yes). Without a usable
+        # AI model there is nothing to offer, and the "add your AI key" notice already says so.
+        offer = "?oner=1" if ai_registry.has_models(self.request.user) else ""
+        return f"{reverse('ideas:detail', args=[self.object.pk])}{offer}"
 
 
 class IdeaUpdateView(UserFormKwargsMixin, OwnedIdeaMixin, UpdateView):

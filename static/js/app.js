@@ -172,6 +172,56 @@ async function enrichPendingIdea() {
 }
 enrichPendingIdea();
 
+// ---------- New idea: ask before the AI works. The answer can be remembered (per device) ----------
+const SUGGEST_PREF_KEY = "idealar.suggest";
+
+function suggestPref() {
+  try {
+    return localStorage.getItem(SUGGEST_PREF_KEY) || "ask";
+  } catch (error) {
+    return "ask"; // storage can be blocked; asking every time is the safe default
+  }
+}
+
+function setSuggestPref(value) {
+  try {
+    localStorage.setItem(SUGGEST_PREF_KEY, value);
+  } catch (error) {
+    console.warn("Could not remember the suggestion choice:", error);
+  }
+}
+
+function dropOfferFromAddress() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("oner");
+  window.history.replaceState(null, "", url);
+}
+
+const offer = document.querySelector("[data-suggest-offer]");
+if (offer) {
+  const remember = offer.querySelector("[data-offer-remember]");
+  const yes = offer.querySelector("[data-offer-yes]");
+  offer.querySelector("[data-offer-no]").addEventListener("click", () => {
+    if (remember.checked) setSuggestPref("never");
+    offer.hidden = true;
+    dropOfferFromAddress();
+  });
+  yes.addEventListener("submit", () => { if (remember.checked) setSuggestPref("always"); });
+  const pref = suggestPref();
+  if (pref === "never") {
+    offer.hidden = true;
+    dropOfferFromAddress();
+  } else if (pref === "always") {
+    yes.requestSubmit(); // the user already said "always"
+  }
+}
+
+const suggestSelect = document.querySelector("[data-suggest-pref]");
+if (suggestSelect) {
+  suggestSelect.value = suggestPref();
+  suggestSelect.addEventListener("change", () => setSuggestPref(suggestSelect.value));
+}
+
 // ---------- Remember the chosen AI (per device) ----------
 const PROVIDER_STORAGE_KEY = "idealar.provider";
 

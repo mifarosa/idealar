@@ -218,6 +218,9 @@ kbd { font: 12px "SFMono-Regular", Consolas, monospace; color: var(--muted); bor
 .capture .cancel { flex: none; height: 38px; padding: 0 12px; }
 
 /* ---------- Toasts (flash messages) ---------- */
+.offer { border: 1px solid var(--line); border-left: 3px solid var(--signal); background: var(--panel); padding: 14px 16px; margin: 0 0 20px; display: flex; flex-direction: column; gap: 10px; }
+.offer[hidden] { display: none; }
+.offer .remember { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .ai-notice { display: block; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); border-left: 3px solid var(--signal); font-size: 14px; text-decoration: none; flex: none; }
 .ai-notice:hover { background: var(--hover); }
 .toasts { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 20; width: min(32rem, calc(100% - 24px)); }
