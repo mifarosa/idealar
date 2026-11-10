@@ -1,0 +1,8 @@
+{% load i18n %}
+<form method="get" class="actions">
+  <select class="select" name="proje" aria-label="{% trans "Pano" %}" data-autosubmit>
+    <option value="ozet" {% if overview %}selected{% endif %}>{% trans "Genel bakış" %}</option>
+    <option value="kisisel" {% if not overview and not project %}selected{% endif %}>{% trans "Kişisel pano" %}</option>
+    {% for item in projects %}<option value="{{ item.pk }}" {% if project and item.pk == project.pk %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+  </select>
+</form>

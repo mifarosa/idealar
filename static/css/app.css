@@ -367,3 +367,13 @@ a.card-title:hover { text-decoration: underline; }
 .chat-form[aria-busy="true"] .send { opacity: 0.45; cursor: progress; }
 .chat-form[aria-busy="true"] textarea { cursor: progress; }
 .chat-form[aria-busy="true"] .field { background: var(--hover); }
+
+/* Kanban overview: open cards of every board in one list */
+.overview-board { margin-bottom: 28px; }
+.overview-board h2 { font-size: 16px; margin-bottom: 4px; }
+.overview-list { list-style: none; margin: 0 0 8px; padding: 0; }
+.overview-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.overview-item .tag { flex: none; width: 4.5rem; text-align: center; }
+.overview-item .status-doing { color: var(--ink); border-color: var(--ink); }
+.overview-title { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; overflow-wrap: anywhere; }
+.overview-item form { flex: none; }

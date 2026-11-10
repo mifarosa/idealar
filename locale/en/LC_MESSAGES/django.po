@@ -2397,3 +2397,22 @@ msgstr ""
 #: templates/support/ticket_list.html:17
 msgid "Henüz bir kaydın yok."
 msgstr "You have no tickets yet."
+
+msgid "Genel bakış"
+msgstr "Overview"
+
+#, python-format
+msgid "%(counter)s açık kart"
+msgid_plural "%(counter)s açık kart"
+msgstr[0] "%(counter)s open card"
+msgstr[1] "%(counter)s open cards"
+
+msgid "Başla"
+msgstr "Start"
+
+msgid "Bitir"
+msgstr "Finish"
+
+#, python-format
+msgid "%(name)s panosuna kart ekle"
+msgstr "Add a card to %(name)s"

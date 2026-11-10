@@ -154,7 +154,7 @@ class EnglishInterfaceTests(TestCase):
 
     def test_plurals_follow_english_rules(self):
         self.client.post(reverse("kanban:add"), {"title": "second", "status": "todo"})
-        page = self.client.get(reverse("kanban:board"))
+        page = self.client.get(reverse("kanban:board"), {"proje": "kisisel"})
 
         self.assertContains(page, "2 cards")
 

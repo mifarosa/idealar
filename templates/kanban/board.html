@@ -5,12 +5,7 @@
 {% block content %}
 <div class="page-head">
   <h1>{% trans "Kanban" %} <span class="muted" style="font-size:14px;font-weight:400">{% blocktranslate count counter=card_count %}{{ counter }} kart{% plural %}{{ counter }} kart{% endblocktranslate %}</span></h1>
-  <form method="get" class="actions">
-    <select class="select" name="proje" aria-label="{% trans "Pano" %}" data-autosubmit>
-      <option value="">{% trans "Kişisel pano" %}</option>
-      {% for item in projects %}<option value="{{ item.pk }}" {% if project and item.pk == project.pk %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
-    </select>
-  </form>
+  {% include "kanban/_board_select.html" %}
 </div>
 
 <div class="board" data-move-url-template="{% url 'kanban:move' 0 %}">
