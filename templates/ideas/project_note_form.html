@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Notu düzenle" %} · Idealar{% endblock %}
+{% block content %}
+<a class="crumb" href="{% url 'ideas:project-detail' project.pk %}#notes"><svg class="icon"><use href="#i-back"/></svg>{{ project.name }}</a>
+<div class="page-head"><h1>{% trans "Notu düzenle" %}</h1></div>
+<form method="post" class="form">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="form-field">
+    <label class="form-label" for="{{ form.body.id_for_label }}">{% trans "Not" %}</label>
+    {{ form.body }}
+    {{ form.body.errors }}
+  </div>
+  <div class="actions">
+    <button class="btn primary" type="submit">{% trans "Kaydet" %}</button>
+    <a class="btn quiet" href="{% url 'ideas:project-detail' project.pk %}#notes">{% trans "Vazgeç" %}</a>
+  </div>
+</form>
+{% endblock %}

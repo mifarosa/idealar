@@ -11,7 +11,7 @@ from django.utils.translation import gettext as _, ngettext
 from . import github_import, project_review
 from .errors import ActionNotApplicable
 from .github_repo import GitHubError
-from .forms import ProjectForm
+from .forms import ProjectForm, ProjectNoteForm
 from .mixins import UserFormKwargsMixin
 from .models import Project
 
@@ -29,7 +29,7 @@ class ProjectListView(OwnedProjectMixin, ListView):
     context_object_name = "projects"
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related("ideas")
+        return super().get_queryset().prefetch_related("ideas", "notes")
 
 
 class ProjectDetailView(OwnedProjectMixin, DetailView):
@@ -38,6 +38,8 @@ class ProjectDetailView(OwnedProjectMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["ideas"] = self.object.ideas.with_progress().prefetch_related("features")
+        context["notes"] = self.object.notes.all()
+        context["note_form"] = ProjectNoteForm()
         return context
 
 

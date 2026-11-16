@@ -19,6 +19,7 @@ class Feature:
 
 
 TIMELINE = (
+    Feature(date(2026, 11, 16), gettext_lazy("Proje notları"), gettext_lazy("Her proje için ayrı notlar tut: kararlar, bağlantılar, hatırlanacaklar. Proje sohbetinde AI de bu notları görür.")),
     Feature(date(2026, 10, 30), gettext_lazy("Verilerin sende"), gettext_lazy("Tüm verilerini JSON olarak indir, istediğin an hesabını ve her şeyini sil. Neyin saklandığı gizlilik sayfasında açıkça yazıyor.")),
     Feature(date(2026, 10, 30), gettext_lazy("Türkçe ve İngilizce"), gettext_lazy("Arayüz iki dilde: logonun yanındaki TR/EN düğmesiyle istediğin dili seç. Yeni bir logo da geldi.")),
     Feature(date(2026, 10, 30), gettext_lazy("Kanban: kişisel ve proje panoları"), gettext_lazy("Yapılacak, yapılıyor, bitti. Projeye bağlı fikirler panoda kendiliğinden kart olur; kartları sürükleyip bırak. Kişisel pano evdeki küçük işler için serbest, istersen oraya fikir de ekleyebilirsin.")),

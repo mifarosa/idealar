@@ -26,8 +26,11 @@ def export_user_data(user) -> dict:
             for idea in ideas
         ],
         "projects": [
-            {"name": p.name, "description": p.description, "github_url": p.github_url, "created": _iso(p.created_at)}
-            for p in user.projects.all()
+            {
+                "name": p.name, "description": p.description, "github_url": p.github_url, "created": _iso(p.created_at),
+                "notes": [{"text": n.body, "created": _iso(n.created_at), "updated": _iso(n.updated_at)} for n in p.notes.all()],
+            }
+            for p in user.projects.prefetch_related("notes")
         ],
         "conversations": [
             {

@@ -377,3 +377,16 @@ a.card-title:hover { text-decoration: underline; }
 .overview-item .status-doing { color: var(--ink); border-color: var(--ink); }
 .overview-title { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; overflow-wrap: anywhere; }
 .overview-item form { flex: none; }
+
+/* Project notes */
+.notes { margin-top: 40px; }
+.note-add { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; margin-bottom: 20px; }
+.note-add .field { width: 100%; align-items: stretch; padding: 0; }
+.note-add textarea { width: 100%; min-height: 6rem; padding: 10px 12px; resize: vertical; max-height: 20rem; line-height: 1.5; }
+.note-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.project-note { border: 1px solid var(--line); border-left: 3px solid var(--signal); background: var(--panel); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.note-text { overflow-wrap: anywhere; }
+.note-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+.note-foot .actions { display: flex; gap: 6px; }
+.note-foot .actions form { display: inline; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

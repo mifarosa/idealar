@@ -85,6 +85,25 @@ class Project(models.Model):
         return Progress(done=features.filter(is_done=True).count(), total=features.count())
 
 
+class ProjectNote(models.Model):
+    """A free-form note belonging to one project (decisions, links, to-remember); only the project's owner sees it."""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="notes")
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self) -> str:
+        return self.body[:40]
+
+    @property
+    def was_edited(self) -> bool:
+        return (self.updated_at - self.created_at).total_seconds() > 1
+
+
 class Idea(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ideas")
     title = models.CharField(max_length=200, blank=True)

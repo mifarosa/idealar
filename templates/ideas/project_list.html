@@ -15,7 +15,7 @@
   <li>
     <a href="{% url 'ideas:project-detail' project.pk %}">
       <div class="title">{{ project.name }}</div>
-      <div class="meta">{% blocktranslate count counter=project.ideas.all|length with done=project.progress.done total=project.progress.total %}{{ counter }} fikir{% plural %}{{ counter }} fikir{% endblocktranslate %} · {% blocktranslate with done=project.progress.done total=project.progress.total %}{{ done }}/{{ total }} özellik{% endblocktranslate %}{% if project.github_url %} · {% trans "GitHub bağlı" %}{% endif %}</div>
+      <div class="meta">{% blocktranslate count counter=project.ideas.all|length with done=project.progress.done total=project.progress.total %}{{ counter }} fikir{% plural %}{{ counter }} fikir{% endblocktranslate %} · {% blocktranslate with done=project.progress.done total=project.progress.total %}{{ done }}/{{ total }} özellik{% endblocktranslate %}{% if project.notes.all|length %} · {% blocktranslate count counter=project.notes.all|length %}{{ counter }} not{% plural %}{{ counter }} not{% endblocktranslate %}{% endif %}{% if project.github_url %} · {% trans "GitHub bağlı" %}{% endif %}</div>
     </a>
   </li>
   {% endfor %}

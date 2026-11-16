@@ -2,7 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy, gettext as _
 
 from .github_repo import GitHubError, parse_repo_url
-from .models import PLATFORM_CHOICES, Feature, Idea, Project
+from .models import PLATFORM_CHOICES, Feature, Idea, Project, ProjectNote
 
 
 class QuickIdeaForm(forms.ModelForm):
@@ -85,6 +85,20 @@ class ProjectForm(forms.ModelForm):
         if commit:
             project.ideas.set(self.cleaned_data["ideas"])
         return project
+
+
+MAX_NOTE_CHARS = 10000
+
+
+class ProjectNoteForm(forms.ModelForm):
+    body = forms.CharField(
+        label=gettext_lazy("Not"), max_length=MAX_NOTE_CHARS, strip=True,
+        widget=forms.Textarea(attrs={"rows": 5, "placeholder": gettext_lazy("Bu proje için not yaz…")}),
+    )
+
+    class Meta:
+        model = ProjectNote
+        fields = ["body"]
 
 
 class CopyFeatureForm(forms.Form):

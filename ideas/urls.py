@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import ai_settings_views, ai_views, chat_views, feature_views, project_views, views
+from . import ai_settings_views, ai_views, chat_views, feature_views, project_note_views, project_views, views
 
 app_name = "ideas"
 
@@ -43,4 +43,7 @@ urlpatterns = [
     path("projects/<int:pk>/inspect/", project_views.ProjectInspectView.as_view(), name="project-inspect"),
     path("projects/<int:pk>/matches/<int:index>/", project_views.ProjectMatchDecideView.as_view(), name="project-match-decide"),
     path("projects/<int:pk>/delete/", project_views.ProjectDeleteView.as_view(), name="project-delete"),
+    path("projects/<int:project_pk>/notes/add/", project_note_views.ProjectNoteAddView.as_view(), name="project-note-add"),
+    path("projects/<int:project_pk>/notes/<int:note_pk>/edit/", project_note_views.ProjectNoteEditView.as_view(), name="project-note-edit"),
+    path("projects/<int:project_pk>/notes/<int:note_pk>/delete/", project_note_views.ProjectNoteDeleteView.as_view(), name="project-note-delete"),
 ]

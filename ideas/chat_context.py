@@ -9,6 +9,9 @@ MAX_GENERAL_IDEAS = 120
 MAX_PROJECTS = 40
 MAX_LINKABLE_IDEAS = 60
 MAX_BODY_CHARS = 800
+MAX_PROJECT_NOTES = 20
+MAX_NOTE_CHARS = 700
+MAX_NOTES_BLOCK_CHARS = 4000
 
 
 @dataclass(frozen=True)
@@ -81,8 +84,23 @@ def _first_line(text: str) -> str:
     return lines[0][:120] if lines else ""
 
 
+def _project_notes(project: Project) -> str:
+    """The project's own notes, newest first, within a budget so they cannot crowd out the ideas."""
+    lines, used = [], 0
+    for note in project.notes.all()[:MAX_PROJECT_NOTES]:
+        line = "- " + " ".join(note.body.split())[:MAX_NOTE_CHARS]
+        if used + len(line) > MAX_NOTES_BLOCK_CHARS:
+            break
+        lines.append(line)
+        used += len(line)
+    return "Project notes (written by the developer, newest first):\n" + "\n".join(lines) if lines else ""
+
+
 def _describe_project(project: Project, ideas: list[Idea]) -> str:
     header = f"Project: {project.name}\n{project.description.strip()}".strip()
+    notes = _project_notes(project)
+    if notes:
+        header = f"{header}\n{notes}"
     if not ideas:
         return f"{header}\n(No ideas are linked to this project yet.)"
     return f"{header}\nIdeas in this project:\n" + "\n".join(_describe_idea(idea, detailed=True) for idea in ideas)

@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
 
-from ideas.models import Feature, Idea, Project
+from ideas.models import Feature, Idea, Project, ProjectNote
 from kanban import services as kanban
 from support.models import Ticket
 
@@ -104,6 +104,7 @@ class EnglishInterfaceTests(TestCase):
         self.idea.advice = [{"kind": "tag", "text": "health", "target": None, "target_title": "", "reason": "fits", "status": "pending"}]
         self.idea.similar = [{"kind": "idea", "id": 99, "title": "Other", "verdict": "similar", "reason": "same goal", "source": "ai", "status": "pending"}]
         self.idea.save()
+        self.note = ProjectNote.objects.create(project=self.project, body="Review takes two days")
         kanban.add_task(self.user, None, "Buy milk", "todo")
         Ticket.objects.create(owner=self.user, title="It breaks", body="always")
 
@@ -124,7 +125,7 @@ class EnglishInterfaceTests(TestCase):
             reverse("ideas:list"), reverse("ideas:detail", args=[self.idea.pk]), reverse("ideas:create"),
             reverse("ideas:update", args=[self.idea.pk]), reverse("ideas:delete", args=[self.idea.pk]),
             reverse("ideas:project-list"), reverse("ideas:project-create"), reverse("ideas:project-detail", args=[self.project.pk]),
-            reverse("ideas:project-update", args=[self.project.pk]), reverse("ideas:project-delete", args=[self.project.pk]),
+            reverse("ideas:project-update", args=[self.project.pk]), reverse("ideas:project-note-edit", args=[self.project.pk, self.note.pk]), reverse("ideas:project-delete", args=[self.project.pk]),
             reverse("ideas:project-import"), reverse("ideas:chat"), reverse("ideas:idea-chat", args=[self.idea.pk]),
             reverse("ideas:project-chat", args=[self.project.pk]), reverse("accounts:settings"),
             reverse("ideas:ai-models"), reverse("ideas:ai-model-create"), reverse("kanban:board"),

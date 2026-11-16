@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 16:45+0300\n"
+"POT-Creation-Date: 2026-11-17 00:22+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,10 +37,23 @@ msgid "Bu hesap kapatılmış."
 msgstr "This account has been disabled."
 
 #: accounts/timeline.py:22
+#| msgid "Proje adı"
+msgid "Proje notları"
+msgstr "Project notes"
+
+#: accounts/timeline.py:22
+msgid ""
+"Her proje için ayrı notlar tut: kararlar, bağlantılar, hatırlanacaklar. "
+"Proje sohbetinde AI de bu notları görür."
+msgstr ""
+"Keep separate notes for each project: decisions, links, things to remember. "
+"In the project chat the AI sees these notes too."
+
+#: accounts/timeline.py:23
 msgid "Verilerin sende"
 msgstr "Your data is yours"
 
-#: accounts/timeline.py:22
+#: accounts/timeline.py:23
 msgid ""
 "Tüm verilerini JSON olarak indir, istediğin an hesabını ve her şeyini sil. "
 "Neyin saklandığı gizlilik sayfasında açıkça yazıyor."
@@ -48,11 +61,11 @@ msgstr ""
 "Download all your data as JSON and delete your account and everything in it "
 "whenever you like. What is stored is stated plainly on the privacy page."
 
-#: accounts/timeline.py:23
+#: accounts/timeline.py:24
 msgid "Türkçe ve İngilizce"
 msgstr "Turkish and English"
 
-#: accounts/timeline.py:23
+#: accounts/timeline.py:24
 msgid ""
 "Arayüz iki dilde: logonun yanındaki TR/EN düğmesiyle istediğin dili seç. "
 "Yeni bir logo da geldi."
@@ -60,11 +73,11 @@ msgstr ""
 "The interface comes in two languages: pick yours with the TR/EN button next "
 "to the logo. There is a new logo too."
 
-#: accounts/timeline.py:24
+#: accounts/timeline.py:25
 msgid "Kanban: kişisel ve proje panoları"
 msgstr "Kanban: personal and project boards"
 
-#: accounts/timeline.py:24
+#: accounts/timeline.py:25
 msgid ""
 "Yapılacak, yapılıyor, bitti. Projeye bağlı fikirler panoda kendiliğinden "
 "kart olur; kartları sürükleyip bırak. Kişisel pano evdeki küçük işler için "
@@ -74,11 +87,11 @@ msgstr ""
 "automatically; drag the cards around. The personal board is free-form for "
 "small everyday tasks, and you can add ideas to it too."
 
-#: accounts/timeline.py:25
+#: accounts/timeline.py:26
 msgid "Öneri ve şikayet kutusu"
 msgstr "Suggestions and complaints box"
 
-#: accounts/timeline.py:25
+#: accounts/timeline.py:26
 msgid ""
 "Bir şey bozuksa ya da bir fikrin varsa yaz; yanıtı ve durumu (açık, "
 "inceleniyor, çözüldü) aynı yerden takip et."
@@ -86,11 +99,11 @@ msgstr ""
 "If something is broken or you have an idea, write it down; follow the reply "
 "and the status (open, in progress, solved) in the same place."
 
-#: accounts/timeline.py:26
+#: accounts/timeline.py:27
 msgid "Sohbetten projeye ekle"
 msgstr "Add to a project from the chat"
 
-#: accounts/timeline.py:26
+#: accounts/timeline.py:27
 msgid ""
 "AI ile konuşurken “bu fikri şu projeye bağla” de; öneriyi tek tıkla "
 "onaylarsın."
@@ -98,11 +111,11 @@ msgstr ""
 "While talking to the AI say “link this idea to that project”; you confirm "
 "the suggestion with one click."
 
-#: accounts/timeline.py:27
+#: accounts/timeline.py:28
 msgid "Tüm notlarını okuyan öneriler"
 msgstr "Suggestions that read all your notes"
 
-#: accounts/timeline.py:27
+#: accounts/timeline.py:28
 msgid ""
 "Yeni bir fikir yazınca AI diğer bütün notlarına bakar: ilgili notlar, "
 "birleştirilebilecekler, ödünç alınabilecek özellikler, yeni fikirler."
@@ -110,11 +123,11 @@ msgstr ""
 "When you write a new idea the AI looks at all your other notes: related "
 "notes, notes that could be merged, features worth borrowing, new ideas."
 
-#: accounts/timeline.py:28
+#: accounts/timeline.py:29
 msgid "Kendi yapay zekânı getir"
 msgstr "Bring your own AI"
 
-#: accounts/timeline.py:28
+#: accounts/timeline.py:29
 msgid ""
 "Claude, ChatGPT, Gemini, Groq ve daha fazlası. Anahtarın şifrelenerek "
 "saklanır, kimse görmez."
@@ -122,19 +135,19 @@ msgstr ""
 "Claude, ChatGPT, Gemini, Groq and more. Your key is stored encrypted and "
 "nobody can see it."
 
-#: accounts/timeline.py:29
+#: accounts/timeline.py:30
 msgid "Google ile giriş"
 msgstr "Sign in with Google"
 
-#: accounts/timeline.py:29
+#: accounts/timeline.py:30
 msgid "Şifre yok: tek tıkla gir."
 msgstr "No password: sign in with one click."
 
-#: accounts/timeline.py:30
+#: accounts/timeline.py:31
 msgid "GitHub projelerini içe aktar"
 msgstr "Import your GitHub projects"
 
-#: accounts/timeline.py:30
+#: accounts/timeline.py:31
 msgid ""
 "Depolarını seç, proje olarak eklensin; AI depoyu inceleyip neyin yapıldığını"
 " söylesin."
@@ -142,61 +155,61 @@ msgstr ""
 "Pick your repositories and they become projects; the AI reviews a repository"
 " and tells you what is already done."
 
-#: accounts/timeline.py:31
+#: accounts/timeline.py:32
 msgid "Claude için hazır prompt"
 msgstr "Ready-made prompt for Claude"
 
-#: accounts/timeline.py:31
+#: accounts/timeline.py:32
 msgid ""
 "Bir fikri tek tıkla, yapay zekâya yapıştırılacak hazır bir plana çevir."
 msgstr "Turn an idea into a ready plan to paste into an AI with one click."
 
-#: accounts/timeline.py:32
+#: accounts/timeline.py:33
 msgid "Yeni arayüz"
 msgstr "New interface"
 
-#: accounts/timeline.py:32
+#: accounts/timeline.py:33
 msgid ""
 "Açık, gri ve koyu tema; klavye kısayolları; bilgisayarda ve telefonda rahat."
 msgstr ""
 "Light, gray and dark themes; keyboard shortcuts; comfortable on a computer "
 "and on a phone."
 
-#: accounts/timeline.py:33
+#: accounts/timeline.py:34
 msgid "Benzer fikir uyarısı"
 msgstr "Similar idea warning"
 
-#: accounts/timeline.py:33
+#: accounts/timeline.py:34
 msgid ""
 "Zaten bir şeyin varsa söyler, yeni proje açmak yerine ona eklemeni önerir."
 msgstr ""
 "If you already have something similar it tells you and suggests adding to it"
 " instead of starting a new project."
 
-#: accounts/timeline.py:34
+#: accounts/timeline.py:35
 msgid "AI ile sohbet"
 msgstr "Chat with the AI"
 
-#: accounts/timeline.py:34
+#: accounts/timeline.py:35
 msgid ""
 "Fikirlerinle yazışır gibi konuş; öneriler kartlarla gelir, sen onaylarsın."
 msgstr ""
 "Talk about your ideas like in a messaging app; suggestions come as cards and"
 " you confirm them."
 
-#: accounts/timeline.py:35
+#: accounts/timeline.py:36
 msgid "Otomatik başlık, özet ve etiket"
 msgstr "Automatic title, summary and tags"
 
-#: accounts/timeline.py:35
+#: accounts/timeline.py:36
 msgid "Aklına geleni yaz; gerisini AI toparlasın."
 msgstr "Write whatever comes to mind; let the AI tidy up the rest."
 
-#: accounts/timeline.py:36
+#: accounts/timeline.py:37
 msgid "Fikirler, projeler, özellik listeleri"
 msgstr "Ideas, projects, feature lists"
 
-#: accounts/timeline.py:36
+#: accounts/timeline.py:37
 msgid ""
 "Yapılan ve yapılmayanı işaretle, fikirleri projelere bağla. Telefona "
 "uygulama gibi kurulur."
@@ -628,7 +641,7 @@ msgstr "SUGGESTED APPROACH (AI draft, open to discussion)"
 msgid "ÇALIŞMA ŞEKLİ"
 msgstr "WAY OF WORKING"
 
-#: ideas/chat_context.py:34
+#: ideas/chat_context.py:37
 msgid "Genel sohbet"
 msgstr "General chat"
 
@@ -732,7 +745,16 @@ msgstr "Project name"
 msgid "GitHub adresi (isteğe bağlı)"
 msgstr "GitHub address (optional)"
 
-#: ideas/forms.py:92
+#: ideas/forms.py:95 templates/ideas/project_detail.html:78
+#: templates/ideas/project_note_form.html:11
+msgid "Not"
+msgstr "Note"
+
+#: ideas/forms.py:96
+msgid "Bu proje için not yaz…"
+msgstr "Write a note for this project…"
+
+#: ideas/forms.py:106
 msgid "Hangi fikirlere kopyalansın?"
 msgstr "Which ideas should it be copied to?"
 
@@ -786,55 +808,71 @@ msgstr "Done"
 msgid "Başarısız"
 msgstr "Failed"
 
-#: ideas/models.py:209 templates/accounts/settings.html:7
+#: ideas/models.py:228 templates/accounts/settings.html:7
 #: templates/support/ticket_detail.html:18
 msgid "Kullanıcı"
 msgstr "User"
+
+#: ideas/project_note_views.py:34
+msgid "Not eklendi."
+msgstr "Note added."
+
+#: ideas/project_note_views.py:36
+msgid "Not boş olamaz ve çok uzun olmamalı."
+msgstr "The note cannot be empty or too long."
+
+#: ideas/project_note_views.py:53
+msgid "Not güncellendi."
+msgstr "Note updated."
+
+#: ideas/project_note_views.py:63
+msgid "Not silindi."
+msgstr "Note deleted."
 
 #: ideas/project_review.py:86
 msgid "AI şu an yanıt veremedi, biraz sonra tekrar dene."
 msgstr "The AI could not answer right now, try again in a moment."
 
-#: ideas/project_views.py:50
+#: ideas/project_views.py:52
 msgid "Proje kaydedildi."
 msgstr "Project saved."
 
-#: ideas/project_views.py:59
+#: ideas/project_views.py:61
 msgid "Proje güncellendi."
 msgstr "Project updated."
 
-#: ideas/project_views.py:67
+#: ideas/project_views.py:69
 msgid "Proje silindi (fikirler silinmedi)."
 msgstr "Project deleted (the ideas were not deleted)."
 
-#: ideas/project_views.py:84
+#: ideas/project_views.py:86
 msgid "Önce projeye bir GitHub adresi ekle (Düzenle)."
 msgstr "First add a GitHub address to the project (Edit)."
 
-#: ideas/project_views.py:86
+#: ideas/project_views.py:88
 msgid "Proje incelendi."
 msgstr "Project reviewed."
 
-#: ideas/project_views.py:99
+#: ideas/project_views.py:101
 msgid "Özellik yapıldı olarak işaretlendi."
 msgstr "Feature marked as done."
 
-#: ideas/project_views.py:99
+#: ideas/project_views.py:101
 msgid "Yoksayıldı."
 msgstr "Dismissed."
 
-#: ideas/project_views.py:101
+#: ideas/project_views.py:103
 msgid "Bu özellik artık projenin bir parçası değil."
 msgstr "This feature is no longer part of the project."
 
-#: ideas/project_views.py:124
+#: ideas/project_views.py:126
 #, python-brace-format
 msgid "{n} proje eklendi."
 msgid_plural "{n} proje eklendi."
 msgstr[0] "{n} project added."
 msgstr[1] "{n} projects added."
 
-#: ideas/project_views.py:124
+#: ideas/project_views.py:126
 msgid "Eklenecek yeni proje yoktu."
 msgstr "There were no new projects to add."
 
@@ -871,11 +909,11 @@ msgstr "Idea updated."
 msgid "Fikir silindi."
 msgstr "Idea deleted."
 
-#: kanban/models.py:6
+#: kanban/models.py:6 templates/kanban/overview.html:17
 msgid "Yapılacak"
 msgstr "To do"
 
-#: kanban/models.py:6
+#: kanban/models.py:6 templates/kanban/overview.html:17
 msgid "Yapılıyor"
 msgstr "Doing"
 
@@ -883,23 +921,23 @@ msgstr "Doing"
 msgid "Bitti"
 msgstr "Done"
 
-#: kanban/views.py:63
+#: kanban/views.py:87
 msgid "Kartın bir başlığı olmalı."
 msgstr "The card needs a title."
 
-#: kanban/views.py:77
+#: kanban/views.py:101
 msgid "Bu fikir bulunamadı."
 msgstr "This idea could not be found."
 
-#: kanban/views.py:98
+#: kanban/views.py:122
 msgid "Geçersiz taşıma."
 msgstr "Invalid move."
 
-#: kanban/views.py:110
+#: kanban/views.py:134
 msgid "Fikrin adını fikir sayfasından değiştirebilirsin."
 msgstr "You can change the idea's name on the idea page."
 
-#: kanban/views.py:112
+#: kanban/views.py:136
 msgid "Başlık boş olamaz ve çok uzun olmamalı."
 msgstr "The title cannot be empty or too long."
 
@@ -1254,7 +1292,6 @@ msgid "Gelen kutusu (%(count)s)"
 msgstr "Inbox (%(count)s)"
 
 #: templates/accounts/settings.html:10
-#| msgid "Yeni fikir"
 msgid "Yeni fikirde"
 msgstr "For a new idea"
 
@@ -1339,7 +1376,7 @@ msgstr "Chat"
 
 #: templates/base.html:59 templates/base.html:88
 #: templates/ideas/project_detail.html:11 templates/kanban/board.html:3
-#: templates/kanban/board.html:7
+#: templates/kanban/board.html:7 templates/kanban/overview.html:3
 msgid "Kanban"
 msgstr "Kanban"
 
@@ -1371,7 +1408,9 @@ msgstr "Confirm"
 #: templates/ideas/idea_confirm_delete.html:11
 #: templates/ideas/idea_form.html:12 templates/ideas/idea_list.html:13
 #: templates/ideas/project_confirm_delete.html:11
-#: templates/ideas/project_form.html:11 templates/support/ticket_form.html:19
+#: templates/ideas/project_form.html:11
+#: templates/ideas/project_note_form.html:17
+#: templates/support/ticket_form.html:19
 msgid "Vazgeç"
 msgstr "Cancel"
 
@@ -1405,7 +1444,6 @@ msgid "AI düşünüyor…"
 msgstr "The AI is thinking…"
 
 #: templates/ideas/_idea_detail.html:11
-#| msgid "AI önerileri"
 msgid "AI önerisi"
 msgstr "AI suggestions"
 
@@ -1414,9 +1452,6 @@ msgid "Bu fikre öneri vereyim mi?"
 msgstr "Shall I give suggestions for this idea?"
 
 #: templates/ideas/_idea_detail.html:12
-#| msgid ""
-#| "AI başlık, özet, etiket ve önerileri hazırlıyor, benzerlik kontrolü yapıyor "
-#| "ve tüm notlarını okuyup öneri çıkarıyor. Birkaç saniye sürebilir."
 msgid ""
 "Başlık, özet, etiket ve özellik önerileri hazırlar, benzer fikirlerine bakar"
 " ve tüm notlarına göre öneri çıkarırım. Bu, AI anahtarından birkaç çağrı "
@@ -1440,7 +1475,6 @@ msgstr ""
 " a few seconds."
 
 #: templates/ideas/_idea_detail.html:15
-#| msgid "Evet, sil"
 msgid "Evet, öner"
 msgstr "Yes, suggest"
 
@@ -1559,7 +1593,7 @@ msgid "Özellikler"
 msgstr "Features"
 
 #: templates/ideas/_idea_detail.html:92 templates/ideas/chat.html:11
-#: templates/ideas/chat_list.html:15 templates/kanban/board.html:33
+#: templates/ideas/chat_list.html:15 templates/kanban/board.html:28
 msgid "Adı değiştir"
 msgstr "Rename"
 
@@ -1570,7 +1604,8 @@ msgstr "Copy to another idea"
 #: templates/ideas/_idea_detail.html:94 templates/ideas/_idea_detail.html:132
 #: templates/ideas/ai_models.html:35 templates/ideas/chat.html:14
 #: templates/ideas/chat_list.html:16 templates/ideas/idea_form.html:13
-#: templates/ideas/project_detail.html:13 templates/kanban/board.html:34
+#: templates/ideas/project_detail.html:13
+#: templates/ideas/project_detail.html:90 templates/kanban/board.html:29
 msgid "Sil"
 msgstr "Delete"
 
@@ -1597,6 +1632,7 @@ msgstr "Dismiss suggestion"
 
 #: templates/ideas/_idea_detail.html:127
 #: templates/ideas/project_detail.html:12
+#: templates/ideas/project_detail.html:89
 msgid "Düzenle"
 msgstr "Edit"
 
@@ -1714,6 +1750,7 @@ msgstr "Add model"
 
 #: templates/ideas/ai_model_form.html:19 templates/ideas/idea_form.html:11
 #: templates/ideas/idea_list.html:14 templates/ideas/project_form.html:10
+#: templates/ideas/project_note_form.html:16
 msgid "Kaydet"
 msgstr "Save"
 
@@ -2148,7 +2185,7 @@ msgid "Adres ekle"
 msgstr "Add address"
 
 #: templates/ideas/project_detail.html:65 templates/ideas/project_list.html:18
-#: templates/kanban/board.html:25
+#: templates/kanban/board.html:20 templates/kanban/overview.html:20
 #, python-format
 msgid "%(done)s/%(total)s özellik"
 msgstr "%(done)s/%(total)s features"
@@ -2156,6 +2193,26 @@ msgstr "%(done)s/%(total)s features"
 #: templates/ideas/project_detail.html:69
 msgid "Bu projeye bağlı fikir yok. Düzenleyip fikir bağlayabilirsin."
 msgstr "No ideas are linked to this project. You can edit it to link ideas."
+
+#: templates/ideas/project_detail.html:75
+msgid "Notlar"
+msgstr "Notes"
+
+#: templates/ideas/project_detail.html:80
+msgid "Not ekle"
+msgstr "Add note"
+
+#: templates/ideas/project_detail.html:87
+msgid "düzenlendi"
+msgstr "edited"
+
+#: templates/ideas/project_detail.html:90
+msgid "Bu not silinsin mi?"
+msgstr "Delete this note?"
+
+#: templates/ideas/project_detail.html:95
+msgid "Bu proje için henüz not yok."
+msgstr "No notes for this project yet."
 
 #: templates/ideas/project_form.html:3 templates/ideas/project_form.html:5
 msgid "Projeyi düzenle"
@@ -2234,6 +2291,13 @@ msgstr[0] "%(counter)s idea"
 msgstr[1] "%(counter)s ideas"
 
 #: templates/ideas/project_list.html:18
+#, python-format
+msgid "%(counter)s not"
+msgid_plural "%(counter)s not"
+msgstr[0] "%(counter)s note"
+msgstr[1] "%(counter)s notes"
+
+#: templates/ideas/project_list.html:18
 msgid "GitHub bağlı"
 msgstr "GitHub linked"
 
@@ -2246,6 +2310,25 @@ msgstr ""
 "No projects yet. <a class=\"link\" href=\"%(import_url)s\">Import from "
 "GitHub</a> or create a new project."
 
+#: templates/ideas/project_note_form.html:3
+#: templates/ideas/project_note_form.html:6
+msgid "Notu düzenle"
+msgstr "Edit note"
+
+#: templates/kanban/_board_select.html:3
+msgid "Pano"
+msgstr "Board"
+
+#: templates/kanban/_board_select.html:4 templates/kanban/overview.html:3
+#: templates/kanban/overview.html:7
+msgid "Genel bakış"
+msgstr "Overview"
+
+#: templates/kanban/_board_select.html:5 templates/kanban/overview.html:13
+#: templates/kanban/overview.html:32
+msgid "Kişisel pano"
+msgstr "Personal board"
+
 #: templates/kanban/board.html:7
 #, python-format
 msgid "%(counter)s kart"
@@ -2253,70 +2336,82 @@ msgid_plural "%(counter)s kart"
 msgstr[0] "%(counter)s card"
 msgstr[1] "%(counter)s cards"
 
-#: templates/kanban/board.html:9
-msgid "Pano"
-msgstr "Board"
-
-#: templates/kanban/board.html:10
-msgid "Kişisel pano"
-msgstr "Personal board"
-
-#: templates/kanban/board.html:25
+#: templates/kanban/board.html:20
 msgid "fikir"
 msgstr "idea"
 
-#: templates/kanban/board.html:31
+#: templates/kanban/board.html:26
 msgid "Sola taşı"
 msgstr "Move left"
 
-#: templates/kanban/board.html:32
+#: templates/kanban/board.html:27
 msgid "Sağa taşı"
 msgstr "Move right"
 
-#: templates/kanban/board.html:34
+#: templates/kanban/board.html:29
 msgid "Fikir bu projeden çıkarılsın mı? Fikrin kendisi silinmez."
 msgstr "Remove the idea from this project? The idea itself is not deleted."
 
-#: templates/kanban/board.html:34
+#: templates/kanban/board.html:29
 msgid "Fikir bu panodan kaldırılsın mı? Fikrin kendisi silinmez."
 msgstr "Remove the idea from this board? The idea itself is not deleted."
 
-#: templates/kanban/board.html:34
+#: templates/kanban/board.html:29
 msgid "Bu kart silinsin mi?"
 msgstr "Delete this card?"
 
-#: templates/kanban/board.html:34
+#: templates/kanban/board.html:29
 msgid "Panodan kaldır"
 msgstr "Remove from board"
 
-#: templates/kanban/board.html:34
+#: templates/kanban/board.html:29
 msgid "Fikri panodan kaldır"
 msgstr "Remove the idea from the board"
 
-#: templates/kanban/board.html:34
+#: templates/kanban/board.html:29
 msgid "Kartı sil"
 msgstr "Delete card"
 
-#: templates/kanban/board.html:43
+#: templates/kanban/board.html:38 templates/kanban/overview.html:32
 msgid "Kart ekle…"
 msgstr "Add a card…"
 
-#: templates/kanban/board.html:43
+#: templates/kanban/board.html:38
 #, python-format
 msgid "%(column)s sütununa kart ekle"
 msgstr "Add a card to the %(column)s column"
 
-#: templates/kanban/board.html:49
+#: templates/kanban/board.html:44
 msgid "Fikir ekle"
 msgstr "Add idea"
 
-#: templates/kanban/board.html:50
+#: templates/kanban/board.html:45
 msgid "Projeye fikir ekle…"
 msgstr "Add an idea to the project…"
 
-#: templates/kanban/board.html:50
+#: templates/kanban/board.html:45
 msgid "Panoya fikir ekle…"
 msgstr "Add an idea to the board…"
+
+#: templates/kanban/overview.html:7
+#, python-format
+msgid "%(counter)s açık kart"
+msgid_plural "%(counter)s açık kart"
+msgstr[0] "%(counter)s open card"
+msgstr[1] "%(counter)s open cards"
+
+#: templates/kanban/overview.html:24
+msgid "Bitir"
+msgstr "Finish"
+
+#: templates/kanban/overview.html:24
+msgid "Başla"
+msgstr "Start"
+
+#: templates/kanban/overview.html:32
+#, python-format
+msgid "%(name)s panosuna kart ekle"
+msgstr "Add a card to %(name)s"
 
 #: templates/pwa/offline.html:3
 msgid "Çevrimdışı"
@@ -2397,22 +2492,3 @@ msgstr ""
 #: templates/support/ticket_list.html:17
 msgid "Henüz bir kaydın yok."
 msgstr "You have no tickets yet."
-
-msgid "Genel bakış"
-msgstr "Overview"
-
-#, python-format
-msgid "%(counter)s açık kart"
-msgid_plural "%(counter)s açık kart"
-msgstr[0] "%(counter)s open card"
-msgstr[1] "%(counter)s open cards"
-
-msgid "Başla"
-msgstr "Start"
-
-msgid "Bitir"
-msgstr "Finish"
-
-#, python-format
-msgid "%(name)s panosuna kart ekle"
-msgstr "Add a card to %(name)s"

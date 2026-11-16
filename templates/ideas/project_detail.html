@@ -70,4 +70,30 @@
     {% endif %}
   </section>
 </div>
+
+<section class="notes" id="notes">
+  <div class="sec"><h3>{% trans "Notlar" %}</h3><span>{{ notes|length }}</span></div>
+  <form method="post" action="{% url 'ideas:project-note-add' object.pk %}" class="note-add">
+    {% csrf_token %}
+    <label class="visually-hidden" for="{{ note_form.body.id_for_label }}">{% trans "Not" %}</label>
+    <div class="field">{{ note_form.body }}</div>
+    <button class="btn primary" type="submit">{% trans "Not ekle" %}</button>
+  </form>
+  <ul class="note-list">
+    {% for note in notes %}
+    <li class="project-note">
+      <p class="note-text">{{ note.body|urlizetrunc:60|linebreaksbr }}</p>
+      <div class="note-foot">
+        <span class="muted">{{ note.created_at|date:"d M Y, H:i" }}{% if note.was_edited %} · {% trans "düzenlendi" %}{% endif %}</span>
+        <span class="actions">
+          <a class="btn quiet small" href="{% url 'ideas:project-note-edit' object.pk note.pk %}">{% trans "Düzenle" %}</a>
+          <form method="post" action="{% url 'ideas:project-note-delete' object.pk note.pk %}" data-confirm="{% trans 'Bu not silinsin mi?' %}">{% csrf_token %}<button class="btn quiet danger small" type="submit">{% trans "Sil" %}</button></form>
+        </span>
+      </div>
+    </li>
+    {% empty %}
+    <li class="muted">{% trans "Bu proje için henüz not yok." %}</li>
+    {% endfor %}
+  </ul>
+</section>
 {% endblock %}
